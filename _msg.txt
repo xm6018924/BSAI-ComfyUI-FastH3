@@ -1,0 +1,3 @@
+feat(nodes): BSAIFastH3NativeVSA.enabled/video_keep_percent 与 BSAIFastH3Timesteps.ladder 加 forceInput
+
+支持 BSAI-H3-MotionFix 的 vsa_enabled/video_keep_percent/ladder 输出直接接线自动驱动（高速动作修复）。

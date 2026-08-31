@@ -106,11 +106,13 @@ class BSAIFastH3NativeVSA:
             "model": ("MODEL",),
             "enabled": ("BOOLEAN", {
                 "default": True,
-                "tooltip": "关闭时透传模型，不安装 VSA 补丁。"}),
+                "forceInput": True,
+                "tooltip": "关闭时透传模型，不安装 VSA 补丁。可接 BSAI H3 MotionFix.vsa_enabled 自动驱动。"}),
             "video_keep_percent": ("FLOAT", {
                 "default": 10.0, "min": 0.5, "max": 100.0, "step": 0.5,
+                "forceInput": True,
                 "tooltip": "视频 token 中保留精确注意力的 tile 百分比。FastVideo 官方约 10%。"
-                           "越小越省显存/越快，越低细节损失越大。"}),
+                           "越小越省显存/越快，越低细节损失越大。可接 BSAI H3 MotionFix.video_keep_percent 自动驱动。"}),
             "start_percent": ("FLOAT", {
                 "default": 0.0, "min": 0.0, "max": 1.0, "step": 0.01,
                 "tooltip": "采样进度在此之前的步运行 Dense（高温预热）。"}),
@@ -168,8 +170,9 @@ class BSAIFastH3Timesteps:
             "model": ("MODEL",),
             "ladder": ("STRING", {
                 "default": "999,749,500,250", "multiline": False,
+                "forceInput": True,
                 "tooltip": "显式训练的 4 步阶梯（v0.2 卡片要求用训练跳点采样，勿用均匀网格）。"
-                           "逗号分隔的 timestep（0-1000）。"}),
+                           "逗号分隔的 timestep（0-1000）。可接 BSAI H3 MotionFix.ladder 自动驱动。"}),
         }}
 
     RETURN_TYPES = ("SIGMAS",)
