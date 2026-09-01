@@ -175,6 +175,50 @@ Full pipeline: **T2V + I2V/Multi-ref + audio + BSAI-H3-upscale-4K**, mode switch
 
 ---
 
+## 6.1. 示例工作流 3：打斗动作毛刺/模糊修复（3 轨对比）/ Workflow 3: Fight-Scene Glitch & Blur Fix (3-track)
+
+**文件 / File**：`example_workflows/BSAI H3 MotionFix 打斗毛刺模糊修复 v2.2 (参数优化 3轨对比).json`
+
+针对 FastH3 4 步蒸馏模型在**高速打斗/奔跑/大位移镜头**下的画面毛刺、拖影/残影、时序闪烁与噪点问题，3 条输出轨同时跑、对比选优。47 节点 / 68 连线。
+Targets glitches/smear/flicker/noise of the FastH3 4-step distilled model on fast fight/run/high-motion shots, with 3 output tracks for A/B/C comparison. 47 nodes / 68 links.
+
+```
+            ┌─► 直出 SaveVideo（FastH3 4步原片，快速预览）
+FastH3 4步轨 ┼─► FlashVSR 时序修复轨（默认看这条：scale=2 去噪+时间一致性）
+            └─► 原生 24 步终稿轨（默认静音，Ctrl+M 启用 → 根治 4 步模糊）
+            └─►（可选进阶）MAINodes 慢动作重拍链，见说明文档 5.6 节
+```
+
+**v2.2 关键参数（按 2026-08-31 全网最新证据优化）/ v2.2 key params (tuned per latest evidence):**
+| 位置 Location | 值 Value | 依据 Evidence |
+|---|---|---|
+| FlashVSR scale | **2（官方默认）** | 4 倍放大对高动态打斗会放大噪点/伪影；2 倍时序去噪最稳 |
+| 原生终稿轨步数 | **24** | 社区共识打斗/大动态 20–24 步，取上限更稳 |
+
+**前置依赖（除本插件外还需安装）/ Extra plugins required:**
+| 依赖 Plugin | 用途 Purpose | 安装 / Install |
+|---|---|---|
+| [BSAI-H3-MotionFix](https://github.com/xm6018924/BSAI-H3-MotionFix) | `BSAI_H3_MotionFix` 毛刺修复向导 + 终稿轨参考 / fix guide | Manager 或 git clone |
+| KJ `MiniMax-H3-experimental` 节点包 | H3 原生节点 / native H3 nodes | 见 KJ 仓库 |
+| `ComfyUI-FlashVSR_Ultra_Fast` | `FlashVSRNode` 时序修复 / temporal repair | Manager 或 git clone |
+| `ComfyUI-Easy-Use` | `easy ifElse` 模式切换 | Manager |
+| `VideoHelperSuite` (VHS) | `VHS_VideoCombine` 导出 | Manager |
+| `ComfyMath` | `ResolutionSelector` / `ComfyMathExpression` | Manager |
+| `pysssss`（Custom-Scripts） | `ShowText\|pysssss` 输出 | Manager |
+
+**使用步骤 / How to use：**
+1. 装齐依赖并重启 ComfyUI。Install deps and restart.
+2. 填入参考图（LoadImage）、提示词模板（`BSAI_H3_PromptTemplate`，内置武打/散打对咏春等模板）。
+3. 主轨参数由 `BSAI_H3_MotionFix` 自动驱动（VSA 开关 / 时间步阶梯 / 参考长度）；`Float (duration)` 默认 5s 自动换算帧数。
+4. 点 Run：**FlashVSR 修复轨**（默认最值得看）输出「BSAI MotionFix FlashVSR 时序修复」mp4；直出轨秒出预览。
+5. 打斗关键镜头：框选标题含「BSAI MotionFix 终稿轨」的节点 → **Ctrl+M** 启用原生 24 步终稿轨，重跑对比。
+6. 仍残影：按说明文档 5.6 节接 MAINodes 慢动作重拍链（本机已装 H3JerkOracle 等全套）。
+
+> 完整使用说明见 `BSAI-H3-MotionFix/workflows/README-MotionFix-v2.0-打斗毛刺模糊修复说明.md`（中英双语）。
+> Full docs: `README-MotionFix-v2.0-...md` (bilingual) in the BSAI-H3-MotionFix repo.
+
+---
+
 ## 7. 与官方/其它方案对比 / Comparison
 
 | 方案 Solution | 去噪步数 Steps | 注意力 Attention | 一句话 Summary |
