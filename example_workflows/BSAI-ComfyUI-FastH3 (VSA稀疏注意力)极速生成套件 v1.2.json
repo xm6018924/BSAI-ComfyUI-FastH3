@@ -1,0 +1,7199 @@
+{
+  "id": "973bcfeb-8000-4627-8ad7-1799546577e6",
+  "revision": 0,
+  "last_node_id": 69,
+  "last_link_id": 79,
+  "nodes": [
+    {
+      "id": 10,
+      "type": "BasicGuider",
+      "pos": [
+        528.5641936686235,
+        -281.2539721917997
+      ],
+      "size": [
+        300,
+        70
+      ],
+      "flags": {},
+      "order": 37,
+      "mode": 0,
+      "inputs": [
+        {
+          "localized_name": "模型",
+          "name": "model",
+          "type": "MODEL",
+          "link": 4
+        },
+        {
+          "localized_name": "条件",
+          "name": "conditioning",
+          "type": "CONDITIONING",
+          "link": 49
+        }
+      ],
+      "outputs": [
+        {
+          "localized_name": "引导器",
+          "name": "GUIDER",
+          "type": "GUIDER",
+          "slot_index": 0,
+          "links": [
+            13
+          ]
+        }
+      ],
+      "title": "BasicGuider",
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.34.0",
+        "Node name for S&R": "BasicGuider"
+      }
+    },
+    {
+      "id": 11,
+      "type": "SamplerCustomAdvanced",
+      "pos": [
+        858.8282007120118,
+        -279.99271174713033
+      ],
+      "size": [
+        300,
+        326
+      ],
+      "flags": {},
+      "order": 38,
+      "mode": 0,
+      "inputs": [
+        {
+          "localized_name": "噪波",
+          "name": "noise",
+          "type": "NOISE",
+          "link": 12
+        },
+        {
+          "localized_name": "引导器",
+          "name": "guider",
+          "type": "GUIDER",
+          "link": 13
+        },
+        {
+          "localized_name": "采样器",
+          "name": "sampler",
+          "type": "SAMPLER",
+          "link": 8
+        },
+        {
+          "localized_name": "西格玛",
+          "name": "sigmas",
+          "type": "SIGMAS",
+          "link": 7
+        },
+        {
+          "localized_name": "Latent图像",
+          "name": "latent_image",
+          "type": "LATENT",
+          "link": 50
+        }
+      ],
+      "outputs": [
+        {
+          "localized_name": "Latent",
+          "name": "output",
+          "type": "LATENT",
+          "slot_index": 0,
+          "links": [
+            14,
+            15,
+            116
+          ]
+        },
+        {
+          "localized_name": "降噪Latent",
+          "name": "denoised_output",
+          "type": "LATENT",
+          "links": []
+        }
+      ],
+      "title": "SamplerCustomAdvanced",
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.34.0",
+        "Node name for S&R": "SamplerCustomAdvanced"
+      }
+    },
+    {
+      "id": 9,
+      "type": "RandomNoise",
+      "pos": [
+        527.2065344435657,
+        -155.73508982283562
+      ],
+      "size": [
+        301.0680260360306,
+        82
+      ],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [
+        {
+          "localized_name": "噪波随机种",
+          "name": "noise_seed",
+          "type": "INT",
+          "widget": {
+            "name": "noise_seed"
+          },
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "localized_name": "噪波",
+          "name": "NOISE",
+          "type": "NOISE",
+          "slot_index": 0,
+          "links": [
+            12
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.34.0",
+        "Node name for S&R": "RandomNoise"
+      },
+      "widgets_values": [
+        390995256046408,
+        "randomize"
+      ],
+      "widgets_values_named": {
+        "noise_seed": 390995256046408,
+        "control_after_generate": "randomize"
+      }
+    },
+    {
+      "id": 4,
+      "type": "BSAIFastH3EulerSampler",
+      "pos": [
+        524.148056991653,
+        -19.946343156466995
+      ],
+      "size": [
+        310.7250615214523,
+        106
+      ],
+      "flags": {},
+      "order": 1,
+      "mode": 0,
+      "inputs": [
+        {
+          "localized_name": "shift_video",
+          "name": "shift_video",
+          "type": "FLOAT",
+          "widget": {
+            "name": "shift_video"
+          },
+          "link": null
+        },
+        {
+          "localized_name": "shift_audio",
+          "name": "shift_audio",
+          "type": "FLOAT",
+          "widget": {
+            "name": "shift_audio"
+          },
+          "link": null
+        },
+        {
+          "localized_name": "schedule_mode",
+          "name": "schedule_mode",
+          "type": "COMBO",
+          "widget": {
+            "name": "schedule_mode"
+          },
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "localized_name": "采样器",
+          "name": "SAMPLER",
+          "type": "SAMPLER",
+          "slot_index": 0,
+          "links": [
+            8
+          ]
+        }
+      ],
+      "title": "BSAI④ FastH3 Euler 4步采样器",
+      "properties": {
+        "aux_id": "xm6018924/BSAI-ComfyUI-FastH3",
+        "ver": "0b1dc7b3588e2b0c60536101a48500000a38c672",
+        "Node name for S&R": "BSAIFastH3EulerSampler"
+      },
+      "widgets_values": [
+        12,
+        3,
+        "auto"
+      ],
+      "widgets_values_named": {
+        "shift_video": 12,
+        "shift_audio": 3,
+        "schedule_mode": "auto"
+      }
+    },
+    {
+      "id": 12,
+      "type": "VAEDecode",
+      "pos": [
+        1179.8874546055838,
+        -282.4844531899
+      ],
+      "size": [
+        300,
+        70
+      ],
+      "flags": {},
+      "order": 39,
+      "mode": 0,
+      "inputs": [
+        {
+          "localized_name": "Latent",
+          "name": "samples",
+          "type": "LATENT",
+          "link": 14
+        },
+        {
+          "localized_name": "vae",
+          "name": "vae",
+          "type": "VAE",
+          "link": 10
+        }
+      ],
+      "outputs": [
+        {
+          "localized_name": "图像",
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "slot_index": 0,
+          "links": [
+            16,
+            46,
+            58,
+            119
+          ]
+        }
+      ],
+      "title": "视频解码 VAEDecode",
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.34.0",
+        "Node name for S&R": "VAEDecode"
+      }
+    },
+    {
+      "id": 32,
+      "type": "MuyeTextEditOutput",
+      "pos": [
+        5474.590938556042,
+        7589.306659007291
+      ],
+      "size": [
+        400,
+        200
+      ],
+      "flags": {},
+      "order": 2,
+      "mode": 4,
+      "inputs": [
+        {
+          "localized_name": "编辑文本",
+          "name": "编辑文本",
+          "type": "STRING",
+          "widget": {
+            "name": "编辑文本"
+          },
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "localized_name": "文本",
+          "name": "文本",
+          "shape": 6,
+          "type": "STRING",
+          "links": []
+        }
+      ],
+      "properties": {
+        "aux_id": "muyexiuluo/ComfyUI_Muye",
+        "ver": "9057aa8e1dddcef183e33565923d3d8d0f2b63a3",
+        "Node name for S&R": "MuyeTextEditOutput"
+      },
+      "widgets_values": [
+        "FlashVSR1.1 速度快，视频长度10秒以内可以选择放大4倍，15秒建议放大倍数：2\nSeedVR2 速度慢，建议放大倍数：2\n\n\n"
+      ],
+      "widgets_values_named": {
+        "编辑文本": "FlashVSR1.1 速度快，视频长度10秒以内可以选择放大4倍，15秒建议放大倍数：2\nSeedVR2 速度慢，建议放大倍数：2\n\n\n"
+      }
+    },
+    {
+      "id": 13,
+      "type": "VAEDecodeAudio",
+      "pos": [
+        1175.6528445296424,
+        -166.2131911531044
+      ],
+      "size": [
+        300,
+        70
+      ],
+      "flags": {},
+      "order": 40,
+      "mode": 0,
+      "inputs": [
+        {
+          "localized_name": "Latent",
+          "name": "samples",
+          "type": "LATENT",
+          "link": 15
+        },
+        {
+          "localized_name": "vae",
+          "name": "vae",
+          "type": "VAE",
+          "link": 11
+        }
+      ],
+      "outputs": [
+        {
+          "localized_name": "音频",
+          "name": "AUDIO",
+          "type": "AUDIO",
+          "slot_index": 0,
+          "links": [
+            17,
+            18,
+            47,
+            60,
+            108
+          ]
+        }
+      ],
+      "title": "音频解码 VAEDecodeAudio",
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.34.0",
+        "Node name for S&R": "VAEDecodeAudio"
+      }
+    },
+    {
+      "id": 8,
+      "type": "MiniMaxH3ImageToVideo",
+      "pos": [
+        550.6756652588214,
+        243.38724412873233
+      ],
+      "size": [
+        484.8866222047857,
+        259.13789973677353
+      ],
+      "flags": {},
+      "order": 30,
+      "mode": 4,
+      "inputs": [
+        {
+          "localized_name": "clip",
+          "name": "clip",
+          "type": "CLIP",
+          "link": 3
+        },
+        {
+          "localized_name": "vae",
+          "name": "vae",
+          "type": "VAE",
+          "link": 5
+        },
+        {
+          "localized_name": "首帧",
+          "name": "first_frame",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": 22
+        },
+        {
+          "localized_name": "末帧",
+          "name": "last_frame",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "localized_name": "提示词",
+          "name": "prompt",
+          "type": "STRING",
+          "widget": {
+            "name": "prompt"
+          },
+          "link": 21
+        },
+        {
+          "localized_name": "宽度",
+          "name": "width",
+          "type": "INT",
+          "widget": {
+            "name": "width"
+          },
+          "link": 24
+        },
+        {
+          "localized_name": "高度",
+          "name": "height",
+          "type": "INT",
+          "widget": {
+            "name": "height"
+          },
+          "link": 25
+        },
+        {
+          "localized_name": "长度",
+          "name": "length",
+          "type": "INT",
+          "widget": {
+            "name": "length"
+          },
+          "link": 54
+        }
+      ],
+      "outputs": [
+        {
+          "localized_name": "正向",
+          "name": "positive",
+          "type": "CONDITIONING",
+          "slot_index": 0,
+          "links": [
+            32
+          ]
+        },
+        {
+          "localized_name": "Latent",
+          "name": "LATENT",
+          "type": "LATENT",
+          "slot_index": 0,
+          "links": [
+            33
+          ]
+        }
+      ],
+      "title": "FastH3 T2VA · 文生视频+音频（首尾帧不接）",
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.34.0",
+        "Node name for S&R": "MiniMaxH3ImageToVideo"
+      },
+      "widgets_values": [
+        "cinematic aerial shot, a lone astronaut walking across a vast crimson desert under twin moons, volumetric god rays, slow dolly in, 35mm film grain, dramatic orchestral score building",
+        864,
+        480,
+        124
+      ],
+      "widgets_values_named": {
+        "prompt": "cinematic aerial shot, a lone astronaut walking across a vast crimson desert under twin moons, volumetric god rays, slow dolly in, 35mm film grain, dramatic orchestral score building",
+        "width": 864,
+        "height": 480,
+        "length": 124
+      }
+    },
+    {
+      "id": 19,
+      "type": "LoadImage",
+      "pos": [
+        -2319.288538368899,
+        -343.75126485624247
+      ],
+      "size": [
+        404.5933934876416,
+        476.01064229927965
+      ],
+      "flags": {},
+      "order": 3,
+      "mode": 0,
+      "inputs": [
+        {
+          "localized_name": "图像",
+          "name": "image",
+          "type": "COMBO",
+          "widget": {
+            "name": "image"
+          },
+          "link": null
+        },
+        {
+          "localized_name": "选择文件上传",
+          "name": "upload",
+          "type": "IMAGEUPLOAD",
+          "widget": {
+            "name": "upload"
+          },
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "localized_name": "图像",
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [
+            22,
+            37,
+            85
+          ]
+        },
+        {
+          "localized_name": "遮罩",
+          "name": "MASK",
+          "type": "MASK",
+          "links": []
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.34.0",
+        "Node name for S&R": "LoadImage"
+      },
+      "widgets_values": [
+        "Qwen_Image_2509_00001.png",
+        "image"
+      ],
+      "widgets_values_named": {
+        "image": "Qwen_Image_2509_00001.png",
+        "upload": "image"
+      }
+    },
+    {
+      "id": 29,
+      "type": "LoadImage",
+      "pos": [
+        -2318.48230514231,
+        183.36545623579963
+      ],
+      "size": [
+        404.5933934876416,
+        476.01064229927965
+      ],
+      "flags": {},
+      "order": 4,
+      "mode": 0,
+      "inputs": [
+        {
+          "localized_name": "图像",
+          "name": "image",
+          "type": "COMBO",
+          "widget": {
+            "name": "image"
+          },
+          "link": null
+        },
+        {
+          "localized_name": "选择文件上传",
+          "name": "upload",
+          "type": "IMAGEUPLOAD",
+          "widget": {
+            "name": "upload"
+          },
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "localized_name": "图像",
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [
+            40,
+            86
+          ]
+        },
+        {
+          "localized_name": "遮罩",
+          "name": "MASK",
+          "type": "MASK",
+          "links": []
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.34.0",
+        "Node name for S&R": "LoadImage"
+      },
+      "widgets_values": [
+        "ComfyUI_00038_.png",
+        "image"
+      ],
+      "widgets_values_named": {
+        "image": "ComfyUI_00038_.png",
+        "upload": "image"
+      }
+    },
+    {
+      "id": 26,
+      "type": "PrimitiveBoolean",
+      "pos": [
+        1132.8949976093265,
+        872.3559944226713
+      ],
+      "size": [
+        270,
+        58
+      ],
+      "flags": {},
+      "order": 5,
+      "mode": 0,
+      "inputs": [
+        {
+          "localized_name": "值",
+          "name": "value",
+          "type": "BOOLEAN",
+          "widget": {
+            "name": "value"
+          },
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "localized_name": "布尔",
+          "name": "BOOLEAN",
+          "type": "BOOLEAN",
+          "links": [
+            29,
+            31
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.34.0",
+        "Node name for S&R": "PrimitiveBoolean"
+      },
+      "widgets_values": [
+        true
+      ],
+      "widgets_values_named": {
+        "value": true
+      }
+    },
+    {
+      "id": 3,
+      "type": "BSAIFastH3Timesteps",
+      "pos": [
+        141.6640468232737,
+        -281.56620335710056
+      ],
+      "size": [
+        340,
+        90
+      ],
+      "flags": {},
+      "order": 34,
+      "mode": 0,
+      "inputs": [
+        {
+          "localized_name": "model",
+          "name": "model",
+          "type": "MODEL",
+          "link": 2
+        },
+        {
+          "localized_name": "ladder",
+          "name": "ladder",
+          "type": "STRING",
+          "link": 53
+        }
+      ],
+      "outputs": [
+        {
+          "localized_name": "Sigmas",
+          "name": "SIGMAS",
+          "type": "SIGMAS",
+          "slot_index": 0,
+          "links": [
+            7
+          ]
+        }
+      ],
+      "title": "BSAI③ FastH3 精确时间步 [999,749,500,250]",
+      "properties": {
+        "aux_id": "xm6018924/BSAI-ComfyUI-FastH3",
+        "ver": "0b1dc7b3588e2b0c60536101a48500000a38c672",
+        "Node name for S&R": "BSAIFastH3Timesteps"
+      }
+    },
+    {
+      "id": 17,
+      "type": "BSAIFastH3VSAStats",
+      "pos": [
+        137.19526171288356,
+        -128.24609146381843
+      ],
+      "size": [
+        348.72066824853573,
+        49.07039620351412
+      ],
+      "flags": {},
+      "order": 35,
+      "mode": 0,
+      "inputs": [
+        {
+          "localized_name": "model",
+          "name": "model",
+          "type": "MODEL",
+          "link": 20
+        }
+      ],
+      "outputs": [
+        {
+          "localized_name": "stats",
+          "name": "stats",
+          "type": "STRING",
+          "slot_index": 0,
+          "links": []
+        }
+      ],
+      "title": "BSAI VSA 命中统计（只读）",
+      "properties": {
+        "aux_id": "xm6018924/BSAI-ComfyUI-FastH3",
+        "ver": "0b1dc7b3588e2b0c60536101a48500000a38c672",
+        "Node name for S&R": "BSAIFastH3VSAStats"
+      }
+    },
+    {
+      "id": 21,
+      "type": "ComfyMathExpression",
+      "pos": [
+        -68.54593604013299,
+        1022.8257350254883
+      ],
+      "size": [
+        360,
+        160
+      ],
+      "flags": {
+        "collapsed": true
+      },
+      "order": 22,
+      "mode": 0,
+      "inputs": [
+        {
+          "label": "values.a",
+          "localized_name": "a",
+          "name": "values.a",
+          "type": "FLOAT,INT,BOOLEAN",
+          "link": 23
+        },
+        {
+          "localized_name": "b",
+          "name": "values.b",
+          "shape": 7,
+          "type": "FLOAT,INT,BOOLEAN",
+          "link": null
+        },
+        {
+          "label": "expression",
+          "localized_name": "表达式",
+          "name": "expression",
+          "type": "STRING",
+          "widget": {
+            "name": "expression"
+          },
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "label": "FLOAT",
+          "localized_name": "浮点",
+          "name": "FLOAT",
+          "type": "FLOAT",
+          "links": []
+        },
+        {
+          "label": "INT",
+          "localized_name": "整数",
+          "name": "INT",
+          "type": "INT",
+          "links": [
+            117
+          ]
+        },
+        {
+          "label": "BOOL",
+          "localized_name": "布尔值",
+          "name": "BOOL",
+          "type": "BOOLEAN",
+          "links": []
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.29.0",
+        "Node name for S&R": "ComfyMathExpression",
+        "ue_properties": {
+          "widget_ue_connectable": {},
+          "version": "7.5.2",
+          "input_ue_unconnectable": {}
+        }
+      },
+      "widgets_values": [
+        "max(5, round(a * 24)) + (5 - (max(5, round(a * 24)) % 17)) % 17"
+      ],
+      "widgets_values_named": {
+        "expression": "max(5, round(a * 24)) + (5 - (max(5, round(a * 24)) % 17)) % 17"
+      }
+    },
+    {
+      "id": 27,
+      "type": "easy ifElse",
+      "pos": [
+        1438.134597198383,
+        955.7930009858305
+      ],
+      "size": [
+        270,
+        78
+      ],
+      "flags": {},
+      "order": 45,
+      "mode": 0,
+      "inputs": [
+        {
+          "localized_name": "真流程",
+          "name": "on_true",
+          "type": "*",
+          "link": 28
+        },
+        {
+          "localized_name": "假流程",
+          "name": "on_false",
+          "type": "*",
+          "link": 33
+        },
+        {
+          "localized_name": "是否为真",
+          "name": "boolean",
+          "type": "BOOLEAN",
+          "widget": {
+            "name": "boolean"
+          },
+          "link": 29
+        }
+      ],
+      "outputs": [
+        {
+          "localized_name": "*",
+          "name": "*",
+          "type": "*",
+          "links": [
+            50,
+            68
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfyui-easy-use",
+        "ver": "1.3.6",
+        "Node name for S&R": "easy ifElse"
+      },
+      "widgets_values": [
+        false
+      ],
+      "widgets_values_named": {
+        "boolean": false
+      }
+    },
+    {
+      "id": 20,
+      "type": "PrimitiveFloat",
+      "pos": [
+        -237.63305038747478,
+        896.3631259919846
+      ],
+      "size": [
+        270,
+        70
+      ],
+      "flags": {},
+      "order": 6,
+      "mode": 0,
+      "inputs": [
+        {
+          "label": "value",
+          "localized_name": "值",
+          "name": "value",
+          "type": "FLOAT",
+          "widget": {
+            "name": "value"
+          },
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "label": "FLOAT",
+          "localized_name": "浮点",
+          "name": "FLOAT",
+          "type": "FLOAT",
+          "links": [
+            23,
+            51
+          ]
+        }
+      ],
+      "title": "Float (duration)",
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.29.0",
+        "Node name for S&R": "PrimitiveFloat",
+        "ue_properties": {
+          "widget_ue_connectable": {},
+          "version": "7.5.2",
+          "input_ue_unconnectable": {}
+        }
+      },
+      "widgets_values": [
+        5
+      ],
+      "widgets_values_named": {
+        "value": 5
+      }
+    },
+    {
+      "id": 46,
+      "type": "VAEDecodeAudio",
+      "pos": [
+        -939.1426339245476,
+        1559.196519725066
+      ],
+      "size": [
+        300,
+        120
+      ],
+      "flags": {},
+      "order": 54,
+      "mode": 4,
+      "inputs": [
+        {
+          "localized_name": "Latent",
+          "name": "samples",
+          "type": "LATENT",
+          "link": 70
+        },
+        {
+          "localized_name": "vae",
+          "name": "vae",
+          "type": "VAE",
+          "link": 72
+        }
+      ],
+      "outputs": [
+        {
+          "localized_name": "音频",
+          "name": "AUDIO",
+          "type": "AUDIO",
+          "slot_index": 0,
+          "links": [
+            74
+          ]
+        }
+      ],
+      "title": "BSAI MotionFix 终稿轨 ⑨ 音频解码",
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.34.0",
+        "Node name for S&R": "VAEDecodeAudio"
+      }
+    },
+    {
+      "id": 47,
+      "type": "VHS_VideoCombine",
+      "pos": [
+        -595.336620945555,
+        1375.9882891785362
+      ],
+      "size": [
+        2264.847412718955,
+        334
+      ],
+      "flags": {},
+      "order": 55,
+      "mode": 4,
+      "inputs": [
+        {
+          "localized_name": "images",
+          "name": "images",
+          "type": "IMAGE",
+          "link": 73
+        },
+        {
+          "localized_name": "audio",
+          "name": "audio",
+          "shape": 7,
+          "type": "AUDIO",
+          "link": 74
+        },
+        {
+          "localized_name": "meta_batch",
+          "name": "meta_batch",
+          "shape": 7,
+          "type": "VHS_BatchManager",
+          "link": null
+        },
+        {
+          "localized_name": "vae",
+          "name": "vae",
+          "shape": 7,
+          "type": "VAE",
+          "link": null
+        },
+        {
+          "localized_name": "frame_rate",
+          "name": "frame_rate",
+          "type": "FLOAT",
+          "widget": {
+            "name": "frame_rate"
+          },
+          "link": null
+        },
+        {
+          "localized_name": "loop_count",
+          "name": "loop_count",
+          "type": "INT",
+          "widget": {
+            "name": "loop_count"
+          },
+          "link": null
+        },
+        {
+          "localized_name": "filename_prefix",
+          "name": "filename_prefix",
+          "type": "STRING",
+          "widget": {
+            "name": "filename_prefix"
+          },
+          "link": null
+        },
+        {
+          "localized_name": "format",
+          "name": "format",
+          "type": "COMBO",
+          "widget": {
+            "name": "format"
+          },
+          "link": null
+        },
+        {
+          "localized_name": "pingpong",
+          "name": "pingpong",
+          "type": "BOOLEAN",
+          "widget": {
+            "name": "pingpong"
+          },
+          "link": null
+        },
+        {
+          "localized_name": "save_output",
+          "name": "save_output",
+          "type": "BOOLEAN",
+          "widget": {
+            "name": "save_output"
+          },
+          "link": null
+        },
+        {
+          "name": "pix_fmt",
+          "type": [
+            "yuv420p",
+            "yuv420p10le"
+          ],
+          "widget": {
+            "name": "pix_fmt"
+          },
+          "link": null
+        },
+        {
+          "name": "crf",
+          "type": "INT",
+          "widget": {
+            "name": "crf"
+          },
+          "link": null
+        },
+        {
+          "name": "save_metadata",
+          "type": "BOOLEAN",
+          "widget": {
+            "name": "save_metadata"
+          },
+          "link": null
+        },
+        {
+          "name": "trim_to_audio",
+          "type": "BOOLEAN",
+          "widget": {
+            "name": "trim_to_audio"
+          },
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "localized_name": "Filenames",
+          "name": "Filenames",
+          "type": "VHS_FILENAMES",
+          "links": []
+        }
+      ],
+      "title": "BSAI MotionFix 终稿轨 ⑩ 终稿输出 (含音轨)",
+      "properties": {
+        "cnr_id": "comfyui-videohelpersuite",
+        "ver": "115de7a9d9e34410cffb9ecfd268e993b11a50fb",
+        "Node name for S&R": "VHS_VideoCombine"
+      },
+      "widgets_values": {
+        "frame_rate": 24,
+        "loop_count": 0,
+        "filename_prefix": "BSAI MotionFix 原生20步 终稿",
+        "format": "video/h264-mp4",
+        "pix_fmt": "yuv420p",
+        "crf": 19,
+        "save_metadata": true,
+        "trim_to_audio": false,
+        "pingpong": false,
+        "save_output": true,
+        "videopreview": {
+          "hidden": false,
+          "paused": false,
+          "params": {
+            "filename": "BSAI MotionFix 原生20步 终稿_00004-audio.mp4",
+            "subfolder": "",
+            "type": "output",
+            "format": "video/h264-mp4",
+            "frame_rate": 24,
+            "workflow": "BSAI MotionFix 原生20步 终稿_00004.png",
+            "fullpath": "C:\\BSAI\\ComfyUI-BSAI_pro_v38_Film Factory\\ComfyUI\\output\\BSAI MotionFix 原生20步 终稿_00004-audio.mp4",
+            "id": "7ee16c47-ab3d-4295-869e-0157bcfec580"
+          }
+        }
+      },
+      "widgets_values_named": {
+        "frame_rate": 24,
+        "loop_count": 0,
+        "filename_prefix": "BSAI MotionFix 原生20步 终稿",
+        "format": "video/h264-mp4",
+        "pix_fmt": "yuv420p",
+        "crf": 19,
+        "save_metadata": true,
+        "trim_to_audio": false,
+        "pingpong": false,
+        "save_output": true,
+        "videopreview": {
+          "hidden": false,
+          "paused": false,
+          "params": {
+            "filename": "BSAI MotionFix 原生20步 终稿_00004-audio.mp4",
+            "subfolder": "",
+            "type": "output",
+            "format": "video/h264-mp4",
+            "frame_rate": 24,
+            "workflow": "BSAI MotionFix 原生20步 终稿_00004.png",
+            "fullpath": "C:\\BSAI\\ComfyUI-BSAI_pro_v38_Film Factory\\ComfyUI\\output\\BSAI MotionFix 原生20步 终稿_00004-audio.mp4",
+            "id": "7ee16c47-ab3d-4295-869e-0157bcfec580"
+          }
+        }
+      }
+    },
+    {
+      "id": 33,
+      "type": "BSAI_H3_Upscale4K",
+      "pos": [
+        5475.427827293382,
+        7032.109919801072
+      ],
+      "size": [
+        420,
+        500
+      ],
+      "flags": {},
+      "order": 48,
+      "mode": 4,
+      "inputs": [
+        {
+          "localized_name": "images / 图像",
+          "name": "images / 图像",
+          "type": "IMAGE",
+          "link": 46
+        },
+        {
+          "localized_name": "model_name / 模型",
+          "name": "model_name / 模型",
+          "type": "COMBO",
+          "widget": {
+            "name": "model_name / 模型"
+          },
+          "link": null
+        },
+        {
+          "localized_name": "scale / 放大倍数",
+          "name": "scale / 放大倍数",
+          "type": "FLOAT",
+          "widget": {
+            "name": "scale / 放大倍数"
+          },
+          "link": null
+        },
+        {
+          "localized_name": "tile_size / 分块大小",
+          "name": "tile_size / 分块大小",
+          "type": "INT",
+          "widget": {
+            "name": "tile_size / 分块大小"
+          },
+          "link": null
+        },
+        {
+          "localized_name": "tile_pad / 分块重叠",
+          "name": "tile_pad / 分块重叠",
+          "type": "INT",
+          "widget": {
+            "name": "tile_pad / 分块重叠"
+          },
+          "link": null
+        },
+        {
+          "localized_name": "batch_frames / 批帧数",
+          "name": "batch_frames / 批帧数",
+          "type": "INT",
+          "widget": {
+            "name": "batch_frames / 批帧数"
+          },
+          "link": null
+        },
+        {
+          "localized_name": "use_fp16 / 半精度",
+          "name": "use_fp16 / 半精度",
+          "type": "BOOLEAN",
+          "widget": {
+            "name": "use_fp16 / 半精度"
+          },
+          "link": null
+        },
+        {
+          "localized_name": "use_compile / 编译加速",
+          "name": "use_compile / 编译加速",
+          "type": "BOOLEAN",
+          "widget": {
+            "name": "use_compile / 编译加速"
+          },
+          "link": null
+        },
+        {
+          "localized_name": "temporal_strength / 时序强度",
+          "name": "temporal_strength / 时序强度",
+          "type": "FLOAT",
+          "widget": {
+            "name": "temporal_strength / 时序强度"
+          },
+          "link": null
+        },
+        {
+          "localized_name": "detail_amount / 细节强度",
+          "name": "detail_amount / 细节强度",
+          "type": "FLOAT",
+          "widget": {
+            "name": "detail_amount / 细节强度"
+          },
+          "link": null
+        },
+        {
+          "localized_name": "detail_radius / 细节半径",
+          "name": "detail_radius / 细节半径",
+          "type": "FLOAT",
+          "widget": {
+            "name": "detail_radius / 细节半径"
+          },
+          "link": null
+        },
+        {
+          "localized_name": "softness / 柔和度",
+          "name": "softness / 柔和度",
+          "type": "FLOAT",
+          "widget": {
+            "name": "softness / 柔和度"
+          },
+          "link": null
+        },
+        {
+          "localized_name": "face_restore / 人脸修复",
+          "name": "face_restore / 人脸修复",
+          "type": "COMBO",
+          "widget": {
+            "name": "face_restore / 人脸修复"
+          },
+          "link": null
+        },
+        {
+          "localized_name": "face_det_conf / 检测置信度",
+          "name": "face_det_conf / 检测置信度",
+          "type": "FLOAT",
+          "widget": {
+            "name": "face_det_conf / 检测置信度"
+          },
+          "link": null
+        },
+        {
+          "localized_name": "face_blend / 融合强度",
+          "name": "face_blend / 融合强度",
+          "type": "FLOAT",
+          "widget": {
+            "name": "face_blend / 融合强度"
+          },
+          "link": null
+        },
+        {
+          "localized_name": "face_fidelity / 保真度",
+          "name": "face_fidelity / 保真度",
+          "type": "FLOAT",
+          "widget": {
+            "name": "face_fidelity / 保真度"
+          },
+          "link": null
+        },
+        {
+          "localized_name": "detail_mode / 细节模式",
+          "name": "detail_mode / 细节模式",
+          "type": "COMBO",
+          "widget": {
+            "name": "detail_mode / 细节模式"
+          },
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "localized_name": "IMAGE / 图像",
+          "name": "IMAGE / 图像",
+          "type": "IMAGE",
+          "links": [
+            45
+          ]
+        },
+        {
+          "localized_name": "width / 宽",
+          "name": "width / 宽",
+          "type": "INT",
+          "links": []
+        },
+        {
+          "localized_name": "height / 高",
+          "name": "height / 高",
+          "type": "INT",
+          "links": []
+        },
+        {
+          "localized_name": "scale_used / 实际倍率",
+          "name": "scale_used / 实际倍率",
+          "type": "FLOAT",
+          "links": []
+        },
+        {
+          "localized_name": "info / 信息",
+          "name": "info / 信息",
+          "type": "STRING",
+          "links": []
+        }
+      ],
+      "properties": {
+        "aux_id": "xm6018924/BSAI-H3-upscale-4K",
+        "ver": "8c9b4f02f4b9bda3bb110dcdd5130019bebd48e0",
+        "Node name for S&R": "BSAI_H3_Upscale4K"
+      },
+      "widgets_values": [
+        "Topaz 星光 2.6 (生成式完美档)",
+        4,
+        512,
+        16,
+        16,
+        true,
+        false,
+        0,
+        0,
+        1.8,
+        0,
+        "Off",
+        0.15,
+        0.7,
+        0.6,
+        "smart"
+      ],
+      "widgets_values_named": {
+        "model_name / 模型": "Topaz 星光 2.6 (生成式完美档)",
+        "scale / 放大倍数": 4,
+        "tile_size / 分块大小": 512,
+        "tile_pad / 分块重叠": 16,
+        "batch_frames / 批帧数": 16,
+        "use_fp16 / 半精度": true,
+        "use_compile / 编译加速": false,
+        "temporal_strength / 时序强度": 0,
+        "detail_amount / 细节强度": 0,
+        "detail_radius / 细节半径": 1.8,
+        "softness / 柔和度": 0,
+        "face_restore / 人脸修复": "Off",
+        "face_det_conf / 检测置信度": 0.15,
+        "face_blend / 融合强度": 0.7,
+        "face_fidelity / 保真度": 0.6,
+        "detail_mode / 细节模式": "smart"
+      }
+    },
+    {
+      "id": 55,
+      "type": "KSamplerSelect",
+      "pos": [
+        -811.2391472848574,
+        3488.3781465969014
+      ],
+      "size": [
+        428.1332898023893,
+        58
+      ],
+      "flags": {},
+      "order": 7,
+      "mode": 0,
+      "inputs": [
+        {
+          "localized_name": "采样器名称",
+          "name": "sampler_name",
+          "type": "COMBO",
+          "widget": {
+            "name": "sampler_name"
+          },
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "localized_name": "采样器",
+          "name": "SAMPLER",
+          "type": "SAMPLER",
+          "slot_index": 0,
+          "links": [
+            97
+          ]
+        }
+      ],
+      "title": "BSAI MotionFix 重拍 ⑧ 采样器 res_multistep",
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.34.0",
+        "Node name for S&R": "KSamplerSelect"
+      },
+      "widgets_values": [
+        "er_sde"
+      ],
+      "widgets_values_named": {
+        "sampler_name": "er_sde"
+      }
+    },
+    {
+      "id": 54,
+      "type": "RandomNoise",
+      "pos": [
+        -812.8466159170005,
+        3597.259429374176
+      ],
+      "size": [
+        430.29534034126607,
+        82
+      ],
+      "flags": {},
+      "order": 8,
+      "mode": 0,
+      "inputs": [
+        {
+          "localized_name": "噪波随机种",
+          "name": "noise_seed",
+          "type": "INT",
+          "widget": {
+            "name": "noise_seed"
+          },
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "localized_name": "噪波",
+          "name": "NOISE",
+          "type": "NOISE",
+          "slot_index": 0,
+          "links": [
+            95
+          ]
+        }
+      ],
+      "title": "BSAI MotionFix 重拍 ⑦ 噪声 RandomNoise",
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.34.0",
+        "Node name for S&R": "RandomNoise"
+      },
+      "widgets_values": [
+        424242,
+        "fixed"
+      ],
+      "widgets_values_named": {
+        "noise_seed": 424242,
+        "control_after_generate": "fixed"
+      }
+    },
+    {
+      "id": 53,
+      "type": "BasicGuider",
+      "pos": [
+        -807.1070530246259,
+        3927.019991329354
+      ],
+      "size": [
+        423.26559553078766,
+        46
+      ],
+      "flags": {},
+      "order": 61,
+      "mode": 0,
+      "inputs": [
+        {
+          "localized_name": "模型",
+          "name": "model",
+          "type": "MODEL",
+          "link": 92
+        },
+        {
+          "localized_name": "条件",
+          "name": "conditioning",
+          "type": "CONDITIONING",
+          "link": 93
+        }
+      ],
+      "outputs": [
+        {
+          "localized_name": "引导器",
+          "name": "GUIDER",
+          "type": "GUIDER",
+          "slot_index": 0,
+          "links": [
+            96
+          ]
+        }
+      ],
+      "title": "BSAI MotionFix 重拍 ⑥ 引导 BasicGuider",
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.34.0",
+        "Node name for S&R": "BasicGuider"
+      }
+    },
+    {
+      "id": 59,
+      "type": "VAEDecodeAudio",
+      "pos": [
+        111.99045752483445,
+        3343.937842220506
+      ],
+      "size": [
+        426.28490996546986,
+        46
+      ],
+      "flags": {},
+      "order": 64,
+      "mode": 0,
+      "inputs": [
+        {
+          "localized_name": "Latent",
+          "name": "samples",
+          "type": "LATENT",
+          "link": 102
+        },
+        {
+          "localized_name": "vae",
+          "name": "vae",
+          "type": "VAE",
+          "link": 103
+        }
+      ],
+      "outputs": [
+        {
+          "localized_name": "音频",
+          "name": "AUDIO",
+          "type": "AUDIO",
+          "slot_index": 0,
+          "links": [
+            106
+          ]
+        }
+      ],
+      "title": "BSAI MotionFix 重拍 ⑫ 音频解码 VAEDecodeAudio",
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.34.0",
+        "Node name for S&R": "VAEDecodeAudio"
+      }
+    },
+    {
+      "id": 61,
+      "type": "H3AudioRecover",
+      "pos": [
+        579.3515278412153,
+        3339.77724125084
+      ],
+      "size": [
+        432.1541858271306,
+        126
+      ],
+      "flags": {},
+      "order": 66,
+      "mode": 0,
+      "inputs": [
+        {
+          "localized_name": "audio",
+          "name": "audio",
+          "type": "AUDIO",
+          "link": 106
+        },
+        {
+          "localized_name": "reference",
+          "name": "reference",
+          "shape": 7,
+          "type": "AUDIO",
+          "link": 108
+        },
+        {
+          "localized_name": "hold_map",
+          "name": "hold_map",
+          "type": "STRING",
+          "widget": {
+            "name": "hold_map"
+          },
+          "link": 107
+        },
+        {
+          "localized_name": "fps",
+          "name": "fps",
+          "type": "INT",
+          "widget": {
+            "name": "fps"
+          },
+          "link": null
+        },
+        {
+          "localized_name": "reference_mix",
+          "name": "reference_mix",
+          "shape": 7,
+          "type": "FLOAT",
+          "widget": {
+            "name": "reference_mix"
+          },
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "localized_name": "音频",
+          "name": "AUDIO",
+          "type": "AUDIO",
+          "slot_index": 0,
+          "links": [
+            110
+          ]
+        }
+      ],
+      "title": "BSAI MotionFix 重拍 ⑭ 音频恢复 H3AudioRecover",
+      "properties": {
+        "Node name for S&R": "H3AudioRecover"
+      },
+      "widgets_values": [
+        "",
+        24,
+        1
+      ],
+      "widgets_values_named": {
+        "hold_map": "",
+        "fps": 24,
+        "reference_mix": 1
+      }
+    },
+    {
+      "id": 52,
+      "type": "MiniMaxH3ReferenceToVideo",
+      "pos": [
+        -1331.6320245833028,
+        3320.875840014412
+      ],
+      "size": [
+        468.7990002630686,
+        384
+      ],
+      "flags": {},
+      "order": 60,
+      "mode": 0,
+      "inputs": [
+        {
+          "label": "clip",
+          "localized_name": "clip",
+          "name": "clip",
+          "type": "CLIP",
+          "link": 82
+        },
+        {
+          "label": "vae",
+          "localized_name": "vae",
+          "name": "vae",
+          "type": "VAE",
+          "link": 83
+        },
+        {
+          "label": "audio_vae",
+          "localized_name": "audio_vae",
+          "name": "audio_vae",
+          "type": "VAE",
+          "link": 84
+        },
+        {
+          "label": "ref_images.ref_image_0",
+          "localized_name": "ref_image_0",
+          "name": "ref_images.ref_image_0",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": 85
+        },
+        {
+          "localized_name": "ref_image_1",
+          "name": "ref_images.ref_image_1",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": 86
+        },
+        {
+          "localized_name": "ref_image_2",
+          "name": "ref_images.ref_image_2",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": 87
+        },
+        {
+          "localized_name": "ref_image_3",
+          "name": "ref_images.ref_image_3",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "label": "ref_videos.ref_video_0",
+          "localized_name": "ref_video_0",
+          "name": "ref_videos.ref_video_0",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "label": "ref_video_audios.ref_video_audio_0",
+          "localized_name": "ref_video_audio_0",
+          "name": "ref_video_audios.ref_video_audio_0",
+          "shape": 7,
+          "type": "AUDIO",
+          "link": null
+        },
+        {
+          "label": "ref_audios.ref_audio_0",
+          "localized_name": "ref_audio_0",
+          "name": "ref_audios.ref_audio_0",
+          "shape": 7,
+          "type": "AUDIO",
+          "link": null
+        },
+        {
+          "label": "prompt",
+          "localized_name": "提示词",
+          "name": "prompt",
+          "type": "STRING",
+          "widget": {
+            "name": "prompt"
+          },
+          "link": 88
+        },
+        {
+          "label": "width",
+          "localized_name": "宽度",
+          "name": "width",
+          "type": "INT",
+          "widget": {
+            "name": "width"
+          },
+          "link": 89
+        },
+        {
+          "label": "height",
+          "localized_name": "高度",
+          "name": "height",
+          "type": "INT",
+          "widget": {
+            "name": "height"
+          },
+          "link": 90
+        },
+        {
+          "label": "length",
+          "localized_name": "长度",
+          "name": "length",
+          "type": "INT",
+          "widget": {
+            "name": "length"
+          },
+          "link": 91
+        },
+        {
+          "label": "ref_image_size",
+          "localized_name": "参考图像尺寸",
+          "name": "ref_image_size",
+          "type": "COMBO",
+          "widget": {
+            "name": "ref_image_size"
+          },
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "label": "positive",
+          "localized_name": "正向",
+          "name": "positive",
+          "type": "CONDITIONING",
+          "slot_index": 0,
+          "links": [
+            93
+          ]
+        },
+        {
+          "label": "LATENT",
+          "localized_name": "Latent",
+          "name": "LATENT",
+          "type": "LATENT",
+          "slot_index": 1,
+          "links": []
+        }
+      ],
+      "title": "BSAI MotionFix 重拍 ⑤ 重拍条件 ReferenceToVideo",
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.33.0",
+        "Node name for S&R": "MiniMaxH3ReferenceToVideo",
+        "ue_properties": {
+          "widget_ue_connectable": {},
+          "version": "7.5.2",
+          "input_ue_unconnectable": {}
+        }
+      },
+      "widgets_values": [
+        "",
+        544,
+        960,
+        124,
+        "max"
+      ],
+      "widgets_values_named": {
+        "prompt": "",
+        "width": 544,
+        "height": 960,
+        "length": 124,
+        "ref_image_size": "max"
+      }
+    },
+    {
+      "id": 31,
+      "type": "VHS_VideoCombine",
+      "pos": [
+        5915.27089586487,
+        7024.618712556315
+      ],
+      "size": [
+        2068.8182603872483,
+        334
+      ],
+      "flags": {},
+      "order": 47,
+      "mode": 4,
+      "inputs": [
+        {
+          "localized_name": "images",
+          "name": "images",
+          "type": "IMAGE",
+          "link": 45
+        },
+        {
+          "localized_name": "audio",
+          "name": "audio",
+          "shape": 7,
+          "type": "AUDIO",
+          "link": 47
+        },
+        {
+          "localized_name": "meta_batch",
+          "name": "meta_batch",
+          "shape": 7,
+          "type": "VHS_BatchManager",
+          "link": null
+        },
+        {
+          "localized_name": "vae",
+          "name": "vae",
+          "shape": 7,
+          "type": "VAE",
+          "link": null
+        },
+        {
+          "localized_name": "frame_rate",
+          "name": "frame_rate",
+          "type": "FLOAT",
+          "widget": {
+            "name": "frame_rate"
+          },
+          "link": null
+        },
+        {
+          "localized_name": "loop_count",
+          "name": "loop_count",
+          "type": "INT",
+          "widget": {
+            "name": "loop_count"
+          },
+          "link": null
+        },
+        {
+          "localized_name": "filename_prefix",
+          "name": "filename_prefix",
+          "type": "STRING",
+          "widget": {
+            "name": "filename_prefix"
+          },
+          "link": null
+        },
+        {
+          "localized_name": "format",
+          "name": "format",
+          "type": "COMBO",
+          "widget": {
+            "name": "format"
+          },
+          "link": null
+        },
+        {
+          "localized_name": "pingpong",
+          "name": "pingpong",
+          "type": "BOOLEAN",
+          "widget": {
+            "name": "pingpong"
+          },
+          "link": null
+        },
+        {
+          "localized_name": "save_output",
+          "name": "save_output",
+          "type": "BOOLEAN",
+          "widget": {
+            "name": "save_output"
+          },
+          "link": null
+        },
+        {
+          "name": "pix_fmt",
+          "type": [
+            "yuv420p",
+            "yuv420p10le"
+          ],
+          "widget": {
+            "name": "pix_fmt"
+          },
+          "link": null
+        },
+        {
+          "name": "crf",
+          "type": "INT",
+          "widget": {
+            "name": "crf"
+          },
+          "link": null
+        },
+        {
+          "name": "save_metadata",
+          "type": "BOOLEAN",
+          "widget": {
+            "name": "save_metadata"
+          },
+          "link": null
+        },
+        {
+          "name": "trim_to_audio",
+          "type": "BOOLEAN",
+          "widget": {
+            "name": "trim_to_audio"
+          },
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "localized_name": "Filenames",
+          "name": "Filenames",
+          "type": "VHS_FILENAMES",
+          "links": []
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfyui-videohelpersuite",
+        "ver": "115de7a9d9e34410cffb9ecfd268e993b11a50fb",
+        "Node name for S&R": "VHS_VideoCombine"
+      },
+      "widgets_values": {
+        "frame_rate": 24,
+        "loop_count": 0,
+        "filename_prefix": "BSAI H3 upscale 4K  视频超分",
+        "format": "video/h264-mp4",
+        "pix_fmt": "yuv420p",
+        "crf": 19,
+        "save_metadata": true,
+        "trim_to_audio": false,
+        "pingpong": false,
+        "save_output": true,
+        "videopreview": {
+          "hidden": false,
+          "paused": false,
+          "params": {
+            "filename": "BSAI H3 upscale 4K  视频超分_00010-audio.mp4",
+            "subfolder": "",
+            "type": "output",
+            "format": "video/h264-mp4",
+            "frame_rate": 24,
+            "workflow": "BSAI H3 upscale 4K  视频超分_00010.png",
+            "fullpath": "C:\\BSAI\\ComfyUI-BSAI_pro_v38_Film Factory\\ComfyUI\\output\\BSAI H3 upscale 4K  视频超分_00010-audio.mp4",
+            "id": "96f482b8-06c6-4d62-b305-c0c613fe11d5"
+          }
+        }
+      },
+      "widgets_values_named": {
+        "frame_rate": 24,
+        "loop_count": 0,
+        "filename_prefix": "BSAI H3 upscale 4K  视频超分",
+        "format": "video/h264-mp4",
+        "pix_fmt": "yuv420p",
+        "crf": 19,
+        "save_metadata": true,
+        "trim_to_audio": false,
+        "pingpong": false,
+        "save_output": true,
+        "videopreview": {
+          "hidden": false,
+          "paused": false,
+          "params": {
+            "filename": "BSAI H3 upscale 4K  视频超分_00010-audio.mp4",
+            "subfolder": "",
+            "type": "output",
+            "format": "video/h264-mp4",
+            "frame_rate": 24,
+            "workflow": "BSAI H3 upscale 4K  视频超分_00010.png",
+            "fullpath": "C:\\BSAI\\ComfyUI-BSAI_pro_v38_Film Factory\\ComfyUI\\output\\BSAI H3 upscale 4K  视频超分_00010-audio.mp4",
+            "id": "96f482b8-06c6-4d62-b305-c0c613fe11d5"
+          }
+        }
+      }
+    },
+    {
+      "id": 36,
+      "type": "FlashVSRNode",
+      "pos": [
+        8094.152164281627,
+        7021.7335379892165
+      ],
+      "size": [
+        507.37828299080945,
+        262.05858406091534
+      ],
+      "flags": {},
+      "order": 49,
+      "mode": 4,
+      "inputs": [
+        {
+          "localized_name": "frames",
+          "name": "frames",
+          "type": "IMAGE",
+          "link": 58
+        },
+        {
+          "localized_name": "model",
+          "name": "model",
+          "type": "COMBO",
+          "widget": {
+            "name": "model"
+          },
+          "link": null
+        },
+        {
+          "localized_name": "mode",
+          "name": "mode",
+          "type": "COMBO",
+          "widget": {
+            "name": "mode"
+          },
+          "link": null
+        },
+        {
+          "localized_name": "scale",
+          "name": "scale",
+          "type": "INT",
+          "widget": {
+            "name": "scale"
+          },
+          "link": null
+        },
+        {
+          "localized_name": "tiled_vae",
+          "name": "tiled_vae",
+          "type": "BOOLEAN",
+          "widget": {
+            "name": "tiled_vae"
+          },
+          "link": null
+        },
+        {
+          "localized_name": "tiled_dit",
+          "name": "tiled_dit",
+          "type": "BOOLEAN",
+          "widget": {
+            "name": "tiled_dit"
+          },
+          "link": null
+        },
+        {
+          "localized_name": "unload_dit",
+          "name": "unload_dit",
+          "type": "BOOLEAN",
+          "widget": {
+            "name": "unload_dit"
+          },
+          "link": null
+        },
+        {
+          "localized_name": "seed",
+          "name": "seed",
+          "type": "INT",
+          "widget": {
+            "name": "seed"
+          },
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "localized_name": "image",
+          "name": "image",
+          "type": "IMAGE",
+          "slot_index": 0,
+          "links": [
+            59
+          ]
+        }
+      ],
+      "title": "BSAI MotionFix ① 时序修复 FlashVSR（scale=2 防放大噪点）",
+      "properties": {
+        "cnr_id": "flashvsr_ultra_fast",
+        "ver": "4820b3f02347bddcbbb9a5a85ab7638fe976366e",
+        "Node name for S&R": "FlashVSRNode"
+      },
+      "widgets_values": [
+        "FlashVSR-v1.1",
+        "tiny",
+        2,
+        true,
+        true,
+        false,
+        204707920984704,
+        "randomize"
+      ],
+      "widgets_values_named": {
+        "model": "FlashVSR-v1.1",
+        "mode": "tiny",
+        "scale": 2,
+        "tiled_vae": true,
+        "tiled_dit": true,
+        "unload_dit": false,
+        "seed": 204707920984704,
+        "control_after_generate": "randomize"
+      }
+    },
+    {
+      "id": 37,
+      "type": "VHS_VideoCombine",
+      "pos": [
+        8619.987666259949,
+        7019.4751757752565
+      ],
+      "size": [
+        2053.4989994128964,
+        334
+      ],
+      "flags": {},
+      "order": 50,
+      "mode": 4,
+      "inputs": [
+        {
+          "localized_name": "images",
+          "name": "images",
+          "type": "IMAGE",
+          "link": 59
+        },
+        {
+          "localized_name": "audio",
+          "name": "audio",
+          "shape": 7,
+          "type": "AUDIO",
+          "link": 60
+        },
+        {
+          "localized_name": "meta_batch",
+          "name": "meta_batch",
+          "shape": 7,
+          "type": "VHS_BatchManager",
+          "link": null
+        },
+        {
+          "localized_name": "vae",
+          "name": "vae",
+          "shape": 7,
+          "type": "VAE",
+          "link": null
+        },
+        {
+          "localized_name": "frame_rate",
+          "name": "frame_rate",
+          "type": "FLOAT",
+          "widget": {
+            "name": "frame_rate"
+          },
+          "link": null
+        },
+        {
+          "localized_name": "loop_count",
+          "name": "loop_count",
+          "type": "INT",
+          "widget": {
+            "name": "loop_count"
+          },
+          "link": null
+        },
+        {
+          "localized_name": "filename_prefix",
+          "name": "filename_prefix",
+          "type": "STRING",
+          "widget": {
+            "name": "filename_prefix"
+          },
+          "link": null
+        },
+        {
+          "localized_name": "format",
+          "name": "format",
+          "type": "COMBO",
+          "widget": {
+            "name": "format"
+          },
+          "link": null
+        },
+        {
+          "localized_name": "pingpong",
+          "name": "pingpong",
+          "type": "BOOLEAN",
+          "widget": {
+            "name": "pingpong"
+          },
+          "link": null
+        },
+        {
+          "localized_name": "save_output",
+          "name": "save_output",
+          "type": "BOOLEAN",
+          "widget": {
+            "name": "save_output"
+          },
+          "link": null
+        },
+        {
+          "name": "pix_fmt",
+          "type": [
+            "yuv420p",
+            "yuv420p10le"
+          ],
+          "widget": {
+            "name": "pix_fmt"
+          },
+          "link": null
+        },
+        {
+          "name": "crf",
+          "type": "INT",
+          "widget": {
+            "name": "crf"
+          },
+          "link": null
+        },
+        {
+          "name": "save_metadata",
+          "type": "BOOLEAN",
+          "widget": {
+            "name": "save_metadata"
+          },
+          "link": null
+        },
+        {
+          "name": "trim_to_audio",
+          "type": "BOOLEAN",
+          "widget": {
+            "name": "trim_to_audio"
+          },
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "localized_name": "Filenames",
+          "name": "Filenames",
+          "type": "VHS_FILENAMES",
+          "links": []
+        }
+      ],
+      "title": "BSAI MotionFix ② 修复版合成输出（含音轨）",
+      "properties": {
+        "cnr_id": "comfyui-videohelpersuite",
+        "ver": "115de7a9d9e34410cffb9ecfd268e993b11a50fb",
+        "Node name for S&R": "VHS_VideoCombine"
+      },
+      "widgets_values": {
+        "frame_rate": 24,
+        "loop_count": 0,
+        "filename_prefix": "BSAI MotionFix FlashVSR 时序修复",
+        "format": "video/h264-mp4",
+        "pix_fmt": "yuv420p",
+        "crf": 19,
+        "save_metadata": true,
+        "trim_to_audio": false,
+        "pingpong": false,
+        "save_output": true,
+        "videopreview": {
+          "hidden": false,
+          "paused": false,
+          "params": {
+            "filename": "BSAI MotionFix FlashVSR 时序修复_00002-audio.mp4",
+            "subfolder": "",
+            "type": "output",
+            "format": "video/h264-mp4",
+            "frame_rate": 24,
+            "workflow": "BSAI MotionFix FlashVSR 时序修复_00002.png",
+            "fullpath": "C:\\BSAI\\ComfyUI-BSAI_pro_v38_Film Factory\\ComfyUI\\output\\BSAI MotionFix FlashVSR 时序修复_00002-audio.mp4",
+            "id": "6630a7c5-6cc9-4ebb-822f-45aba366e54f"
+          }
+        }
+      },
+      "widgets_values_named": {
+        "frame_rate": 24,
+        "loop_count": 0,
+        "filename_prefix": "BSAI MotionFix FlashVSR 时序修复",
+        "format": "video/h264-mp4",
+        "pix_fmt": "yuv420p",
+        "crf": 19,
+        "save_metadata": true,
+        "trim_to_audio": false,
+        "pingpong": false,
+        "save_output": true,
+        "videopreview": {
+          "hidden": false,
+          "paused": false,
+          "params": {
+            "filename": "BSAI MotionFix FlashVSR 时序修复_00002-audio.mp4",
+            "subfolder": "",
+            "type": "output",
+            "format": "video/h264-mp4",
+            "frame_rate": 24,
+            "workflow": "BSAI MotionFix FlashVSR 时序修复_00002.png",
+            "fullpath": "C:\\BSAI\\ComfyUI-BSAI_pro_v38_Film Factory\\ComfyUI\\output\\BSAI MotionFix FlashVSR 时序修复_00002-audio.mp4",
+            "id": "6630a7c5-6cc9-4ebb-822f-45aba366e54f"
+          }
+        }
+      }
+    },
+    {
+      "id": 51,
+      "type": "H3V2VInit",
+      "pos": [
+        -818.3444135908001,
+        3218.9050971107563
+      ],
+      "size": [
+        436.6625816711934,
+        218
+      ],
+      "flags": {},
+      "order": 59,
+      "mode": 0,
+      "inputs": [
+        {
+          "localized_name": "samples",
+          "name": "samples",
+          "type": "LATENT",
+          "link": 81
+        },
+        {
+          "localized_name": "oracle_samples",
+          "name": "oracle_samples",
+          "shape": 7,
+          "type": "LATENT",
+          "link": null
+        },
+        {
+          "localized_name": "mask",
+          "name": "mask",
+          "shape": 7,
+          "type": "MASK",
+          "link": null
+        },
+        {
+          "localized_name": "length",
+          "name": "length",
+          "shape": 7,
+          "type": "INT",
+          "widget": {
+            "name": "length"
+          },
+          "link": null
+        },
+        {
+          "localized_name": "freeze_threshold",
+          "name": "freeze_threshold",
+          "shape": 7,
+          "type": "FLOAT",
+          "widget": {
+            "name": "freeze_threshold"
+          },
+          "link": null
+        },
+        {
+          "localized_name": "freeze_grow",
+          "name": "freeze_grow",
+          "shape": 7,
+          "type": "INT",
+          "widget": {
+            "name": "freeze_grow"
+          },
+          "link": null
+        },
+        {
+          "localized_name": "mask_feather",
+          "name": "mask_feather",
+          "shape": 7,
+          "type": "INT",
+          "widget": {
+            "name": "mask_feather"
+          },
+          "link": null
+        },
+        {
+          "localized_name": "invert_mask",
+          "name": "invert_mask",
+          "shape": 7,
+          "type": "BOOLEAN",
+          "widget": {
+            "name": "invert_mask"
+          },
+          "link": null
+        },
+        {
+          "localized_name": "time_varying",
+          "name": "time_varying",
+          "shape": 7,
+          "type": "BOOLEAN",
+          "widget": {
+            "name": "time_varying"
+          },
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "localized_name": "Latent",
+          "name": "LATENT",
+          "type": "LATENT",
+          "slot_index": 0,
+          "links": [
+            99
+          ]
+        }
+      ],
+      "title": "BSAI MotionFix 重拍 ④ V2V 初始化 H3V2VInit",
+      "properties": {
+        "Node name for S&R": "H3V2VInit"
+      },
+      "widgets_values": [
+        0,
+        0,
+        2,
+        0,
+        false,
+        false
+      ],
+      "widgets_values_named": {
+        "length": 0,
+        "freeze_threshold": 0,
+        "freeze_grow": 2,
+        "mask_feather": 0,
+        "invert_mask": false,
+        "time_varying": false
+      }
+    },
+    {
+      "id": 57,
+      "type": "SamplerCustomAdvanced",
+      "pos": [
+        -337.8156327111765,
+        3218.6879902243318
+      ],
+      "size": [
+        426.5884765625,
+        326
+      ],
+      "flags": {},
+      "order": 62,
+      "mode": 0,
+      "inputs": [
+        {
+          "localized_name": "噪波",
+          "name": "noise",
+          "type": "NOISE",
+          "link": 95
+        },
+        {
+          "localized_name": "引导器",
+          "name": "guider",
+          "type": "GUIDER",
+          "link": 96
+        },
+        {
+          "localized_name": "采样器",
+          "name": "sampler",
+          "type": "SAMPLER",
+          "link": 97
+        },
+        {
+          "localized_name": "西格玛",
+          "name": "sigmas",
+          "type": "SIGMAS",
+          "link": 98
+        },
+        {
+          "localized_name": "Latent图像",
+          "name": "latent_image",
+          "type": "LATENT",
+          "link": 99
+        }
+      ],
+      "outputs": [
+        {
+          "localized_name": "Latent",
+          "name": "output",
+          "type": "LATENT",
+          "slot_index": 0,
+          "links": [
+            100,
+            102
+          ]
+        },
+        {
+          "localized_name": "降噪Latent",
+          "name": "denoised_output",
+          "type": "LATENT",
+          "slot_index": 0,
+          "links": []
+        }
+      ],
+      "title": "BSAI MotionFix 重拍 ⑩ 二次采样 SamplerCustomAdvanced",
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.34.0",
+        "Node name for S&R": "SamplerCustomAdvanced"
+      }
+    },
+    {
+      "id": 58,
+      "type": "VAEDecode",
+      "pos": [
+        122.37844252733314,
+        3224.208696048755
+      ],
+      "size": [
+        421.7464755352852,
+        46
+      ],
+      "flags": {},
+      "order": 63,
+      "mode": 0,
+      "inputs": [
+        {
+          "localized_name": "Latent",
+          "name": "samples",
+          "type": "LATENT",
+          "link": 100
+        },
+        {
+          "localized_name": "vae",
+          "name": "vae",
+          "type": "VAE",
+          "link": 101
+        }
+      ],
+      "outputs": [
+        {
+          "localized_name": "图像",
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "slot_index": 0,
+          "links": [
+            104
+          ]
+        }
+      ],
+      "title": "BSAI MotionFix 重拍 ⑪ 视频解码 VAEDecode",
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.34.0",
+        "Node name for S&R": "VAEDecode"
+      }
+    },
+    {
+      "id": 62,
+      "type": "CreateVideo",
+      "pos": [
+        1031.7582807339147,
+        3213.5888921124842
+      ],
+      "size": [
+        334.3375,
+        126
+      ],
+      "flags": {},
+      "order": 67,
+      "mode": 0,
+      "inputs": [
+        {
+          "localized_name": "图像",
+          "name": "images",
+          "type": "IMAGE",
+          "link": 109
+        },
+        {
+          "localized_name": "音频",
+          "name": "audio",
+          "shape": 7,
+          "type": "AUDIO",
+          "link": 110
+        },
+        {
+          "localized_name": "帧率",
+          "name": "fps",
+          "type": "FLOAT",
+          "widget": {
+            "name": "fps"
+          },
+          "link": null
+        },
+        {
+          "localized_name": "bit_depth",
+          "name": "bit_depth",
+          "shape": 7,
+          "type": "COMBO",
+          "widget": {
+            "name": "bit_depth"
+          },
+          "link": null
+        },
+        {
+          "localized_name": "color_space",
+          "name": "color_space",
+          "shape": 7,
+          "type": "COMBO",
+          "widget": {
+            "name": "color_space"
+          },
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "localized_name": "视频",
+          "name": "VIDEO",
+          "type": "VIDEO",
+          "slot_index": 0,
+          "links": [
+            111
+          ]
+        }
+      ],
+      "title": "BSAI MotionFix 重拍 ⑮ 合成视频 (慢动作重拍)",
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.34.0",
+        "Node name for S&R": "CreateVideo"
+      },
+      "widgets_values": [
+        24,
+        "auto",
+        "sRGB"
+      ],
+      "widgets_values_named": {
+        "fps": 24,
+        "bit_depth": "auto",
+        "color_space": "sRGB"
+      }
+    },
+    {
+      "id": 63,
+      "type": "SaveVideo",
+      "pos": [
+        1396.35073754622,
+        3207.9451738963908
+      ],
+      "size": [
+        2413.4932922368494,
+        130
+      ],
+      "flags": {},
+      "order": 68,
+      "mode": 0,
+      "inputs": [
+        {
+          "localized_name": "视频",
+          "name": "video",
+          "type": "VIDEO",
+          "link": 111
+        },
+        {
+          "localized_name": "文件名前缀",
+          "name": "filename_prefix",
+          "type": "STRING",
+          "widget": {
+            "name": "filename_prefix"
+          },
+          "link": null
+        },
+        {
+          "localized_name": "格式",
+          "name": "format",
+          "type": "COMFY_DYNAMICCOMBO_V3",
+          "widget": {
+            "name": "format"
+          },
+          "link": null
+        },
+        {
+          "localized_name": "codec",
+          "name": "format.codec",
+          "type": "COMFY_DYNAMICCOMBO_V3",
+          "widget": {
+            "name": "format.codec"
+          },
+          "link": null
+        },
+        {
+          "localized_name": "encoding",
+          "name": "format.codec.encoding",
+          "shape": 7,
+          "type": "COMFY_DYNAMICCOMBO_V3",
+          "widget": {
+            "name": "format.codec.encoding"
+          },
+          "link": null
+        },
+        {
+          "localized_name": "编码器",
+          "name": "codec",
+          "shape": 7,
+          "type": "COMFY_DYNAMICCOMBO_V3",
+          "widget": {
+            "name": "codec"
+          },
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "localized_name": "video",
+          "name": "video",
+          "type": "VIDEO",
+          "slot_index": 0,
+          "links": []
+        }
+      ],
+      "title": "BSAI MotionFix 重拍 ⑯ 输出 (慢动作重拍)",
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.34.0",
+        "Node name for S&R": "SaveVideo"
+      },
+      "widgets_values": [
+        "BSAI MotionFix 慢动作重拍",
+        "mp4",
+        "h264",
+        "auto",
+        "auto"
+      ],
+      "widgets_values_named": {
+        "filename_prefix": "BSAI MotionFix 慢动作重拍",
+        "format": "mp4",
+        "format.codec": "h264",
+        "format.codec.encoding": "auto",
+        "codec": "auto"
+      }
+    },
+    {
+      "id": 30,
+      "type": "LoadImage",
+      "pos": [
+        -2320.4634160561513,
+        707.0754275349806
+      ],
+      "size": [
+        404.5933934876416,
+        476.01064229927965
+      ],
+      "flags": {},
+      "order": 9,
+      "mode": 0,
+      "inputs": [
+        {
+          "localized_name": "图像",
+          "name": "image",
+          "type": "COMBO",
+          "widget": {
+            "name": "image"
+          },
+          "link": null
+        },
+        {
+          "localized_name": "选择文件上传",
+          "name": "upload",
+          "type": "IMAGEUPLOAD",
+          "widget": {
+            "name": "upload"
+          },
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "localized_name": "图像",
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [
+            39,
+            87,
+            112
+          ]
+        },
+        {
+          "localized_name": "遮罩",
+          "name": "MASK",
+          "type": "MASK",
+          "links": []
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.34.0",
+        "Node name for S&R": "LoadImage"
+      },
+      "widgets_values": [
+        "场景001.jpg",
+        "image"
+      ],
+      "widgets_values_named": {
+        "image": "场景001.jpg",
+        "upload": "image"
+      }
+    },
+    {
+      "id": 16,
+      "type": "SaveAudio",
+      "pos": [
+        1522.2466566084877,
+        -104.69160804978337
+      ],
+      "size": [
+        300,
+        112
+      ],
+      "flags": {},
+      "order": 43,
+      "mode": 0,
+      "inputs": [
+        {
+          "localized_name": "音频",
+          "name": "audio",
+          "type": "AUDIO",
+          "link": 18
+        },
+        {
+          "localized_name": "文件名前缀",
+          "name": "filename_prefix",
+          "type": "STRING",
+          "widget": {
+            "name": "filename_prefix"
+          },
+          "link": null
+        },
+        {
+          "localized_name": "音频UI",
+          "name": "audioUI",
+          "type": "AUDIO_UI",
+          "widget": {
+            "name": "audioUI"
+          },
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "localized_name": "audio",
+          "name": "audio",
+          "type": "AUDIO",
+          "links": []
+        }
+      ],
+      "title": "保存音频 (FLAC)",
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.34.0",
+        "Node name for S&R": "SaveAudio"
+      },
+      "widgets_values": [
+        "BSAI_FastH3"
+      ],
+      "widgets_values_named": {
+        "filename_prefix": "BSAI_FastH3"
+      }
+    },
+    {
+      "id": 48,
+      "type": "H3JerkOracle",
+      "pos": [
+        -2295.0854672813193,
+        3209.065571065914
+      ],
+      "size": [
+        444.58536936619885,
+        422
+      ],
+      "flags": {},
+      "order": 56,
+      "mode": 0,
+      "inputs": [
+        {
+          "localized_name": "samples",
+          "name": "samples",
+          "type": "LATENT",
+          "link": 116
+        },
+        {
+          "localized_name": "length",
+          "name": "length",
+          "type": "INT",
+          "widget": {
+            "name": "length"
+          },
+          "link": 117
+        },
+        {
+          "localized_name": "q",
+          "name": "q",
+          "type": "FLOAT",
+          "widget": {
+            "name": "q"
+          },
+          "link": null
+        },
+        {
+          "localized_name": "d_max",
+          "name": "d_max",
+          "type": "INT",
+          "widget": {
+            "name": "d_max"
+          },
+          "link": null
+        },
+        {
+          "localized_name": "ramp",
+          "name": "ramp",
+          "type": "BOOLEAN",
+          "widget": {
+            "name": "ramp"
+          },
+          "link": null
+        },
+        {
+          "localized_name": "preset",
+          "name": "preset",
+          "shape": 7,
+          "type": "COMBO",
+          "widget": {
+            "name": "preset"
+          },
+          "link": null
+        },
+        {
+          "localized_name": "bridge",
+          "name": "bridge",
+          "shape": 7,
+          "type": "INT",
+          "widget": {
+            "name": "bridge"
+          },
+          "link": null
+        },
+        {
+          "localized_name": "profile_mode",
+          "name": "profile_mode",
+          "shape": 7,
+          "type": "COMBO",
+          "widget": {
+            "name": "profile_mode"
+          },
+          "link": null
+        },
+        {
+          "localized_name": "abstain_below",
+          "name": "abstain_below",
+          "shape": 7,
+          "type": "FLOAT",
+          "widget": {
+            "name": "abstain_below"
+          },
+          "link": null
+        },
+        {
+          "localized_name": "fps",
+          "name": "fps",
+          "shape": 7,
+          "type": "INT",
+          "widget": {
+            "name": "fps"
+          },
+          "link": null
+        },
+        {
+          "localized_name": "s_per_step",
+          "name": "s_per_step",
+          "shape": 7,
+          "type": "FLOAT",
+          "widget": {
+            "name": "s_per_step"
+          },
+          "link": null
+        },
+        {
+          "localized_name": "est_steps",
+          "name": "est_steps",
+          "shape": 7,
+          "type": "INT",
+          "widget": {
+            "name": "est_steps"
+          },
+          "link": null
+        },
+        {
+          "localized_name": "overhead_s",
+          "name": "overhead_s",
+          "shape": 7,
+          "type": "FLOAT",
+          "widget": {
+            "name": "overhead_s"
+          },
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "localized_name": "hold_map",
+          "name": "hold_map",
+          "type": "STRING",
+          "slot_index": 0,
+          "links": [
+            118
+          ]
+        },
+        {
+          "localized_name": "segments",
+          "name": "segments",
+          "type": "STRING",
+          "slot_index": 0,
+          "links": []
+        },
+        {
+          "localized_name": "window_start",
+          "name": "window_start",
+          "type": "INT",
+          "slot_index": 0,
+          "links": []
+        },
+        {
+          "localized_name": "window_len",
+          "name": "window_len",
+          "type": "INT",
+          "slot_index": 0,
+          "links": []
+        },
+        {
+          "localized_name": "profile",
+          "name": "profile",
+          "type": "STRING",
+          "slot_index": 0,
+          "links": []
+        },
+        {
+          "localized_name": "report",
+          "name": "report",
+          "type": "STRING",
+          "slot_index": 0,
+          "links": []
+        }
+      ],
+      "title": "BSAI MotionFix 重拍 ① 动作热力检测 H3JerkOracle",
+      "properties": {
+        "Node name for S&R": "H3JerkOracle"
+      },
+      "widgets_values": [
+        124,
+        0.8,
+        4,
+        true,
+        "balanced (default)",
+        8,
+        "value |d3| (default)",
+        0,
+        24,
+        0,
+        18,
+        6.7
+      ],
+      "widgets_values_named": {
+        "length": 124,
+        "q": 0.8,
+        "d_max": 4,
+        "ramp": true,
+        "preset": "balanced (default)",
+        "bridge": 8,
+        "profile_mode": "value |d3| (default)",
+        "abstain_below": 0,
+        "fps": 24,
+        "s_per_step": 0,
+        "est_steps": 18,
+        "overhead_s": 6.7
+      }
+    },
+    {
+      "id": 66,
+      "type": "LoraLoaderModelOnly",
+      "pos": [
+        -1366.697298435334,
+        3805.638538336384
+      ],
+      "size": [
+        523.8026579608971,
+        82
+      ],
+      "flags": {},
+      "order": 32,
+      "mode": 0,
+      "inputs": [
+        {
+          "localized_name": "模型",
+          "name": "model",
+          "type": "MODEL",
+          "link": 115
+        },
+        {
+          "localized_name": "LoRA名称",
+          "name": "lora_name",
+          "type": "COMBO",
+          "widget": {
+            "name": "lora_name"
+          },
+          "link": null
+        },
+        {
+          "localized_name": "模型强度",
+          "name": "strength_model",
+          "type": "FLOAT",
+          "widget": {
+            "name": "strength_model"
+          },
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "localized_name": "模型",
+          "name": "MODEL",
+          "type": "MODEL",
+          "links": [
+            92,
+            94
+          ]
+        }
+      ],
+      "title": "BSAI MotionFix 重拍 ⑱ Turbo LoRA (ref2v 4-step, 提速)",
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.34.0",
+        "Node name for S&R": "LoraLoaderModelOnly"
+      },
+      "widgets_values": [
+        "minimax_h3_fl2v_turbo_4step_v1.0_768p_comfyui_bf16.safetensors",
+        1
+      ],
+      "widgets_values_named": {
+        "lora_name": "minimax_h3_fl2v_turbo_4step_v1.0_768p_comfyui_bf16.safetensors",
+        "strength_model": 1
+      }
+    },
+    {
+      "id": 65,
+      "type": "UNETLoader",
+      "pos": [
+        -2275.311861382809,
+        3808.3299923920686
+      ],
+      "size": [
+        464.78855028162377,
+        82
+      ],
+      "flags": {},
+      "order": 10,
+      "mode": 0,
+      "inputs": [
+        {
+          "localized_name": "UNet名称",
+          "name": "unet_name",
+          "type": "COMBO",
+          "widget": {
+            "name": "unet_name"
+          },
+          "link": null
+        },
+        {
+          "localized_name": "数据类型",
+          "name": "weight_dtype",
+          "type": "COMBO",
+          "widget": {
+            "name": "weight_dtype"
+          },
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "localized_name": "模型",
+          "name": "MODEL",
+          "type": "MODEL",
+          "slot_index": 0,
+          "links": [
+            114
+          ]
+        }
+      ],
+      "title": "BSAI MotionFix 重拍 ⑰ 原生模型加载 (ref2va, 独立给重拍链)",
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.34.0",
+        "Node name for S&R": "UNETLoader"
+      },
+      "widgets_values": [
+        "minimax_h3_ref2va_pruned_w4a8_mixed.safetensors",
+        "default"
+      ],
+      "widgets_values_named": {
+        "unet_name": "minimax_h3_ref2va_pruned_w4a8_mixed.safetensors",
+        "weight_dtype": "default"
+      }
+    },
+    {
+      "id": 67,
+      "type": "MiniMaxChunkFeedForward",
+      "pos": [
+        -1771.6157709427323,
+        3811.0010698042397
+      ],
+      "size": [
+        366.0904296875,
+        82
+      ],
+      "flags": {},
+      "order": 25,
+      "mode": 0,
+      "inputs": [
+        {
+          "localized_name": "model",
+          "name": "model",
+          "type": "MODEL",
+          "link": 114
+        },
+        {
+          "localized_name": "chunks",
+          "name": "chunks",
+          "type": "INT",
+          "widget": {
+            "name": "chunks"
+          },
+          "link": null
+        },
+        {
+          "localized_name": "seq_threshold",
+          "name": "seq_threshold",
+          "type": "INT",
+          "widget": {
+            "name": "seq_threshold"
+          },
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "localized_name": "model",
+          "name": "model",
+          "type": "MODEL",
+          "links": [
+            115
+          ]
+        }
+      ],
+      "title": "BSAI MotionFix 重拍 ⑲ Chunk FFN (峰值显存减半)",
+      "properties": {
+        "cnr_id": "comfyui-kjnodes",
+        "ver": "e8e88f7c88e3f6205b122f5de87e69a09fbce5ac",
+        "Node name for S&R": "MiniMaxChunkFeedForward"
+      },
+      "widgets_values": [
+        4,
+        65536
+      ],
+      "widgets_values_named": {
+        "chunks": 4,
+        "seq_threshold": 65536
+      }
+    },
+    {
+      "id": 56,
+      "type": "H3InjectSchedule",
+      "pos": [
+        -804.7455230175199,
+        3738.540734385722
+      ],
+      "size": [
+        419.2765133831181,
+        130
+      ],
+      "flags": {},
+      "order": 26,
+      "mode": 0,
+      "inputs": [
+        {
+          "localized_name": "model",
+          "name": "model",
+          "type": "MODEL",
+          "link": 94
+        },
+        {
+          "localized_name": "scheduler",
+          "name": "scheduler",
+          "type": "COMBO",
+          "widget": {
+            "name": "scheduler"
+          },
+          "link": null
+        },
+        {
+          "localized_name": "total_steps",
+          "name": "total_steps",
+          "type": "INT",
+          "widget": {
+            "name": "total_steps"
+          },
+          "link": null
+        },
+        {
+          "localized_name": "inject",
+          "name": "inject",
+          "type": "FLOAT",
+          "widget": {
+            "name": "inject"
+          },
+          "link": null
+        },
+        {
+          "localized_name": "preset",
+          "name": "preset",
+          "shape": 7,
+          "type": "COMBO",
+          "widget": {
+            "name": "preset"
+          },
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "localized_name": "Sigmas",
+          "name": "SIGMAS",
+          "type": "SIGMAS",
+          "slot_index": 0,
+          "links": [
+            98
+          ]
+        }
+      ],
+      "title": "BSAI MotionFix 重拍 ⑨ 调度 H3InjectSchedule",
+      "properties": {
+        "Node name for S&R": "H3InjectSchedule"
+      },
+      "widgets_values": [
+        "beta",
+        4,
+        0.7,
+        "faithful detail 0.50 (metric best)"
+      ],
+      "widgets_values_named": {
+        "scheduler": "beta",
+        "total_steps": 4,
+        "inject": 0.7,
+        "preset": "faithful detail 0.50 (metric best)"
+      }
+    },
+    {
+      "id": 60,
+      "type": "H3ExactRecover",
+      "pos": [
+        585.5789118740443,
+        3223.5152625538094
+      ],
+      "size": [
+        426.1957332949663,
+        58
+      ],
+      "flags": {},
+      "order": 65,
+      "mode": 0,
+      "inputs": [
+        {
+          "localized_name": "images",
+          "name": "images",
+          "type": "IMAGE",
+          "link": 104
+        },
+        {
+          "localized_name": "hold_map",
+          "name": "hold_map",
+          "type": "STRING",
+          "widget": {
+            "name": "hold_map"
+          },
+          "link": 105
+        }
+      ],
+      "outputs": [
+        {
+          "localized_name": "图像",
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "slot_index": 0,
+          "links": [
+            109
+          ]
+        }
+      ],
+      "title": "BSAI MotionFix 重拍 ⑬ 帧率恢复 H3ExactRecover",
+      "properties": {
+        "Node name for S&R": "H3ExactRecover"
+      },
+      "widgets_values": [
+        ""
+      ],
+      "widgets_values_named": {
+        "hold_map": ""
+      }
+    },
+    {
+      "id": 50,
+      "type": "VAEEncode",
+      "pos": [
+        -1330.1127955920635,
+        3225.4047479709743
+      ],
+      "size": [
+        466.75874823515585,
+        46
+      ],
+      "flags": {},
+      "order": 58,
+      "mode": 0,
+      "inputs": [
+        {
+          "localized_name": "像素",
+          "name": "pixels",
+          "type": "IMAGE",
+          "link": 120
+        },
+        {
+          "localized_name": "vae",
+          "name": "vae",
+          "type": "VAE",
+          "link": 80
+        }
+      ],
+      "outputs": [
+        {
+          "localized_name": "Latent",
+          "name": "LATENT",
+          "type": "LATENT",
+          "slot_index": 0,
+          "links": [
+            81
+          ]
+        }
+      ],
+      "title": "BSAI MotionFix 重拍 ③ 慢放帧编码 VAEEncode",
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.34.0",
+        "Node name for S&R": "VAEEncode"
+      }
+    },
+    {
+      "id": 34,
+      "type": "BSAI_H3_MotionFix",
+      "pos": [
+        -250.7308549933989,
+        247.82007051914817
+      ],
+      "size": [
+        400,
+        412
+      ],
+      "flags": {},
+      "order": 23,
+      "mode": 0,
+      "inputs": [
+        {
+          "localized_name": "motion_level",
+          "name": "motion_level",
+          "type": "COMBO",
+          "widget": {
+            "name": "motion_level"
+          },
+          "link": null
+        },
+        {
+          "localized_name": "use_turbo_lora",
+          "name": "use_turbo_lora",
+          "type": "BOOLEAN",
+          "widget": {
+            "name": "use_turbo_lora"
+          },
+          "link": null
+        },
+        {
+          "localized_name": "ref_weight",
+          "name": "ref_weight",
+          "type": "FLOAT",
+          "widget": {
+            "name": "ref_weight"
+          },
+          "link": null
+        },
+        {
+          "localized_name": "clip_seconds",
+          "name": "clip_seconds",
+          "type": "FLOAT",
+          "widget": {
+            "name": "clip_seconds"
+          },
+          "link": 51
+        },
+        {
+          "localized_name": "attention",
+          "name": "attention",
+          "type": "COMBO",
+          "widget": {
+            "name": "attention"
+          },
+          "link": null
+        },
+        {
+          "localized_name": "base_negative",
+          "name": "base_negative",
+          "shape": 7,
+          "type": "STRING",
+          "widget": {
+            "name": "base_negative"
+          },
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "localized_name": "recommended_steps",
+          "name": "recommended_steps",
+          "type": "STRING",
+          "links": []
+        },
+        {
+          "localized_name": "attention_advice",
+          "name": "attention_advice",
+          "type": "STRING",
+          "links": []
+        },
+        {
+          "localized_name": "ref_weight_advice",
+          "name": "ref_weight_advice",
+          "type": "STRING",
+          "links": []
+        },
+        {
+          "localized_name": "negative_prompt",
+          "name": "negative_prompt",
+          "type": "STRING",
+          "links": [
+            56
+          ]
+        },
+        {
+          "localized_name": "checklist",
+          "name": "checklist",
+          "type": "STRING",
+          "links": []
+        },
+        {
+          "localized_name": "post_process",
+          "name": "post_process",
+          "type": "STRING",
+          "links": []
+        },
+        {
+          "localized_name": "vsa_enabled",
+          "name": "vsa_enabled",
+          "type": "BOOLEAN",
+          "links": [
+            57
+          ]
+        },
+        {
+          "localized_name": "video_keep_percent",
+          "name": "video_keep_percent",
+          "type": "FLOAT",
+          "links": [
+            52
+          ]
+        },
+        {
+          "localized_name": "ladder",
+          "name": "ladder",
+          "type": "STRING",
+          "links": [
+            53
+          ]
+        },
+        {
+          "localized_name": "ref_length",
+          "name": "ref_length",
+          "type": "INT",
+          "links": [
+            54,
+            55
+          ]
+        }
+      ],
+      "properties": {
+        "aux_id": "xm6018924/BSAI-H3-MotionFix",
+        "ver": "2d3f03526410a4482d6c001865f764b38e6ed683",
+        "Node name for S&R": "BSAI_H3_MotionFix"
+      },
+      "widgets_values": [
+        "fast_action 高速动作/打斗 (出拳/奔跑/转身)",
+        false,
+        0.8,
+        5,
+        "kitchen_attention",
+        "",
+        "═══ 推荐步数 ═══\n关闭 Turbo，原生 20–24 步\n\n═══ 注意力方案 ═══\nKitchen Attention 正确选择（动作镜头稳定，无撕裂）\n\n═══ 参考权重 ═══\n0.78–0.82（大姿态/转头/出拳，高权重会拉扯五官）（当前 0.8）\n\n═══ 大动态负向词 ═══\nclip 负面: 五官扭曲, 肢体穿模, 画面闪烁, 乱码文字, 画风突变, 肢体畸形, 手部崩坏, 画面撕裂\n\n═══ FastH3 驱动配置 ═══\n· vsa_enabled = 关（Dense 注意力，防边缘虚影/毛刺）\n· video_keep_percent = 35%（VSA 保留 tile 百分比，越高细节损失越小）\n· ladder = 999,749,500,250（FastH3 v0.2 训练 4 步阶梯，勿改）\n· ref_length = 120（5s @ 24fps）→ 连 ReferenceToVideo/ImageToVideo.length\n\n═══ 执行清单 ═══\n① 拆段：单次生成 ≤5 秒（当前 5s（已拆段）），帧数再砍半最直接\n② 分辨率降到 0.5MP 档（16:9→960×544 / 竖屏→768×1344）：4-step 蒸馏模型在 1MP 高速动作必然毛刺，降一档最有效\n③ 固定 seed + 用上一段结尾画面做参考首帧，分段接力生成\n④ 动作镜头单独拆细；后期拼接处留 2–3 帧重叠，不硬切\n⑤ 若仍毛刺/闪烁：成片关掉全部加速（VSA/Sage/Turbo）重跑一版对比\n⑥ 高权重 + 大动作=双重约束拉扯 → 参考权重下调到 0.78–0.82\n\n═══ 后处理 ═══\n· FlashVSR_Ultra_Fast 视频超分（逐帧去噪 + 时间一致性）→ 本链路最适配的毛刺/噪点修复（也可用 BSAI-H3-upscale-4K 的 Topaz/FlashVSR 档）\n· LTX2.5 二次采样放大（≈0.45 降噪）→ 修复动作镜头脸部模糊/残影\n· SeedVR2 / Topaz 超分 → 768P 母片提至 1080P/4K\n· ComfyUI-Spectrum-MiniMax-H3：ER-SDE forecast 污染修复 + offline smoothing 去时序闪烁\n· 分块超分注意接缝与时间闪烁：正常速度播放两遍再逐帧验眼/嘴/发际线"
+      ],
+      "widgets_values_named": {
+        "motion_level": "fast_action 高速动作/打斗 (出拳/奔跑/转身)",
+        "use_turbo_lora": false,
+        "ref_weight": 0.8,
+        "clip_seconds": 5,
+        "attention": "kitchen_attention",
+        "base_negative": "",
+        "修复方案 (实时)": "═══ 推荐步数 ═══\n关闭 Turbo，原生 20–24 步\n\n═══ 注意力方案 ═══\nKitchen Attention 正确选择（动作镜头稳定，无撕裂）\n\n═══ 参考权重 ═══\n0.78–0.82（大姿态/转头/出拳，高权重会拉扯五官）（当前 0.8）\n\n═══ 大动态负向词 ═══\nclip 负面: 五官扭曲, 肢体穿模, 画面闪烁, 乱码文字, 画风突变, 肢体畸形, 手部崩坏, 画面撕裂\n\n═══ FastH3 驱动配置 ═══\n· vsa_enabled = 关（Dense 注意力，防边缘虚影/毛刺）\n· video_keep_percent = 35%（VSA 保留 tile 百分比，越高细节损失越小）\n· ladder = 999,749,500,250（FastH3 v0.2 训练 4 步阶梯，勿改）\n· ref_length = 120（5s @ 24fps）→ 连 ReferenceToVideo/ImageToVideo.length\n\n═══ 执行清单 ═══\n① 拆段：单次生成 ≤5 秒（当前 5s（已拆段）），帧数再砍半最直接\n② 分辨率降到 0.5MP 档（16:9→960×544 / 竖屏→768×1344）：4-step 蒸馏模型在 1MP 高速动作必然毛刺，降一档最有效\n③ 固定 seed + 用上一段结尾画面做参考首帧，分段接力生成\n④ 动作镜头单独拆细；后期拼接处留 2–3 帧重叠，不硬切\n⑤ 若仍毛刺/闪烁：成片关掉全部加速（VSA/Sage/Turbo）重跑一版对比\n⑥ 高权重 + 大动作=双重约束拉扯 → 参考权重下调到 0.78–0.82\n\n═══ 后处理 ═══\n· FlashVSR_Ultra_Fast 视频超分（逐帧去噪 + 时间一致性）→ 本链路最适配的毛刺/噪点修复（也可用 BSAI-H3-upscale-4K 的 Topaz/FlashVSR 档）\n· LTX2.5 二次采样放大（≈0.45 降噪）→ 修复动作镜头脸部模糊/残影\n· SeedVR2 / Topaz 超分 → 768P 母片提至 1080P/4K\n· ComfyUI-Spectrum-MiniMax-H3：ER-SDE forecast 污染修复 + offline smoothing 去时序闪烁\n· 分块超分注意接缝与时间闪烁：正常速度播放两遍再逐帧验眼/嘴/发际线"
+      }
+    },
+    {
+      "id": 35,
+      "type": "ShowText|pysssss",
+      "pos": [
+        163.30652379821038,
+        262.8829555734245
+      ],
+      "size": [
+        310,
+        100
+      ],
+      "flags": {},
+      "order": 28,
+      "mode": 0,
+      "inputs": [
+        {
+          "localized_name": "text",
+          "name": "text",
+          "type": "STRING",
+          "link": 56
+        }
+      ],
+      "outputs": [
+        {
+          "localized_name": "字符串",
+          "name": "STRING",
+          "shape": 6,
+          "type": "STRING",
+          "links": []
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfyui-custom-scripts",
+        "ver": "609f3afaa74b2f88ef9ce8d939626065e3247469",
+        "Node name for S&R": "ShowText|pysssss"
+      },
+      "widgets_values": [
+        "五官扭曲, 肢体穿模, 画面闪烁, 乱码文字, 画风突变, 肢体畸形, 手部崩坏, 画面撕裂"
+      ],
+      "widgets_values_named": {
+        "text_0": "五官扭曲, 肢体穿模, 画面闪烁, 乱码文字, 画风突变, 肢体畸形, 手部崩坏, 画面撕裂"
+      }
+    },
+    {
+      "id": 23,
+      "type": "ShowText|pysssss",
+      "pos": [
+        -1362.2294995199622,
+        -304.90862567796324
+      ],
+      "size": [
+        447.6138855393365,
+        1494.338106406838
+      ],
+      "flags": {},
+      "order": 31,
+      "mode": 0,
+      "inputs": [
+        {
+          "localized_name": "text",
+          "name": "text",
+          "type": "STRING",
+          "link": 27
+        }
+      ],
+      "outputs": [
+        {
+          "localized_name": "字符串",
+          "name": "STRING",
+          "shape": 6,
+          "type": "STRING",
+          "links": []
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfyui-custom-scripts",
+        "ver": "609f3afaa74b2f88ef9ce8d939626065e3247469",
+        "Node name for S&R": "ShowText|pysssss"
+      },
+      "widgets_values": [
+        "For the target video, at 0.00 seconds into the target video, <Picture 1> (from [Shot 1]) is fully referenced as <Subject 1>, and <Picture 2> is fully referenced as <Subject 2>. Preserve the exact facial identity, hairstyle, body proportions, and clothing of BOTH subjects from their own reference images throughout the entire video.\n\nREFERENCE RULES (multi-reference duel):\n- <Picture 1> provides <Subject 1> — exact facial identity, hairstyle, body proportions, clothing, and fighting stance from the image. <Subject 1> fights in modern Sanda/kickboxing style: low kicks, side kicks, spinning back kicks, rapid punch combinations, and evasive footwork. All techniques are executed standing.\n- <Picture 2> provides <Subject 2> — exact facial identity, hairstyle, body proportions, clothing, and fighting stance from the image. <Subject 2> fights in traditional Wing Chun style: centerline straight punches, Tan Sao, Bong Sao, elbow strikes, and fluid footwork.\n- <Picture 3> (SCENE): provides the fighting environment — the output scene must be EXACTLY the scene, background, architecture, lighting, and atmosphere from <Picture 3>. Preserve this exact environment unchanged throughout the fight.\n\nsubject_definitions:\n<Subject 1> is the person from <Picture 1>. Facial identity, hairstyle, body proportions, and clothing must remain consistent throughout. Fighting style is modern Sanda/kickboxing: low kicks, side kicks, spinning back kicks, rapid punch combinations, and evasive footwork. All techniques are executed standing.\n<Subject 2> is the person from <Picture 2>. Facial identity, hairstyle, body proportions, and clothing must remain consistent throughout. Fighting style is traditional Wing Chun: centerline straight punches, Tan Sao, Bong Sao, elbow strikes, and fluid footwork.\n\nsummary: An 8-second high-impact modern action fight. Two skilled fighters with contrasting standing martial arts styles engage in a fluid technical exchange. <Subject 1> uses explosive Sanda strikes and evasive footwork. <Subject 2> uses precise Wing Chun short strikes and deflections. The fight emphasizes clear attack trajectories, immediate deflection, counter-strikes, and mutual neutralization. No throws, no ground fighting. The fighting environment is EXACTLY the scene from <Picture 3> — same background, architecture, lighting, and atmosphere, preserved unchanged throughout the fight.\n\nretention_analysis: <Subject 1> (appears throughout): fully_preserved from <Picture 1>. <Subject 2> (appears throughout): fully_preserved from <Picture 2>.\n\ndetailed_description: The target video is an 8-second real-time combat showcase using one continuous shot. No cuts. All framing changes come from camera movement and fighter displacement. The camera stays on the same side, never crossing the action axis. <Subject 1> remains left, <Subject 2> remains right.\n- 0.0–1.5s: Medium-wide three-quarter view. <Subject 1> initiates with a sharp right low kick. <Subject 2> checks by lifting a knee, then steps forward with rapid Wing Chun straight punches. <Subject 1> slips left and parries with forearms, answers with a short left hook. <Subject 2> uses Bong Sao to deflect and turns it into a horizontal elbow strike.\n- 1.5–3.5s: Camera tracks smoothly right. <Subject 1> throws a fast right side kick to midsection. <Subject 2> pivots, lets kick slide past, fires a straight right. <Subject 1> parries and spins into a back kick. <Subject 2> side-steps, launches centerline punch chain. <Subject 1> weaves under and counters with left uppercut. <Subject 2> uses Tan Sao, steps in with short knee.\n- 3.5–5.5s: Lower angle. <Subject 2> launches vertical Wing Chun punches, forcing <Subject 1> to cover. <Subject 1> ducks low and sweeps. <Subject 2> jumps over, <Subject 1> rises into spinning back kick. <Subject 2> leans back to evade, snaps back with palm strike. Both trade clean blows.\n- 5.5–8.0s: Camera rises and pulls back. Both reset, breathing hard. <Subject 1> explodes with jumping switch knee. <Subject 2> steps off-line, counters with elbow. <Subject 1> blocks, fires spinning hook kick. <Subject 2> ducks, rises with uppercut. Both release simultaneously, shoving each other back. They land in ready stances, breathing heavily, mutual respect. 画面稳定流畅，无闪烁跳帧，无肢体畸形。\n\noverall_soundscape: No dialogue. Short nonverbal exertion sounds: clipped breath bursts, compact effort grunts, sharp exhalations on impacts. Every strike, block, and deflection has one distinct synchronized impact sound. Hard footsteps, clothing fabric swishing, and heavy breathing.\n\nnon_diegetic_music: N/A"
+      ],
+      "widgets_values_named": {
+        "text_0": "For the target video, at 0.00 seconds into the target video, <Picture 1> (from [Shot 1]) is fully referenced as <Subject 1>, and <Picture 2> is fully referenced as <Subject 2>. Preserve the exact facial identity, hairstyle, body proportions, and clothing of BOTH subjects from their own reference images throughout the entire video.\n\nREFERENCE RULES (multi-reference duel):\n- <Picture 1> provides <Subject 1> — exact facial identity, hairstyle, body proportions, clothing, and fighting stance from the image. <Subject 1> fights in modern Sanda/kickboxing style: low kicks, side kicks, spinning back kicks, rapid punch combinations, and evasive footwork. All techniques are executed standing.\n- <Picture 2> provides <Subject 2> — exact facial identity, hairstyle, body proportions, clothing, and fighting stance from the image. <Subject 2> fights in traditional Wing Chun style: centerline straight punches, Tan Sao, Bong Sao, elbow strikes, and fluid footwork.\n- <Picture 3> (SCENE): provides the fighting environment — the output scene must be EXACTLY the scene, background, architecture, lighting, and atmosphere from <Picture 3>. Preserve this exact environment unchanged throughout the fight.\n\nsubject_definitions:\n<Subject 1> is the person from <Picture 1>. Facial identity, hairstyle, body proportions, and clothing must remain consistent throughout. Fighting style is modern Sanda/kickboxing: low kicks, side kicks, spinning back kicks, rapid punch combinations, and evasive footwork. All techniques are executed standing.\n<Subject 2> is the person from <Picture 2>. Facial identity, hairstyle, body proportions, and clothing must remain consistent throughout. Fighting style is traditional Wing Chun: centerline straight punches, Tan Sao, Bong Sao, elbow strikes, and fluid footwork.\n\nsummary: An 8-second high-impact modern action fight. Two skilled fighters with contrasting standing martial arts styles engage in a fluid technical exchange. <Subject 1> uses explosive Sanda strikes and evasive footwork. <Subject 2> uses precise Wing Chun short strikes and deflections. The fight emphasizes clear attack trajectories, immediate deflection, counter-strikes, and mutual neutralization. No throws, no ground fighting. The fighting environment is EXACTLY the scene from <Picture 3> — same background, architecture, lighting, and atmosphere, preserved unchanged throughout the fight.\n\nretention_analysis: <Subject 1> (appears throughout): fully_preserved from <Picture 1>. <Subject 2> (appears throughout): fully_preserved from <Picture 2>.\n\ndetailed_description: The target video is an 8-second real-time combat showcase using one continuous shot. No cuts. All framing changes come from camera movement and fighter displacement. The camera stays on the same side, never crossing the action axis. <Subject 1> remains left, <Subject 2> remains right.\n- 0.0–1.5s: Medium-wide three-quarter view. <Subject 1> initiates with a sharp right low kick. <Subject 2> checks by lifting a knee, then steps forward with rapid Wing Chun straight punches. <Subject 1> slips left and parries with forearms, answers with a short left hook. <Subject 2> uses Bong Sao to deflect and turns it into a horizontal elbow strike.\n- 1.5–3.5s: Camera tracks smoothly right. <Subject 1> throws a fast right side kick to midsection. <Subject 2> pivots, lets kick slide past, fires a straight right. <Subject 1> parries and spins into a back kick. <Subject 2> side-steps, launches centerline punch chain. <Subject 1> weaves under and counters with left uppercut. <Subject 2> uses Tan Sao, steps in with short knee.\n- 3.5–5.5s: Lower angle. <Subject 2> launches vertical Wing Chun punches, forcing <Subject 1> to cover. <Subject 1> ducks low and sweeps. <Subject 2> jumps over, <Subject 1> rises into spinning back kick. <Subject 2> leans back to evade, snaps back with palm strike. Both trade clean blows.\n- 5.5–8.0s: Camera rises and pulls back. Both reset, breathing hard. <Subject 1> explodes with jumping switch knee. <Subject 2> steps off-line, counters with elbow. <Subject 1> blocks, fires spinning hook kick. <Subject 2> ducks, rises with uppercut. Both release simultaneously, shoving each other back. They land in ready stances, breathing heavily, mutual respect. 画面稳定流畅，无闪烁跳帧，无肢体畸形。\n\noverall_soundscape: No dialogue. Short nonverbal exertion sounds: clipped breath bursts, compact effort grunts, sharp exhalations on impacts. Every strike, block, and deflection has one distinct synchronized impact sound. Hard footsteps, clothing fabric swishing, and heavy breathing.\n\nnon_diegetic_music: N/A"
+      }
+    },
+    {
+      "id": 44,
+      "type": "VAELoader",
+      "pos": [
+        -2302.223693942453,
+        1514.8156823759805
+      ],
+      "size": [
+        519.8017546646987,
+        58
+      ],
+      "flags": {},
+      "order": 11,
+      "mode": 4,
+      "inputs": [
+        {
+          "localized_name": "vae名称",
+          "name": "vae_name",
+          "type": "COMBO",
+          "widget": {
+            "name": "vae_name"
+          },
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "localized_name": "VAE",
+          "name": "VAE",
+          "type": "VAE",
+          "slot_index": 0,
+          "links": [
+            71
+          ]
+        }
+      ],
+      "title": "BSAI MotionFix 终稿轨 ⑦ 视频VAE (fp16 原生)",
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.34.0",
+        "Node name for S&R": "VAELoader"
+      },
+      "widgets_values": [
+        "minimax_h3_video_vae_fp16.safetensors"
+      ],
+      "widgets_values_named": {
+        "vae_name": "minimax_h3_video_vae_fp16.safetensors"
+      }
+    },
+    {
+      "id": 2,
+      "type": "BSAIFastH3NativeVSA",
+      "pos": [
+        -243.38594512062787,
+        -281.031673211352
+      ],
+      "size": [
+        340,
+        250
+      ],
+      "flags": {},
+      "order": 29,
+      "mode": 0,
+      "inputs": [
+        {
+          "localized_name": "model",
+          "name": "model",
+          "type": "MODEL",
+          "link": 1
+        },
+        {
+          "localized_name": "enabled",
+          "name": "enabled",
+          "type": "BOOLEAN",
+          "link": 57
+        },
+        {
+          "localized_name": "video_keep_percent",
+          "name": "video_keep_percent",
+          "type": "FLOAT",
+          "link": 52
+        },
+        {
+          "localized_name": "start_percent",
+          "name": "start_percent",
+          "type": "FLOAT",
+          "widget": {
+            "name": "start_percent"
+          },
+          "link": null
+        },
+        {
+          "localized_name": "end_percent",
+          "name": "end_percent",
+          "type": "FLOAT",
+          "widget": {
+            "name": "end_percent"
+          },
+          "link": null
+        },
+        {
+          "localized_name": "min_tokens",
+          "name": "min_tokens",
+          "type": "INT",
+          "widget": {
+            "name": "min_tokens"
+          },
+          "link": null
+        },
+        {
+          "localized_name": "sink_conditioning",
+          "name": "sink_conditioning",
+          "type": "COMBO",
+          "widget": {
+            "name": "sink_conditioning"
+          },
+          "link": null
+        },
+        {
+          "localized_name": "backend",
+          "name": "backend",
+          "type": "COMBO",
+          "widget": {
+            "name": "backend"
+          },
+          "link": null
+        },
+        {
+          "localized_name": "strict_native_backend",
+          "name": "strict_native_backend",
+          "type": "BOOLEAN",
+          "widget": {
+            "name": "strict_native_backend"
+          },
+          "link": null
+        },
+        {
+          "localized_name": "verbose",
+          "name": "verbose",
+          "type": "BOOLEAN",
+          "widget": {
+            "name": "verbose"
+          },
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "localized_name": "模型",
+          "name": "MODEL",
+          "type": "MODEL",
+          "slot_index": 0,
+          "links": [
+            2,
+            4,
+            20
+          ]
+        }
+      ],
+      "title": "BSAI② FastH3 Native VSA 稀疏注意力",
+      "properties": {
+        "aux_id": "xm6018924/BSAI-ComfyUI-FastH3",
+        "ver": "0b1dc7b3588e2b0c60536101a48500000a38c672",
+        "Node name for S&R": "BSAIFastH3NativeVSA"
+      },
+      "widgets_values": [
+        0,
+        1,
+        8192,
+        "exact_kv",
+        "auto",
+        true,
+        true
+      ],
+      "widgets_values_named": {
+        "start_percent": 0,
+        "end_percent": 1,
+        "min_tokens": 8192,
+        "sink_conditioning": "exact_kv",
+        "backend": "auto",
+        "strict_native_backend": true,
+        "verbose": true
+      }
+    },
+    {
+      "id": 43,
+      "type": "SamplerCustomAdvanced",
+      "pos": [
+        -1285.532614719281,
+        1383.9256886887558
+      ],
+      "size": [
+        309.7076171875,
+        326
+      ],
+      "flags": {},
+      "order": 52,
+      "mode": 4,
+      "inputs": [
+        {
+          "localized_name": "噪波",
+          "name": "noise",
+          "type": "NOISE",
+          "link": 67
+        },
+        {
+          "localized_name": "引导器",
+          "name": "guider",
+          "type": "GUIDER",
+          "link": 64
+        },
+        {
+          "localized_name": "采样器",
+          "name": "sampler",
+          "type": "SAMPLER",
+          "link": 65
+        },
+        {
+          "localized_name": "西格玛",
+          "name": "sigmas",
+          "type": "SIGMAS",
+          "link": 66
+        },
+        {
+          "localized_name": "Latent图像",
+          "name": "latent_image",
+          "type": "LATENT",
+          "link": 68
+        }
+      ],
+      "outputs": [
+        {
+          "localized_name": "Latent",
+          "name": "output",
+          "type": "LATENT",
+          "slot_index": 0,
+          "links": [
+            69,
+            70
+          ]
+        },
+        {
+          "localized_name": "降噪Latent",
+          "name": "denoised_output",
+          "type": "LATENT",
+          "links": []
+        }
+      ],
+      "title": "BSAI MotionFix 终稿轨 ⑥ 采样 (20步终稿)",
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.34.0",
+        "Node name for S&R": "SamplerCustomAdvanced"
+      }
+    },
+    {
+      "id": 45,
+      "type": "VAEDecode",
+      "pos": [
+        -941.222934409377,
+        1382.0798250582218
+      ],
+      "size": [
+        300,
+        120
+      ],
+      "flags": {},
+      "order": 53,
+      "mode": 4,
+      "inputs": [
+        {
+          "localized_name": "Latent",
+          "name": "samples",
+          "type": "LATENT",
+          "link": 69
+        },
+        {
+          "localized_name": "vae",
+          "name": "vae",
+          "type": "VAE",
+          "link": 71
+        }
+      ],
+      "outputs": [
+        {
+          "localized_name": "图像",
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "slot_index": 0,
+          "links": [
+            73
+          ]
+        }
+      ],
+      "title": "BSAI MotionFix 终稿轨 ⑧ 视频解码",
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.34.0",
+        "Node name for S&R": "VAEDecode"
+      }
+    },
+    {
+      "id": 7,
+      "type": "VAELoader",
+      "pos": [
+        -869.1073012567556,
+        446.418852793138
+      ],
+      "size": [
+        567.4835051178713,
+        58
+      ],
+      "flags": {},
+      "order": 12,
+      "mode": 0,
+      "inputs": [
+        {
+          "localized_name": "vae名称",
+          "name": "vae_name",
+          "type": "COMBO",
+          "widget": {
+            "name": "vae_name"
+          },
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "localized_name": "VAE",
+          "name": "VAE",
+          "type": "VAE",
+          "slot_index": 0,
+          "links": [
+            11,
+            72,
+            84,
+            103
+          ]
+        }
+      ],
+      "title": "音频 VAE (fp32)",
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.34.0",
+        "Node name for S&R": "VAELoader"
+      },
+      "widgets_values": [
+        "minimax_h3_audio_vae_fp32.safetensors"
+      ],
+      "widgets_values_named": {
+        "vae_name": "minimax_h3_audio_vae_fp32.safetensors"
+      }
+    },
+    {
+      "id": 39,
+      "type": "BasicGuider",
+      "pos": [
+        -1749.051818955505,
+        1380.8539323769107
+      ],
+      "size": [
+        410.8834981770591,
+        46
+      ],
+      "flags": {},
+      "order": 51,
+      "mode": 4,
+      "inputs": [
+        {
+          "localized_name": "模型",
+          "name": "model",
+          "type": "MODEL",
+          "link": 79
+        },
+        {
+          "localized_name": "条件",
+          "name": "conditioning",
+          "type": "CONDITIONING",
+          "link": 61
+        }
+      ],
+      "outputs": [
+        {
+          "localized_name": "引导器",
+          "name": "GUIDER",
+          "type": "GUIDER",
+          "slot_index": 0,
+          "links": [
+            64
+          ]
+        }
+      ],
+      "title": "BSAI MotionFix 终稿轨 ② 引导 (原生 cfg=1)",
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.34.0",
+        "Node name for S&R": "BasicGuider"
+      }
+    },
+    {
+      "id": 24,
+      "type": "MiniMaxH3ReferenceToVideo",
+      "pos": [
+        564.0721934510602,
+        647.9356752387143
+      ],
+      "size": [
+        468.7990002630686,
+        384
+      ],
+      "flags": {},
+      "order": 44,
+      "mode": 0,
+      "inputs": [
+        {
+          "label": "clip",
+          "localized_name": "clip",
+          "name": "clip",
+          "type": "CLIP",
+          "link": 34
+        },
+        {
+          "label": "vae",
+          "localized_name": "vae",
+          "name": "vae",
+          "type": "VAE",
+          "link": 35
+        },
+        {
+          "label": "audio_vae",
+          "localized_name": "audio_vae",
+          "name": "audio_vae",
+          "type": "VAE",
+          "link": 36
+        },
+        {
+          "label": "ref_images.ref_image_0",
+          "localized_name": "ref_image_0",
+          "name": "ref_images.ref_image_0",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": 37
+        },
+        {
+          "localized_name": "ref_image_1",
+          "name": "ref_images.ref_image_1",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": 40
+        },
+        {
+          "localized_name": "ref_image_2",
+          "name": "ref_images.ref_image_2",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": 39
+        },
+        {
+          "localized_name": "ref_image_3",
+          "name": "ref_images.ref_image_3",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "label": "ref_videos.ref_video_0",
+          "localized_name": "ref_video_0",
+          "name": "ref_videos.ref_video_0",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "label": "ref_video_audios.ref_video_audio_0",
+          "localized_name": "ref_video_audio_0",
+          "name": "ref_video_audios.ref_video_audio_0",
+          "shape": 7,
+          "type": "AUDIO",
+          "link": null
+        },
+        {
+          "label": "ref_audios.ref_audio_0",
+          "localized_name": "ref_audio_0",
+          "name": "ref_audios.ref_audio_0",
+          "shape": 7,
+          "type": "AUDIO",
+          "link": null
+        },
+        {
+          "label": "prompt",
+          "localized_name": "提示词",
+          "name": "prompt",
+          "type": "STRING",
+          "widget": {
+            "name": "prompt"
+          },
+          "link": 48
+        },
+        {
+          "label": "width",
+          "localized_name": "宽度",
+          "name": "width",
+          "type": "INT",
+          "widget": {
+            "name": "width"
+          },
+          "link": 41
+        },
+        {
+          "label": "height",
+          "localized_name": "高度",
+          "name": "height",
+          "type": "INT",
+          "widget": {
+            "name": "height"
+          },
+          "link": 44
+        },
+        {
+          "label": "length",
+          "localized_name": "长度",
+          "name": "length",
+          "type": "INT",
+          "widget": {
+            "name": "length"
+          },
+          "link": 55
+        },
+        {
+          "label": "ref_image_size",
+          "localized_name": "参考图像尺寸",
+          "name": "ref_image_size",
+          "type": "COMBO",
+          "widget": {
+            "name": "ref_image_size"
+          },
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "label": "positive",
+          "localized_name": "正向",
+          "name": "positive",
+          "type": "CONDITIONING",
+          "slot_index": 0,
+          "links": [
+            30
+          ]
+        },
+        {
+          "label": "LATENT",
+          "localized_name": "Latent",
+          "name": "LATENT",
+          "type": "LATENT",
+          "slot_index": 1,
+          "links": [
+            28
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.33.0",
+        "Node name for S&R": "MiniMaxH3ReferenceToVideo",
+        "ue_properties": {
+          "widget_ue_connectable": {},
+          "version": "7.5.2",
+          "input_ue_unconnectable": {}
+        }
+      },
+      "widgets_values": [
+        "",
+        544,
+        960,
+        124,
+        "max"
+      ],
+      "widgets_values_named": {
+        "prompt": "",
+        "width": 544,
+        "height": 960,
+        "length": 124,
+        "ref_image_size": "max"
+      }
+    },
+    {
+      "id": 6,
+      "type": "VAELoader",
+      "pos": [
+        -869.1073012567554,
+        341.31168064006505
+      ],
+      "size": [
+        570.888286553253,
+        58
+      ],
+      "flags": {},
+      "order": 13,
+      "mode": 0,
+      "inputs": [
+        {
+          "localized_name": "vae名称",
+          "name": "vae_name",
+          "type": "COMBO",
+          "widget": {
+            "name": "vae_name"
+          },
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "localized_name": "VAE",
+          "name": "VAE",
+          "type": "VAE",
+          "slot_index": 0,
+          "links": [
+            5,
+            10,
+            35,
+            80,
+            83,
+            101
+          ]
+        }
+      ],
+      "title": "视频 VAE (int8_convrot)",
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.34.0",
+        "Node name for S&R": "VAELoader"
+      },
+      "widgets_values": [
+        "minimax_h3_video_vae_int8_convrot.safetensors"
+      ],
+      "widgets_values_named": {
+        "vae_name": "minimax_h3_video_vae_int8_convrot.safetensors"
+      }
+    },
+    {
+      "id": 42,
+      "type": "RandomNoise",
+      "pos": [
+        -1742.5862450486438,
+        1771.0313824442617
+      ],
+      "size": [
+        404.7655509531004,
+        82
+      ],
+      "flags": {},
+      "order": 14,
+      "mode": 4,
+      "inputs": [
+        {
+          "localized_name": "噪波随机种",
+          "name": "noise_seed",
+          "type": "INT",
+          "widget": {
+            "name": "noise_seed"
+          },
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "localized_name": "噪波",
+          "name": "NOISE",
+          "type": "NOISE",
+          "slot_index": 0,
+          "links": [
+            67
+          ]
+        }
+      ],
+      "title": "BSAI MotionFix 终稿轨 ⑤ 噪声 (固定seed)",
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.34.0",
+        "Node name for S&R": "RandomNoise"
+      },
+      "widgets_values": [
+        502182559986537,
+        "randomize"
+      ],
+      "widgets_values_named": {
+        "noise_seed": 502182559986537,
+        "control_after_generate": "randomize"
+      }
+    },
+    {
+      "id": 38,
+      "type": "UNETLoader",
+      "pos": [
+        -2292.8693315052014,
+        1369.926404493464
+      ],
+      "size": [
+        518.0064383792923,
+        82
+      ],
+      "flags": {},
+      "order": 15,
+      "mode": 4,
+      "inputs": [
+        {
+          "localized_name": "UNet名称",
+          "name": "unet_name",
+          "type": "COMBO",
+          "widget": {
+            "name": "unet_name"
+          },
+          "link": null
+        },
+        {
+          "localized_name": "数据类型",
+          "name": "weight_dtype",
+          "type": "COMBO",
+          "widget": {
+            "name": "weight_dtype"
+          },
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "localized_name": "模型",
+          "name": "MODEL",
+          "type": "MODEL",
+          "slot_index": 0,
+          "links": [
+            92,
+            94,
+            76
+          ]
+        }
+      ],
+      "title": "BSAI MotionFix 终稿轨 ① 原生模型加载 (ref2va 20-24步)",
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.34.0",
+        "Node name for S&R": "UNETLoader"
+      },
+      "widgets_values": [
+        "minimax_h3_ref2va_pruned_int8_convrot.safetensors",
+        "default"
+      ],
+      "widgets_values_named": {
+        "unet_name": "minimax_h3_ref2va_pruned_int8_convrot.safetensors",
+        "weight_dtype": "default"
+      }
+    },
+    {
+      "id": 68,
+      "type": "MiniMaxH3TurboLoRA",
+      "pos": [
+        -2308.446837788085,
+        1637.4387490395975
+      ],
+      "size": [
+        514.1720988696395,
+        106
+      ],
+      "flags": {},
+      "order": 27,
+      "mode": 4,
+      "inputs": [
+        {
+          "localized_name": "model",
+          "name": "model",
+          "type": "MODEL",
+          "link": 76
+        },
+        {
+          "localized_name": "lora_name",
+          "name": "lora_name",
+          "type": "COMBO",
+          "widget": {
+            "name": "lora_name"
+          },
+          "link": null
+        },
+        {
+          "localized_name": "strength",
+          "name": "strength",
+          "type": "FLOAT",
+          "widget": {
+            "name": "strength"
+          },
+          "link": null
+        },
+        {
+          "localized_name": "low_vram",
+          "name": "low_vram",
+          "type": "BOOLEAN",
+          "widget": {
+            "name": "low_vram"
+          },
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "localized_name": "模型",
+          "name": "MODEL",
+          "type": "MODEL",
+          "links": [
+            75
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfyui-minimax-h3-turbo",
+        "ver": "4274783a23afcfdbea3b4876cb79effd6c510785",
+        "Node name for S&R": "MiniMaxH3TurboLoRA",
+        "enableTabs": false,
+        "tabWidth": 65,
+        "tabXOffset": 10,
+        "hasSecondTab": false,
+        "secondTabText": "Send Back",
+        "secondTabOffset": 80,
+        "secondTabWidth": 65,
+        "ue_properties": {
+          "widget_ue_connectable": {},
+          "input_ue_unconnectable": {},
+          "version": "7.8"
+        }
+      },
+      "widgets_values": [
+        "minimax_h3_fl2v_turbo_4step_v1.1_768p_comfyui_bf16.safetensors",
+        1,
+        false
+      ],
+      "widgets_values_named": {
+        "lora_name": "minimax_h3_fl2v_turbo_4step_v1.1_768p_comfyui_bf16.safetensors",
+        "strength": 1,
+        "low_vram": false
+      }
+    },
+    {
+      "id": 69,
+      "type": "MiniMaxH3MemoryEfficientSageAttentionPatch",
+      "pos": [
+        -2120.2096333202,
+        1802.9013049804269
+      ],
+      "size": [
+        320.323828125,
+        26
+      ],
+      "flags": {},
+      "order": 33,
+      "mode": 4,
+      "inputs": [
+        {
+          "localized_name": "model",
+          "name": "model",
+          "type": "MODEL",
+          "link": 75
+        }
+      ],
+      "outputs": [
+        {
+          "localized_name": "model",
+          "name": "model",
+          "type": "MODEL",
+          "links": [
+            78,
+            79
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfyui-kjnodes",
+        "ver": "e8e88f7c88e3f6205b122f5de87e69a09fbce5ac",
+        "Node name for S&R": "MiniMaxH3MemoryEfficientSageAttentionPatch",
+        "enableTabs": false,
+        "tabWidth": 65,
+        "tabXOffset": 10,
+        "hasSecondTab": false,
+        "secondTabText": "Send Back",
+        "secondTabOffset": 80,
+        "secondTabWidth": 65,
+        "ue_properties": {
+          "widget_ue_connectable": {},
+          "input_ue_unconnectable": {},
+          "version": "7.8"
+        }
+      }
+    },
+    {
+      "id": 40,
+      "type": "KSamplerSelect",
+      "pos": [
+        -1745.1571624953265,
+        1488.2860388138363
+      ],
+      "size": [
+        400.39315853904816,
+        58
+      ],
+      "flags": {},
+      "order": 16,
+      "mode": 4,
+      "inputs": [
+        {
+          "localized_name": "采样器名称",
+          "name": "sampler_name",
+          "type": "COMBO",
+          "widget": {
+            "name": "sampler_name"
+          },
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "localized_name": "采样器",
+          "name": "SAMPLER",
+          "type": "SAMPLER",
+          "slot_index": 0,
+          "links": [
+            65
+          ]
+        }
+      ],
+      "title": "BSAI MotionFix 终稿轨 ③ 采样器 res_multistep",
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.34.0",
+        "Node name for S&R": "KSamplerSelect"
+      },
+      "widgets_values": [
+        "euler"
+      ],
+      "widgets_values_named": {
+        "sampler_name": "euler"
+      }
+    },
+    {
+      "id": 41,
+      "type": "BasicScheduler",
+      "pos": [
+        -1749.7196517441362,
+        1611.2796131956782
+      ],
+      "size": [
+        424.41825658903997,
+        106
+      ],
+      "flags": {},
+      "order": 36,
+      "mode": 4,
+      "inputs": [
+        {
+          "localized_name": "模型",
+          "name": "model",
+          "type": "MODEL",
+          "link": 78
+        },
+        {
+          "localized_name": "调度器",
+          "name": "scheduler",
+          "type": "COMBO",
+          "widget": {
+            "name": "scheduler"
+          },
+          "link": null
+        },
+        {
+          "localized_name": "步数",
+          "name": "steps",
+          "type": "INT",
+          "widget": {
+            "name": "steps"
+          },
+          "link": null
+        },
+        {
+          "localized_name": "降噪",
+          "name": "denoise",
+          "type": "FLOAT",
+          "widget": {
+            "name": "denoise"
+          },
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "localized_name": "Sigmas",
+          "name": "SIGMAS",
+          "type": "SIGMAS",
+          "slot_index": 0,
+          "links": [
+            66
+          ]
+        }
+      ],
+      "title": "BSAI MotionFix 终稿轨 ④ 调度 (simple 24步终稿)",
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.34.0",
+        "Node name for S&R": "BasicScheduler"
+      },
+      "widgets_values": [
+        "beta",
+        4,
+        1
+      ],
+      "widgets_values_named": {
+        "scheduler": "beta",
+        "steps": 4,
+        "denoise": 1
+      }
+    },
+    {
+      "id": 18,
+      "type": "BSAI_H3_PromptTemplate",
+      "pos": [
+        -1891.2143153975414,
+        -299.279775797289
+      ],
+      "size": [
+        507.41724881163805,
+        498
+      ],
+      "flags": {},
+      "order": 24,
+      "mode": 0,
+      "inputs": [
+        {
+          "localized_name": "scene_image",
+          "name": "scene_image",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": 112
+        },
+        {
+          "localized_name": "external_prompt",
+          "name": "external_prompt",
+          "shape": 7,
+          "type": "STRING",
+          "link": null
+        },
+        {
+          "localized_name": "template_select",
+          "name": "template_select",
+          "type": "STRING",
+          "widget": {
+            "name": "template_select"
+          },
+          "link": null
+        },
+        {
+          "localized_name": "user_customization",
+          "name": "user_customization",
+          "type": "STRING",
+          "widget": {
+            "name": "user_customization"
+          },
+          "link": null
+        },
+        {
+          "localized_name": "direct_prompt",
+          "name": "direct_prompt",
+          "shape": 7,
+          "type": "STRING",
+          "widget": {
+            "name": "direct_prompt"
+          },
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "localized_name": "prompt_output (提示词输出)",
+          "name": "prompt_output (提示词输出)",
+          "type": "STRING",
+          "links": [
+            21,
+            27,
+            48,
+            88
+          ]
+        },
+        {
+          "localized_name": "template_name (模板名称)",
+          "name": "template_name (模板名称)",
+          "type": "STRING",
+          "links": []
+        },
+        {
+          "localized_name": "generation_mode (生成模式)",
+          "name": "generation_mode (生成模式)",
+          "type": "STRING",
+          "links": []
+        },
+        {
+          "localized_name": "description (描述)",
+          "name": "description (描述)",
+          "type": "STRING",
+          "links": []
+        },
+        {
+          "localized_name": "video_duration (视频时长)",
+          "name": "video_duration (视频时长)",
+          "type": "INT",
+          "links": []
+        },
+        {
+          "localized_name": "preview_file (预览文件)",
+          "name": "preview_file (预览文件)",
+          "type": "STRING",
+          "links": []
+        }
+      ],
+      "properties": {
+        "aux_id": "xm6018924/BSAI-MiniMAX-H3-Prompt",
+        "ver": "c72612439bacfa7ca242dbc1e2850cc46327cd86",
+        "Node name for S&R": "BSAI_H3_PromptTemplate"
+      },
+      "widgets_values": [
+        "武打打斗模板 > 拳脚对打类 > 散打对咏春·双人参考对打（多参）",
+        "",
+        "",
+        ""
+      ],
+      "widgets_values_named": {
+        "template_select": "武打打斗模板 > 拳脚对打类 > 散打对咏春·双人参考对打（多参）",
+        "user_customization": "",
+        "direct_prompt": "",
+        "bsai_tpl_ui": ""
+      }
+    },
+    {
+      "id": 22,
+      "type": "ResolutionSelector",
+      "pos": [
+        96.39457961455109,
+        881.8459818122324
+      ],
+      "size": [
+        343.69786343178555,
+        126
+      ],
+      "flags": {},
+      "order": 17,
+      "mode": 0,
+      "showAdvanced": true,
+      "inputs": [
+        {
+          "label": "aspect_ratio",
+          "localized_name": "宽高比",
+          "name": "aspect_ratio",
+          "type": "COMBO",
+          "widget": {
+            "name": "aspect_ratio"
+          },
+          "link": null
+        },
+        {
+          "label": "megapixels",
+          "localized_name": "百万像素",
+          "name": "megapixels",
+          "type": "FLOAT",
+          "widget": {
+            "name": "megapixels"
+          },
+          "link": null
+        },
+        {
+          "label": "multiple",
+          "localized_name": "倍数",
+          "name": "multiple",
+          "type": "INT",
+          "widget": {
+            "name": "multiple"
+          },
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "label": "width",
+          "localized_name": "宽度",
+          "name": "width",
+          "type": "INT",
+          "links": [
+            24,
+            41,
+            89
+          ]
+        },
+        {
+          "label": "height",
+          "localized_name": "高度",
+          "name": "height",
+          "type": "INT",
+          "links": [
+            25,
+            44,
+            90
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.29.0",
+        "Node name for S&R": "ResolutionSelector",
+        "ue_properties": {
+          "widget_ue_connectable": {},
+          "version": "7.5.2",
+          "input_ue_unconnectable": {}
+        }
+      },
+      "widgets_values": [
+        "16:9 (Widescreen)",
+        1,
+        32
+      ],
+      "widgets_values_named": {
+        "aspect_ratio": "16:9 (Widescreen)",
+        "megapixels": 1,
+        "multiple": 32
+      }
+    },
+    {
+      "id": 14,
+      "type": "CreateVideo",
+      "pos": [
+        1519.0265029122056,
+        -287.91170021646565
+      ],
+      "size": [
+        300,
+        126
+      ],
+      "flags": {},
+      "order": 41,
+      "mode": 0,
+      "inputs": [
+        {
+          "localized_name": "图像",
+          "name": "images",
+          "type": "IMAGE",
+          "link": 16
+        },
+        {
+          "localized_name": "音频",
+          "name": "audio",
+          "shape": 7,
+          "type": "AUDIO",
+          "link": 17
+        },
+        {
+          "localized_name": "帧率",
+          "name": "fps",
+          "type": "FLOAT",
+          "widget": {
+            "name": "fps"
+          },
+          "link": null
+        },
+        {
+          "localized_name": "bit_depth",
+          "name": "bit_depth",
+          "shape": 7,
+          "type": "COMBO",
+          "widget": {
+            "name": "bit_depth"
+          },
+          "link": null
+        },
+        {
+          "localized_name": "color_space",
+          "name": "color_space",
+          "shape": 7,
+          "type": "COMBO",
+          "widget": {
+            "name": "color_space"
+          },
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "localized_name": "视频",
+          "name": "VIDEO",
+          "type": "VIDEO",
+          "slot_index": 0,
+          "links": [
+            19
+          ]
+        }
+      ],
+      "title": "合成视频 24fps+音轨",
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.34.0",
+        "Node name for S&R": "CreateVideo"
+      },
+      "widgets_values": [
+        24,
+        "auto",
+        "sRGB"
+      ],
+      "widgets_values_named": {
+        "fps": 24,
+        "bit_depth": "auto",
+        "color_space": "sRGB"
+      }
+    },
+    {
+      "id": 1,
+      "type": "BSAIFastH3Loader",
+      "pos": [
+        -866.3781924007712,
+        -279.9132027456223
+      ],
+      "size": [
+        589.8758783218767,
+        106
+      ],
+      "flags": {},
+      "order": 18,
+      "mode": 0,
+      "inputs": [
+        {
+          "localized_name": "model",
+          "name": "model",
+          "type": "COMBO",
+          "widget": {
+            "name": "model"
+          },
+          "link": null
+        },
+        {
+          "localized_name": "weight_dtype",
+          "name": "weight_dtype",
+          "type": "COMBO",
+          "widget": {
+            "name": "weight_dtype"
+          },
+          "link": null
+        },
+        {
+          "localized_name": "strict_fast_h3_check",
+          "name": "strict_fast_h3_check",
+          "type": "BOOLEAN",
+          "widget": {
+            "name": "strict_fast_h3_check"
+          },
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "localized_name": "模型",
+          "name": "MODEL",
+          "type": "MODEL",
+          "slot_index": 0,
+          "links": [
+            1
+          ]
+        }
+      ],
+      "title": "BSAI① FastH3 专用加载器 (Dense兼容)",
+      "properties": {
+        "aux_id": "xm6018924/BSAI-ComfyUI-FastH3",
+        "ver": "0b1dc7b3588e2b0c60536101a48500000a38c672",
+        "Node name for S&R": "BSAIFastH3Loader"
+      },
+      "widgets_values": [
+        "minimax_h3_fastvideo_vsa_datafree_1300step_4step_int8_convrot.safetensors",
+        "default",
+        true
+      ],
+      "widgets_values_named": {
+        "model": "minimax_h3_fastvideo_vsa_datafree_1300step_4step_int8_convrot.safetensors",
+        "weight_dtype": "default",
+        "strict_fast_h3_check": true
+      }
+    },
+    {
+      "id": 5,
+      "type": "CLIPLoader",
+      "pos": [
+        -867.6587791142806,
+        189.74634023394728
+      ],
+      "size": [
+        575.1442113946384,
+        106
+      ],
+      "flags": {},
+      "order": 19,
+      "mode": 0,
+      "inputs": [
+        {
+          "localized_name": "CLIP名称",
+          "name": "clip_name",
+          "type": "COMBO",
+          "widget": {
+            "name": "clip_name"
+          },
+          "link": null
+        },
+        {
+          "localized_name": "类型",
+          "name": "type",
+          "type": "COMBO",
+          "widget": {
+            "name": "type"
+          },
+          "link": null
+        },
+        {
+          "localized_name": "设备",
+          "name": "device",
+          "shape": 7,
+          "type": "COMBO",
+          "widget": {
+            "name": "device"
+          },
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "localized_name": "CLIP",
+          "name": "CLIP",
+          "type": "CLIP",
+          "slot_index": 0,
+          "links": [
+            3,
+            34,
+            82
+          ]
+        }
+      ],
+      "title": "CLIP 文本编码器 (qwen3vl 32B)",
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.34.0",
+        "Node name for S&R": "CLIPLoader"
+      },
+      "widgets_values": [
+        "qwen3vl_32b_minimax_h3_nvfp4_awq.safetensors",
+        "minimax",
+        "default"
+      ],
+      "widgets_values_named": {
+        "clip_name": "qwen3vl_32b_minimax_h3_nvfp4_awq.safetensors",
+        "type": "minimax",
+        "device": "default"
+      }
+    },
+    {
+      "id": 25,
+      "type": "GroupIgnoreManager",
+      "pos": [
+        1121.9085725047867,
+        269.3897680195066
+      ],
+      "size": [
+        587.2380599812111,
+        186.59288891331005
+      ],
+      "flags": {},
+      "order": 20,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [],
+      "properties": {
+        "groups": [
+          {
+            "id": 1787759951783.3975,
+            "group_name": "参考生视频",
+            "enabled": true,
+            "linkage": {
+              "on_enable": [],
+              "on_disable": []
+            },
+            "parameterBinding": {
+              "enabled": false,
+              "nodeId": "",
+              "paramName": "",
+              "mapping": "normal"
+            }
+          },
+          {
+            "id": 1788178562658.3289,
+            "group_name": "文生+图生视频",
+            "enabled": false,
+            "linkage": {
+              "on_enable": [],
+              "on_disable": []
+            },
+            "parameterBinding": {
+              "enabled": false,
+              "nodeId": "",
+              "paramName": "",
+              "mapping": "normal"
+            }
+          }
+        ],
+        "selectedColorFilter": "",
+        "groupOrder": [],
+        "groupStatesCache": {
+          "显存控制": true,
+          "声音精修": true,
+          "采样": true,
+          "BSAI H3 Prompt Template (提示词模板节点)-lightx2-4步加速（语音交互版）v2.0-音频修复流": false,
+          "图生视频": false,
+          "参考生视频": true,
+          "Group": false,
+          "图1": true,
+          "图2": true,
+          "图2（图生视频请关闭图2）": false,
+          "BSAI支持语音交互的提示词模板": true,
+          "参考图": true,
+          "参考图1": true,
+          "参考图2  或  图生视频 1": true,
+          "参考图3  或  尾帧": true,
+          "参考图2  或  图生视频 1 或 首帧": true,
+          "图生视频 多参生视频 2选1": true,
+          "图生视频 = ture     多参生视频 = False": true,
+          "BSAI H3 Prompt Template (提示词模板)支持语音交互+ACC-8步lora参考工作流": false,
+          "BSAI H3 Prompt Template (提示词模板)支持语音交互+ACC-8步lora-文生+图生+首尾帧+多参生视频参考工作流": false,
+          "关闭图片输入区=文生视频": true,
+          "BSAI H3 Prompt template（提示词模板）": true,
+          "BSAI H3 Prompt template（提示词模板）支持语音交互": true,
+          "模型加载区": true,
+          "图生视频 = False     多参生视频 = ture": true,
+          "打开解决显存不足问题": true,
+          "设置时长和画幅比例与分辨率": true,
+          "BSAI H3 Prompt Template (提示词模板)支持语音交互+ACC-8步lora-文生+图生+首尾帧+多参生视频参考工作流 v1.0": false,
+          "BSAI H3 Prompt Template (提示词模板)支持语音交互+ACC-8步lora-文生+图生+首尾帧+多参生视频参考工作流 v1.1": false,
+          "BSAI H3 upscale 4K / 视频超分": true,
+          "BSAI H3 Prompt Template (提示词模板)支持语音交互+ACC-8步lora-文生+图生+首尾帧+多参生视频参考工作流 v2.0": false,
+          "BSAI_FastH3_T2VA_4step_VSA极速文生视频 (VSA稀疏注意力) 示例工作流 v1.0": true,
+          "文生+图生视频": false,
+          "文生+图生视频 = False     多参生视频 = ture": true,
+          "BSAI_FastH3_4step_VSA极速文生+图生+多参生视频 (VSA稀疏注意力)+H3-upscale-4K示例工作流 v1.0": true,
+          "BSAI H3 MotionFix 高速动作毛刺噪点修复向导": true,
+          "原生模型加载 (ref2va 20-24步)": true,
+          "BSAI MotionFix ① 时序修复 FlashVSR（去毛刺+超分）": true,
+          "BSAI-MotionFix-打斗毛刺模糊修复_v2.1_含原生终稿轨（3轨对比）": false,
+          "BSAI MotionFix 重拍」节点 → **Ctrl+M** 启用 → Run，即得第 4 轨「慢动作重拍": false,
+          "BSAI MotionFix 慢动作重拍组": true,
+          "第3轨：原生模型加载 (ref2va 20-24步)": false,
+          "第4轨：BSAI MotionFix 慢动作重拍组": true,
+          "第1轨：BSAI_FastH3_4step_VSA极速文生+图生+多参生视频 (VSA稀疏注意力)+H3-upscale-4K示例工作流 v1.0": true,
+          "第2轨：BSAI MotionFix ① 时序修复 FlashVSR（去毛刺+超分）": false,
+          "第1轨：BSAI H3 upscale 4K / 视频超分": false,
+          "BSAI-MotionFix-打斗毛刺模糊修复_v3_慢动作重拍（4轨对比·w4a8优化）": false,
+          "BSAI-ComfyUI-FastH3-(VSA稀疏注意力)极速生成套件 v1.0": true,
+          "BSAI-FASTH3": false,
+          "BSAI-ComfyUI-FastH3": true
+        },
+        "managerMode": "custom",
+        "customManagedGroups": [
+          "参考生视频",
+          "文生+图生视频"
+        ],
+        "customGroupOrder": [
+          "文生+图生视频",
+          "参考生视频"
+        ]
+      },
+      "widgets_values": [
+        ""
+      ],
+      "widgets_values_named": {
+        "gmm_ui": ""
+      },
+      "groups": [
+        {
+          "id": 1787759951783.3975,
+          "group_name": "参考生视频",
+          "enabled": true,
+          "linkage": {
+            "on_enable": [],
+            "on_disable": []
+          },
+          "parameterBinding": {
+            "enabled": false,
+            "nodeId": "",
+            "paramName": "",
+            "mapping": "normal"
+          }
+        },
+        {
+          "id": 1788178562658.3289,
+          "group_name": "文生+图生视频",
+          "enabled": false,
+          "linkage": {
+            "on_enable": [],
+            "on_disable": []
+          },
+          "parameterBinding": {
+            "enabled": false,
+            "nodeId": "",
+            "paramName": "",
+            "mapping": "normal"
+          }
+        }
+      ],
+      "selectedColorFilter": "",
+      "groupOrder": [],
+      "managerMode": "custom",
+      "customManagedGroups": [
+        "参考生视频",
+        "文生+图生视频"
+      ],
+      "customGroupOrder": [
+        "文生+图生视频",
+        "参考生视频"
+      ]
+    },
+    {
+      "id": 28,
+      "type": "easy ifElse",
+      "pos": [
+        1429.910166285851,
+        769.2684277456174
+      ],
+      "size": [
+        270,
+        78
+      ],
+      "flags": {},
+      "order": 46,
+      "mode": 0,
+      "inputs": [
+        {
+          "localized_name": "真流程",
+          "name": "on_true",
+          "type": "*",
+          "link": 30
+        },
+        {
+          "localized_name": "假流程",
+          "name": "on_false",
+          "type": "*",
+          "link": 32
+        },
+        {
+          "localized_name": "是否为真",
+          "name": "boolean",
+          "type": "BOOLEAN",
+          "widget": {
+            "name": "boolean"
+          },
+          "link": 31
+        }
+      ],
+      "outputs": [
+        {
+          "localized_name": "*",
+          "name": "*",
+          "type": "*",
+          "links": [
+            49,
+            61
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfyui-easy-use",
+        "ver": "1.3.6",
+        "Node name for S&R": "easy ifElse"
+      },
+      "widgets_values": [
+        false
+      ],
+      "widgets_values_named": {
+        "boolean": false
+      }
+    },
+    {
+      "id": 15,
+      "type": "SaveVideo",
+      "pos": [
+        4250.840544746015,
+        -423.5258288634392
+      ],
+      "size": [
+        6813.095948899072,
+        130
+      ],
+      "flags": {},
+      "order": 42,
+      "mode": 0,
+      "inputs": [
+        {
+          "localized_name": "视频",
+          "name": "video",
+          "type": "VIDEO",
+          "link": 19
+        },
+        {
+          "localized_name": "文件名前缀",
+          "name": "filename_prefix",
+          "type": "STRING",
+          "widget": {
+            "name": "filename_prefix"
+          },
+          "link": null
+        },
+        {
+          "localized_name": "格式",
+          "name": "format",
+          "type": "COMFY_DYNAMICCOMBO_V3",
+          "widget": {
+            "name": "format"
+          },
+          "link": null
+        },
+        {
+          "localized_name": "codec",
+          "name": "format.codec",
+          "type": "COMFY_DYNAMICCOMBO_V3",
+          "widget": {
+            "name": "format.codec"
+          },
+          "link": null
+        },
+        {
+          "localized_name": "encoding",
+          "name": "format.codec.encoding",
+          "shape": 7,
+          "type": "COMFY_DYNAMICCOMBO_V3",
+          "widget": {
+            "name": "format.codec.encoding"
+          },
+          "link": null
+        },
+        {
+          "localized_name": "编码器",
+          "name": "codec",
+          "shape": 7,
+          "type": "COMFY_DYNAMICCOMBO_V3",
+          "widget": {
+            "name": "codec"
+          },
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "localized_name": "video",
+          "name": "video",
+          "type": "VIDEO",
+          "links": []
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.34.0",
+        "Node name for S&R": "SaveVideo"
+      },
+      "widgets_values": [
+        "BSAI_FastH3",
+        "mp4",
+        "h264",
+        "auto",
+        "auto"
+      ],
+      "widgets_values_named": {
+        "filename_prefix": "BSAI_FastH3",
+        "format": "mp4",
+        "format.codec": "h264",
+        "format.codec.encoding": "auto",
+        "codec": "auto"
+      }
+    },
+    {
+      "id": 49,
+      "type": "H3TimeSmear",
+      "pos": [
+        -1821.946556866941,
+        3210.558320253758
+      ],
+      "size": [
+        457.47252883282033,
+        238
+      ],
+      "flags": {},
+      "order": 57,
+      "mode": 0,
+      "inputs": [
+        {
+          "localized_name": "images",
+          "name": "images",
+          "type": "IMAGE",
+          "link": 119
+        },
+        {
+          "localized_name": "dilation",
+          "name": "dilation",
+          "type": "INT",
+          "widget": {
+            "name": "dilation"
+          },
+          "link": null
+        },
+        {
+          "localized_name": "hold_map",
+          "name": "hold_map",
+          "shape": 7,
+          "type": "STRING",
+          "widget": {
+            "name": "hold_map"
+          },
+          "link": 118
+        },
+        {
+          "localized_name": "fps",
+          "name": "fps",
+          "shape": 7,
+          "type": "INT",
+          "widget": {
+            "name": "fps"
+          },
+          "link": null
+        },
+        {
+          "localized_name": "s_per_step",
+          "name": "s_per_step",
+          "shape": 7,
+          "type": "FLOAT",
+          "widget": {
+            "name": "s_per_step"
+          },
+          "link": null
+        },
+        {
+          "localized_name": "est_steps",
+          "name": "est_steps",
+          "shape": 7,
+          "type": "INT",
+          "widget": {
+            "name": "est_steps"
+          },
+          "link": null
+        },
+        {
+          "localized_name": "overhead_s",
+          "name": "overhead_s",
+          "shape": 7,
+          "type": "FLOAT",
+          "widget": {
+            "name": "overhead_s"
+          },
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "localized_name": "images",
+          "name": "images",
+          "type": "IMAGE",
+          "slot_index": 0,
+          "links": [
+            120
+          ]
+        },
+        {
+          "localized_name": "hold_map_used",
+          "name": "hold_map_used",
+          "type": "STRING",
+          "slot_index": 0,
+          "links": [
+            105,
+            107
+          ]
+        },
+        {
+          "localized_name": "length",
+          "name": "length",
+          "type": "INT",
+          "slot_index": 0,
+          "links": [
+            91
+          ]
+        },
+        {
+          "localized_name": "report",
+          "name": "report",
+          "type": "STRING",
+          "links": null
+        }
+      ],
+      "title": "BSAI MotionFix 重拍 ② 慢放 H3TimeSmear",
+      "properties": {
+        "Node name for S&R": "H3TimeSmear"
+      },
+      "widgets_values": [
+        4,
+        "",
+        24,
+        0,
+        18,
+        6.7
+      ],
+      "widgets_values_named": {
+        "dilation": 4,
+        "hold_map": "",
+        "fps": 24,
+        "s_per_step": 0,
+        "est_steps": 18,
+        "overhead_s": 6.7
+      }
+    },
+    {
+      "id": 64,
+      "type": "GroupIgnoreManager",
+      "pos": [
+        -2067.210117160376,
+        6901.565732996489
+      ],
+      "size": [
+        1005.8140499009639,
+        281.55238615921667
+      ],
+      "flags": {},
+      "order": 21,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [],
+      "properties": {
+        "groups": [
+          {
+            "id": 1788249376140.4639,
+            "group_name": "参考生视频",
+            "enabled": true,
+            "linkage": {
+              "on_enable": [],
+              "on_disable": []
+            },
+            "parameterBinding": {
+              "enabled": false,
+              "nodeId": "",
+              "paramName": "",
+              "mapping": "normal"
+            }
+          },
+          {
+            "id": 1788249376140.683,
+            "group_name": "设置时长和画幅比例与分辨率",
+            "enabled": true,
+            "linkage": {
+              "on_enable": [],
+              "on_disable": []
+            },
+            "parameterBinding": {
+              "enabled": false,
+              "nodeId": "",
+              "paramName": "",
+              "mapping": "normal"
+            }
+          },
+          {
+            "id": 1788249376140.5154,
+            "group_name": "文生+图生视频",
+            "enabled": false,
+            "linkage": {
+              "on_enable": [],
+              "on_disable": []
+            },
+            "parameterBinding": {
+              "enabled": false,
+              "nodeId": "",
+              "paramName": "",
+              "mapping": "normal"
+            }
+          },
+          {
+            "id": 1788249376140.529,
+            "group_name": "文生+图生视频 = False     多参生视频 = ture",
+            "enabled": true,
+            "linkage": {
+              "on_enable": [],
+              "on_disable": []
+            },
+            "parameterBinding": {
+              "enabled": false,
+              "nodeId": "",
+              "paramName": "",
+              "mapping": "normal"
+            }
+          },
+          {
+            "id": 1788249376141.0098,
+            "group_name": "第3轨：原生模型加载 (ref2va 20-24步)",
+            "enabled": false,
+            "linkage": {
+              "on_enable": [],
+              "on_disable": []
+            },
+            "parameterBinding": {
+              "enabled": false,
+              "nodeId": "",
+              "paramName": "",
+              "mapping": "normal"
+            }
+          },
+          {
+            "id": 1788249376141.7676,
+            "group_name": "BSAI H3 MotionFix 高速动作毛刺噪点修复向导",
+            "enabled": true,
+            "linkage": {
+              "on_enable": [],
+              "on_disable": []
+            },
+            "parameterBinding": {
+              "enabled": false,
+              "nodeId": "",
+              "paramName": "",
+              "mapping": "normal"
+            }
+          },
+          {
+            "id": 1788249376141.1475,
+            "group_name": "BSAI H3 Prompt template（提示词模板）支持语音交互",
+            "enabled": true,
+            "linkage": {
+              "on_enable": [],
+              "on_disable": []
+            },
+            "parameterBinding": {
+              "enabled": false,
+              "nodeId": "",
+              "paramName": "",
+              "mapping": "normal"
+            }
+          },
+          {
+            "id": 1788249376141.129,
+            "group_name": "第1轨：BSAI H3 upscale 4K / 视频超分",
+            "enabled": false,
+            "linkage": {
+              "on_enable": [],
+              "on_disable": []
+            },
+            "parameterBinding": {
+              "enabled": false,
+              "nodeId": "",
+              "paramName": "",
+              "mapping": "normal"
+            }
+          },
+          {
+            "id": 1788249376141.2163,
+            "group_name": "第2轨：BSAI MotionFix ① 时序修复 FlashVSR（去毛刺+超分）",
+            "enabled": false,
+            "linkage": {
+              "on_enable": [],
+              "on_disable": []
+            },
+            "parameterBinding": {
+              "enabled": false,
+              "nodeId": "",
+              "paramName": "",
+              "mapping": "normal"
+            }
+          },
+          {
+            "id": 1788249376141.9846,
+            "group_name": "第4轨：BSAI MotionFix 慢动作重拍组",
+            "enabled": true,
+            "linkage": {
+              "on_enable": [],
+              "on_disable": []
+            },
+            "parameterBinding": {
+              "enabled": false,
+              "nodeId": "",
+              "paramName": "",
+              "mapping": "normal"
+            }
+          }
+        ],
+        "selectedColorFilter": "",
+        "groupOrder": [],
+        "groupStatesCache": {
+          "设置时长和画幅比例与分辨率": true,
+          "BSAI H3 Prompt template（提示词模板）支持语音交互": true,
+          "参考生视频": true,
+          "文生+图生视频 = False     多参生视频 = ture": true,
+          "文生+图生视频": false,
+          "BSAI H3 MotionFix 高速动作毛刺噪点修复向导": true,
+          "BSAI-MotionFix-打斗毛刺模糊修复_v2.1_含原生终稿轨（3轨对比）": false,
+          "第3轨：原生模型加载 (ref2va 20-24步)": false,
+          "第4轨：BSAI MotionFix 慢动作重拍组": true,
+          "第2轨：BSAI MotionFix ① 时序修复 FlashVSR（去毛刺+超分）": false,
+          "第1轨：BSAI H3 upscale 4K / 视频超分": false,
+          "BSAI_FastH3_4step_VSA极速文生+图生+多参生视频 (VSA稀疏注意力)+H3-upscale-4K示例工作流 v1.0": true,
+          "BSAI-MotionFix-打斗毛刺模糊修复_v3_慢动作重拍（4轨对比·w4a8优化）": false,
+          "BSAI-ComfyUI-FastH3-(VSA稀疏注意力)极速生成套件 v1.0": true,
+          "Group": false,
+          "BSAI-FASTH3": false,
+          "BSAI-ComfyUI-FastH3": true
+        },
+        "managerMode": "custom",
+        "customManagedGroups": [
+          "第3轨：原生模型加载 (ref2va 20-24步)",
+          "第2轨：BSAI MotionFix ① 时序修复 FlashVSR（去毛刺+超分）",
+          "第4轨：BSAI MotionFix 慢动作重拍组",
+          "第1轨：BSAI H3 upscale 4K / 视频超分"
+        ],
+        "customGroupOrder": [
+          "第1轨：BSAI H3 upscale 4K / 视频超分",
+          "第2轨：BSAI MotionFix ① 时序修复 FlashVSR（去毛刺+超分）",
+          "第3轨：原生模型加载 (ref2va 20-24步)",
+          "第4轨：BSAI MotionFix 慢动作重拍组"
+        ]
+      },
+      "widgets_values": [
+        ""
+      ],
+      "widgets_values_named": {
+        "gmm_ui": ""
+      },
+      "groups": [
+        {
+          "id": 1788249376140.4639,
+          "group_name": "参考生视频",
+          "enabled": true,
+          "linkage": {
+            "on_enable": [],
+            "on_disable": []
+          },
+          "parameterBinding": {
+            "enabled": false,
+            "nodeId": "",
+            "paramName": "",
+            "mapping": "normal"
+          }
+        },
+        {
+          "id": 1788249376140.683,
+          "group_name": "设置时长和画幅比例与分辨率",
+          "enabled": true,
+          "linkage": {
+            "on_enable": [],
+            "on_disable": []
+          },
+          "parameterBinding": {
+            "enabled": false,
+            "nodeId": "",
+            "paramName": "",
+            "mapping": "normal"
+          }
+        },
+        {
+          "id": 1788249376140.5154,
+          "group_name": "文生+图生视频",
+          "enabled": false,
+          "linkage": {
+            "on_enable": [],
+            "on_disable": []
+          },
+          "parameterBinding": {
+            "enabled": false,
+            "nodeId": "",
+            "paramName": "",
+            "mapping": "normal"
+          }
+        },
+        {
+          "id": 1788249376140.529,
+          "group_name": "文生+图生视频 = False     多参生视频 = ture",
+          "enabled": true,
+          "linkage": {
+            "on_enable": [],
+            "on_disable": []
+          },
+          "parameterBinding": {
+            "enabled": false,
+            "nodeId": "",
+            "paramName": "",
+            "mapping": "normal"
+          }
+        },
+        {
+          "id": 1788249376141.0098,
+          "group_name": "第3轨：原生模型加载 (ref2va 20-24步)",
+          "enabled": false,
+          "linkage": {
+            "on_enable": [],
+            "on_disable": []
+          },
+          "parameterBinding": {
+            "enabled": false,
+            "nodeId": "",
+            "paramName": "",
+            "mapping": "normal"
+          }
+        },
+        {
+          "id": 1788249376141.7676,
+          "group_name": "BSAI H3 MotionFix 高速动作毛刺噪点修复向导",
+          "enabled": true,
+          "linkage": {
+            "on_enable": [],
+            "on_disable": []
+          },
+          "parameterBinding": {
+            "enabled": false,
+            "nodeId": "",
+            "paramName": "",
+            "mapping": "normal"
+          }
+        },
+        {
+          "id": 1788249376141.1475,
+          "group_name": "BSAI H3 Prompt template（提示词模板）支持语音交互",
+          "enabled": true,
+          "linkage": {
+            "on_enable": [],
+            "on_disable": []
+          },
+          "parameterBinding": {
+            "enabled": false,
+            "nodeId": "",
+            "paramName": "",
+            "mapping": "normal"
+          }
+        },
+        {
+          "id": 1788249376141.129,
+          "group_name": "第1轨：BSAI H3 upscale 4K / 视频超分",
+          "enabled": false,
+          "linkage": {
+            "on_enable": [],
+            "on_disable": []
+          },
+          "parameterBinding": {
+            "enabled": false,
+            "nodeId": "",
+            "paramName": "",
+            "mapping": "normal"
+          }
+        },
+        {
+          "id": 1788249376141.2163,
+          "group_name": "第2轨：BSAI MotionFix ① 时序修复 FlashVSR（去毛刺+超分）",
+          "enabled": false,
+          "linkage": {
+            "on_enable": [],
+            "on_disable": []
+          },
+          "parameterBinding": {
+            "enabled": false,
+            "nodeId": "",
+            "paramName": "",
+            "mapping": "normal"
+          }
+        },
+        {
+          "id": 1788249376141.9846,
+          "group_name": "第4轨：BSAI MotionFix 慢动作重拍组",
+          "enabled": true,
+          "linkage": {
+            "on_enable": [],
+            "on_disable": []
+          },
+          "parameterBinding": {
+            "enabled": false,
+            "nodeId": "",
+            "paramName": "",
+            "mapping": "normal"
+          }
+        }
+      ],
+      "selectedColorFilter": "",
+      "groupOrder": [],
+      "managerMode": "custom",
+      "customManagedGroups": [
+        "第3轨：原生模型加载 (ref2va 20-24步)",
+        "第2轨：BSAI MotionFix ① 时序修复 FlashVSR（去毛刺+超分）",
+        "第4轨：BSAI MotionFix 慢动作重拍组",
+        "第1轨：BSAI H3 upscale 4K / 视频超分"
+      ],
+      "customGroupOrder": [
+        "第1轨：BSAI H3 upscale 4K / 视频超分",
+        "第2轨：BSAI MotionFix ① 时序修复 FlashVSR（去毛刺+超分）",
+        "第3轨：原生模型加载 (ref2va 20-24步)",
+        "第4轨：BSAI MotionFix 慢动作重拍组"
+      ]
+    }
+  ],
+  "links": [
+    [
+      1,
+      1,
+      0,
+      2,
+      0,
+      "MODEL"
+    ],
+    [
+      2,
+      2,
+      0,
+      3,
+      0,
+      "MODEL"
+    ],
+    [
+      3,
+      5,
+      0,
+      8,
+      0,
+      "CLIP"
+    ],
+    [
+      4,
+      2,
+      0,
+      10,
+      0,
+      "MODEL"
+    ],
+    [
+      5,
+      6,
+      0,
+      8,
+      1,
+      "VAE"
+    ],
+    [
+      7,
+      3,
+      0,
+      11,
+      3,
+      "SIGMAS"
+    ],
+    [
+      8,
+      4,
+      0,
+      11,
+      2,
+      "SAMPLER"
+    ],
+    [
+      10,
+      6,
+      0,
+      12,
+      1,
+      "VAE"
+    ],
+    [
+      11,
+      7,
+      0,
+      13,
+      1,
+      "VAE"
+    ],
+    [
+      12,
+      9,
+      0,
+      11,
+      0,
+      "NOISE"
+    ],
+    [
+      13,
+      10,
+      0,
+      11,
+      1,
+      "GUIDER"
+    ],
+    [
+      14,
+      11,
+      0,
+      12,
+      0,
+      "LATENT"
+    ],
+    [
+      15,
+      11,
+      0,
+      13,
+      0,
+      "LATENT"
+    ],
+    [
+      16,
+      12,
+      0,
+      14,
+      0,
+      "IMAGE"
+    ],
+    [
+      17,
+      13,
+      0,
+      14,
+      1,
+      "AUDIO"
+    ],
+    [
+      18,
+      13,
+      0,
+      16,
+      0,
+      "AUDIO"
+    ],
+    [
+      19,
+      14,
+      0,
+      15,
+      0,
+      "VIDEO"
+    ],
+    [
+      20,
+      2,
+      0,
+      17,
+      0,
+      "MODEL"
+    ],
+    [
+      21,
+      18,
+      0,
+      8,
+      4,
+      "STRING"
+    ],
+    [
+      22,
+      19,
+      0,
+      8,
+      2,
+      "IMAGE"
+    ],
+    [
+      23,
+      20,
+      0,
+      21,
+      0,
+      "FLOAT"
+    ],
+    [
+      24,
+      22,
+      0,
+      8,
+      5,
+      "INT"
+    ],
+    [
+      25,
+      22,
+      1,
+      8,
+      6,
+      "INT"
+    ],
+    [
+      27,
+      18,
+      0,
+      23,
+      0,
+      "STRING"
+    ],
+    [
+      28,
+      24,
+      1,
+      27,
+      0,
+      "LATENT"
+    ],
+    [
+      29,
+      26,
+      0,
+      27,
+      2,
+      "BOOLEAN"
+    ],
+    [
+      30,
+      24,
+      0,
+      28,
+      0,
+      "CONDITIONING"
+    ],
+    [
+      31,
+      26,
+      0,
+      28,
+      2,
+      "BOOLEAN"
+    ],
+    [
+      32,
+      8,
+      0,
+      28,
+      1,
+      "CONDITIONING"
+    ],
+    [
+      33,
+      8,
+      1,
+      27,
+      1,
+      "LATENT"
+    ],
+    [
+      34,
+      5,
+      0,
+      24,
+      0,
+      "CLIP"
+    ],
+    [
+      35,
+      6,
+      0,
+      24,
+      1,
+      "VAE"
+    ],
+    [
+      36,
+      7,
+      0,
+      24,
+      2,
+      "VAE"
+    ],
+    [
+      37,
+      19,
+      0,
+      24,
+      3,
+      "IMAGE"
+    ],
+    [
+      39,
+      30,
+      0,
+      24,
+      5,
+      "IMAGE"
+    ],
+    [
+      40,
+      29,
+      0,
+      24,
+      4,
+      "IMAGE"
+    ],
+    [
+      41,
+      22,
+      0,
+      24,
+      11,
+      "INT"
+    ],
+    [
+      44,
+      22,
+      1,
+      24,
+      12,
+      "INT"
+    ],
+    [
+      45,
+      33,
+      0,
+      31,
+      0,
+      "IMAGE"
+    ],
+    [
+      46,
+      12,
+      0,
+      33,
+      0,
+      "IMAGE"
+    ],
+    [
+      47,
+      13,
+      0,
+      31,
+      1,
+      "AUDIO"
+    ],
+    [
+      48,
+      18,
+      0,
+      24,
+      10,
+      "STRING"
+    ],
+    [
+      49,
+      28,
+      0,
+      10,
+      1,
+      "CONDITIONING"
+    ],
+    [
+      50,
+      27,
+      0,
+      11,
+      4,
+      "LATENT"
+    ],
+    [
+      51,
+      20,
+      0,
+      34,
+      3,
+      "FLOAT"
+    ],
+    [
+      52,
+      34,
+      7,
+      2,
+      2,
+      "FLOAT"
+    ],
+    [
+      53,
+      34,
+      8,
+      3,
+      1,
+      "STRING"
+    ],
+    [
+      54,
+      34,
+      9,
+      8,
+      7,
+      "INT"
+    ],
+    [
+      55,
+      34,
+      9,
+      24,
+      13,
+      "INT"
+    ],
+    [
+      56,
+      34,
+      3,
+      35,
+      0,
+      "STRING"
+    ],
+    [
+      57,
+      34,
+      6,
+      2,
+      1,
+      "BOOLEAN"
+    ],
+    [
+      58,
+      12,
+      0,
+      36,
+      0,
+      "IMAGE"
+    ],
+    [
+      59,
+      36,
+      0,
+      37,
+      0,
+      "IMAGE"
+    ],
+    [
+      60,
+      13,
+      0,
+      37,
+      1,
+      "AUDIO"
+    ],
+    [
+      61,
+      28,
+      0,
+      39,
+      1,
+      "CONDITIONING"
+    ],
+    [
+      64,
+      39,
+      0,
+      43,
+      1,
+      "GUIDER"
+    ],
+    [
+      65,
+      40,
+      0,
+      43,
+      2,
+      "SAMPLER"
+    ],
+    [
+      66,
+      41,
+      0,
+      43,
+      3,
+      "SIGMAS"
+    ],
+    [
+      67,
+      42,
+      0,
+      43,
+      0,
+      "NOISE"
+    ],
+    [
+      68,
+      27,
+      0,
+      43,
+      4,
+      "LATENT"
+    ],
+    [
+      69,
+      43,
+      0,
+      45,
+      0,
+      "LATENT"
+    ],
+    [
+      70,
+      43,
+      0,
+      46,
+      0,
+      "LATENT"
+    ],
+    [
+      71,
+      44,
+      0,
+      45,
+      1,
+      "VAE"
+    ],
+    [
+      72,
+      7,
+      0,
+      46,
+      1,
+      "VAE"
+    ],
+    [
+      73,
+      45,
+      0,
+      47,
+      0,
+      "IMAGE"
+    ],
+    [
+      74,
+      46,
+      0,
+      47,
+      1,
+      "AUDIO"
+    ],
+    [
+      75,
+      68,
+      0,
+      69,
+      0,
+      "MODEL"
+    ],
+    [
+      76,
+      38,
+      0,
+      68,
+      0,
+      "MODEL"
+    ],
+    [
+      78,
+      69,
+      0,
+      41,
+      0,
+      "MODEL"
+    ],
+    [
+      79,
+      69,
+      0,
+      39,
+      0,
+      "MODEL"
+    ],
+    [
+      80,
+      6,
+      0,
+      50,
+      1,
+      "VAE"
+    ],
+    [
+      81,
+      50,
+      0,
+      51,
+      0,
+      "LATENT"
+    ],
+    [
+      82,
+      5,
+      0,
+      52,
+      0,
+      "CLIP"
+    ],
+    [
+      83,
+      6,
+      0,
+      52,
+      1,
+      "VAE"
+    ],
+    [
+      84,
+      7,
+      0,
+      52,
+      2,
+      "VAE"
+    ],
+    [
+      85,
+      19,
+      0,
+      52,
+      3,
+      "IMAGE"
+    ],
+    [
+      86,
+      29,
+      0,
+      52,
+      4,
+      "IMAGE"
+    ],
+    [
+      87,
+      30,
+      0,
+      52,
+      5,
+      "IMAGE"
+    ],
+    [
+      88,
+      18,
+      0,
+      52,
+      10,
+      "STRING"
+    ],
+    [
+      89,
+      22,
+      0,
+      52,
+      11,
+      "INT"
+    ],
+    [
+      90,
+      22,
+      1,
+      52,
+      12,
+      "INT"
+    ],
+    [
+      91,
+      49,
+      2,
+      52,
+      13,
+      "INT"
+    ],
+    [
+      92,
+      66,
+      0,
+      53,
+      0,
+      "MODEL"
+    ],
+    [
+      93,
+      52,
+      0,
+      53,
+      1,
+      "CONDITIONING"
+    ],
+    [
+      94,
+      66,
+      0,
+      56,
+      0,
+      "MODEL"
+    ],
+    [
+      95,
+      54,
+      0,
+      57,
+      0,
+      "NOISE"
+    ],
+    [
+      96,
+      53,
+      0,
+      57,
+      1,
+      "GUIDER"
+    ],
+    [
+      97,
+      55,
+      0,
+      57,
+      2,
+      "SAMPLER"
+    ],
+    [
+      98,
+      56,
+      0,
+      57,
+      3,
+      "SIGMAS"
+    ],
+    [
+      99,
+      51,
+      0,
+      57,
+      4,
+      "LATENT"
+    ],
+    [
+      100,
+      57,
+      0,
+      58,
+      0,
+      "LATENT"
+    ],
+    [
+      101,
+      6,
+      0,
+      58,
+      1,
+      "VAE"
+    ],
+    [
+      102,
+      57,
+      0,
+      59,
+      0,
+      "LATENT"
+    ],
+    [
+      103,
+      7,
+      0,
+      59,
+      1,
+      "VAE"
+    ],
+    [
+      104,
+      58,
+      0,
+      60,
+      0,
+      "IMAGE"
+    ],
+    [
+      105,
+      49,
+      1,
+      60,
+      1,
+      "STRING"
+    ],
+    [
+      106,
+      59,
+      0,
+      61,
+      0,
+      "AUDIO"
+    ],
+    [
+      107,
+      49,
+      1,
+      61,
+      2,
+      "STRING"
+    ],
+    [
+      108,
+      13,
+      0,
+      61,
+      1,
+      "AUDIO"
+    ],
+    [
+      109,
+      60,
+      0,
+      62,
+      0,
+      "IMAGE"
+    ],
+    [
+      110,
+      61,
+      0,
+      62,
+      1,
+      "AUDIO"
+    ],
+    [
+      111,
+      62,
+      0,
+      63,
+      0,
+      "VIDEO"
+    ],
+    [
+      112,
+      30,
+      0,
+      18,
+      0,
+      "IMAGE"
+    ],
+    [
+      114,
+      65,
+      0,
+      67,
+      0,
+      "MODEL"
+    ],
+    [
+      115,
+      67,
+      0,
+      66,
+      0,
+      "MODEL"
+    ],
+    [
+      116,
+      11,
+      0,
+      48,
+      0,
+      "LATENT"
+    ],
+    [
+      117,
+      21,
+      1,
+      48,
+      1,
+      "INT"
+    ],
+    [
+      118,
+      48,
+      0,
+      49,
+      2,
+      "STRING"
+    ],
+    [
+      119,
+      12,
+      0,
+      49,
+      0,
+      "IMAGE"
+    ],
+    [
+      120,
+      49,
+      0,
+      50,
+      0,
+      "IMAGE"
+    ]
+  ],
+  "groups": [
+    {
+      "id": 1,
+      "title": "BSAI-ComfyUI-FastH3",
+      "bounding": [
+        -884.3692833258333,
+        106.00291608155406,
+        2736.214001868714,
+        1108.7922782805076
+      ],
+      "color": "#3f789e",
+      "flags": {}
+    },
+    {
+      "id": 2,
+      "title": "设置时长和画幅比例与分辨率",
+      "bounding": [
+        -264.3551779272366,
+        756.6665730705715,
+        747.8361690698533,
+        340.02560779040607
+      ],
+      "color": "#3f789e",
+      "flags": {}
+    },
+    {
+      "id": 3,
+      "title": "BSAI H3 Prompt template（提示词模板）支持语音交互",
+      "bounding": [
+        -1902.4845049712076,
+        -377.6576979181921,
+        1001.4403212354789,
+        1597.0104491952684
+      ],
+      "color": "#b58b2a",
+      "flags": {}
+    },
+    {
+      "id": 4,
+      "title": "参考生视频",
+      "bounding": [
+        507.5051096340105,
+        548.0677077063738,
+        570.3302993054442,
+        545.0813520663178
+      ],
+      "color": "#3f789e",
+      "flags": {}
+    },
+    {
+      "id": 5,
+      "title": "文生+图生视频 = False     多参生视频 = ture",
+      "bounding": [
+        1102.4916183035432,
+        171.46365084229802,
+        642.5517100740187,
+        917.586149375229
+      ],
+      "color": "#a1309b",
+      "flags": {}
+    },
+    {
+      "id": 6,
+      "title": "文生+图生视频",
+      "bounding": [
+        505.13201523306964,
+        164.36923435281838,
+        578.2716522713608,
+        366.3807235529888
+      ],
+      "color": "#3f789e",
+      "flags": {}
+    },
+    {
+      "id": 7,
+      "title": "第1轨：BSAI H3 upscale 4K / 视频超分",
+      "bounding": [
+        5453.289844402782,
+        6956.074218722389,
+        2545.2471892760796,
+        1589.943239917652
+      ],
+      "color": "#3f789e",
+      "flags": {}
+    },
+    {
+      "id": 8,
+      "title": "BSAI H3 MotionFix 高速动作毛刺噪点修复向导",
+      "bounding": [
+        -265.35303033627315,
+        169.47360861902317,
+        753.1130862904024,
+        560.2160785152513
+      ],
+      "color": "#b58b2a",
+      "flags": {}
+    },
+    {
+      "id": 9,
+      "title": "第3轨：原生模型加载 (ref2va 20-24步)",
+      "bounding": [
+        -2335.1939386996246,
+        1290.9629532184542,
+        4040.138807354835,
+        1754.4097395666756
+      ],
+      "color": "#3f789e",
+      "flags": {}
+    },
+    {
+      "id": 10,
+      "title": "第2轨：BSAI MotionFix ① 时序修复 FlashVSR（去毛刺+超分）",
+      "bounding": [
+        8075.878395429032,
+        6943.117290386575,
+        2608.785789575066,
+        1585.842978451873
+      ],
+      "color": "#3f789e",
+      "flags": {}
+    },
+    {
+      "id": 11,
+      "title": "BSAI-MotionFix-打斗毛刺模糊修复_v3_慢动作重拍（4轨对比·w4a8优化）",
+      "bounding": [
+        -2312.4316311526886,
+        -469.04407949135293,
+        6455.74186076186,
+        80.22094253868482
+      ],
+      "color": "#3f789e",
+      "flags": {}
+    },
+    {
+      "id": 12,
+      "title": "第4轨：BSAI MotionFix 慢动作重拍组",
+      "bounding": [
+        -2316.0081574120786,
+        3133.7608066055514,
+        6157.84137079368,
+        1759.8269194665106
+      ],
+      "color": "#3f789e",
+      "flags": {}
+    },
+    {
+      "id": 13,
+      "title": "BSAI-ComfyUI-FastH3-(VSA稀疏注意力)极速生成套件 v1.0",
+      "bounding": [
+        -887.8477640714617,
+        -374.6852062299618,
+        2740.387215055674,
+        465.74290549402974
+      ],
+      "color": "#3f789e",
+      "flags": {}
+    }
+  ],
+  "config": {},
+  "extra": {
+    "ds": {
+      "scale": 0.1464100000000296,
+      "offset": [
+        5519.553937982404,
+        761.1700014840571
+      ]
+    },
+    "qgn_navigation_groups": [],
+    "qgn_locked": false,
+    "frontendVersion": "1.51.9",
+    "VHS_latentpreview": false,
+    "VHS_latentpreviewrate": 0,
+    "VHS_MetadataImage": true,
+    "VHS_KeepIntermediate": true
+  },
+  "version": 0.4
+}
