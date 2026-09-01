@@ -177,23 +177,26 @@ Full pipeline: **T2V + I2V/Multi-ref + audio + BSAI-H3-upscale-4K**, mode switch
 
 ## 6.1. 示例工作流 3：打斗动作毛刺/模糊修复（3 轨对比）/ Workflow 3: Fight-Scene Glitch & Blur Fix (3-track)
 
-**文件 / File**：`example_workflows/BSAI H3 MotionFix 打斗毛刺模糊修复 v2.2 (参数优化 3轨对比).json`
+**文件 / File**：`example_workflows/BSAI H3 MotionFix 打斗毛刺模糊修复 v2.3 (慢动作重拍 4轨对比).json`
 
-针对 FastH3 4 步蒸馏模型在**高速打斗/奔跑/大位移镜头**下的画面毛刺、拖影/残影、时序闪烁与噪点问题，3 条输出轨同时跑、对比选优。47 节点 / 68 连线。
-Targets glitches/smear/flicker/noise of the FastH3 4-step distilled model on fast fight/run/high-motion shots, with 3 output tracks for A/B/C comparison. 47 nodes / 68 links.
+针对 FastH3 4 步蒸馏模型在**高速打斗/奔跑/大位移镜头**下的画面毛刺、拖影/残影、时序闪烁与噪点问题，4 条输出轨同时跑、对比选优。63 节点 / 105 连线（v2.3 在 v2.2 基础上内置 MAINodes 慢动作重拍链）。
+Targets glitches/smear/flicker/noise of the FastH3 4-step distilled model on fast fight/run/high-motion shots, with 4 output tracks for A/B/C/D comparison. 63 nodes / 105 links (v2.3 adds the built-in MAINodes slow-motion re-shoot chain on top of v2.2).
 
 ```
             ┌─► 直出 SaveVideo（FastH3 4步原片，快速预览）
 FastH3 4步轨 ┼─► FlashVSR 时序修复轨（默认看这条：scale=2 去噪+时间一致性）
-            └─► 原生 24 步终稿轨（默认静音，Ctrl+M 启用 → 根治 4 步模糊）
-            └─►（可选进阶）MAINodes 慢动作重拍链，见说明文档 5.6 节
+            ├─► 原生 24 步终稿轨（默认静音，Ctrl+M 启用 → 根治 4 步模糊）
+            └─► MAINodes 慢动作重拍轨（默认静音，Ctrl+M 启用 → 动作热力+慢放重绘，最对症残影）
 ```
 
-**v2.2 关键参数（按 2026-08-31 全网最新证据优化）/ v2.2 key params (tuned per latest evidence):**
+**v2.3 关键参数（按 2026-08-31 全网最新证据优化）/ v2.3 key params (tuned per latest evidence):**
 | 位置 Location | 值 Value | 依据 Evidence |
 |---|---|---|
 | FlashVSR scale | **2（官方默认）** | 4 倍放大对高动态打斗会放大噪点/伪影；2 倍时序去噪最稳 |
 | 原生终稿轨步数 | **24** | 社区共识打斗/大动态 20–24 步，取上限更稳 |
+| 重拍链 JerkOracle | q=0.75, d_max=4, ramp=ON | 动作热力检测「慢动作重拍」：快动作区慢放→V2V 重绘→恢复帧率 |
+| 重拍链 InjectSchedule | simple, 25 步, inject=0.70 | 二次采样 partial denoise，0.5 保原画 / 0.8 更发散 |
+| 重拍链二次采样模型 | **原生 ref2va**（终稿轨同款） | 与 MAINodes 官方 pipeline 一致，不用 4 步蒸馏做 partial denoise |
 
 **前置依赖（除本插件外还需安装）/ Extra plugins required:**
 | 依赖 Plugin | 用途 Purpose | 安装 / Install |
