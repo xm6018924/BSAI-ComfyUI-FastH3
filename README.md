@@ -112,6 +112,53 @@ python -m pip install comfy_kitchen
 
 ---
 
+## 4.1. PDD 8 步加速更新（2026-09-02）/ PDD 8-step Acceleration Update
+
+> 全球最新技术迭代（2026-08-27 → 09-02 检索）：官方 alibaba-pai 发布 **PDD (Parallel Decoding Distillation) 8 步加速 LoRA**，
+> ComfyUI 核心 #15908 已合并支持，可作为 MotionFix 慢动作重拍链的**官方加速替代**（8 NFE、质量优于 4 步 turbo LoRA）。
+> Latest global update: alibaba-pai's official **PDD 8-step Acc LoRA** + ComfyUI core #15908 support —
+> an official 8-NFE acceleration for the MotionFix slow-motion re-shoot chain, higher quality than the 4-step turbo LoRA.
+
+### 新依赖（可选，仅在 PDD 加速轨需要）/ New optional deps (only for the PDD track)
+
+| 组件 Component | 来源 Source | 说明 Notes |
+|---|---|---|
+| `ComfyUI-MiniMax-H3-PDD-Acc` 节点 / nodes | `https://github.com/Jalen-Brunson/ComfyUI-MiniMax-H3-PDD-Acc` | `MiniMaxH3PDDAccApply` / `PDDAccScheduler` / `PDDAccWarmupScheduler` |
+| `minimax_h3_ref2va_pdd_acc_8step_comfyui.safetensors` | alibaba-pai `MiniMax-H3-Acc-LoRAs`（官方）/ official | 放 `models/pdd_acc/`，rank=64, 8-step, 32 步 PDD head bank |
+| `minimax_h3_fl2va_pdd_acc_8step_comfyui.safetensors` | alibaba-pai 官方 / official | 放 `models/pdd_acc/`（FL2VA 侧，可选） |
+| ComfyUI 核心 ≥ #15908 | ComfyUI master | 本机已验证 `2504e68d4` |
+
+### v2.10 PDD 加速工作流 / PDD-accelerated workflow
+
+**文件 / File**：`example_workflows/BSAI-ComfyUI-FastH3-(VSA稀疏注意力)极速生成套件 v2.10 PDD加速.json`
+
+把 MotionFix 慢动作重拍链从「4 步 turbo LoRA」升级为「**官方 PDD 8 步蒸馏**」，结构与 v1.2 完全同构（71 节点 / 112 连线）：
+
+```
+重拍链模型 / re-shoot model chain:
+  65(w4a8 ref2va) → 67(ChunkFFN) → 70(MiniMaxH3SigmaShift 12/3)
+                                   → 71(MiniMaxH3PDDAccApply ref2va 8step)
+                                       ├─ model → 53(BasicGuider) / 56
+                                       └─ 72(PDDAccScheduler denoise=0.50) → 57.sigmas
+55(KSamplerSelect) = euler   ← PDD recipe 强制（非 er_sde）
+```
+
+- **为什么 denoise=0.50**：PDD 8 步边界 shift-12 为 `[1.0, 0.988, 0.973, 0.952, 0.923, 0.878, 0.800, 0.632, 0.0]`；denoise=0.50 → 起点 sigma 0.923、跑 4 块，**保留 V2V 初始化结构 + PDD 精修细节**，最贴近原 `H3InjectSchedule inject=0.7` 的 v2v 语义。
+- **Why denoise=0.50**: PDD 8-step shift-12 boundaries are `[1.0, 0.988, 0.973, 0.952, 0.923, 0.878, 0.800, 0.632, 0.0]`; denoise=0.50 → start at sigma 0.923, 4 blocks — keeps V2V init structure + PDD detail refinement, matching the original `inject=0.7` v2v semantics.
+- 采样器必须 **euler**、**SigmaShift 12/3**、**禁用 turbo LoRA**（PDD 官方 recipe）。Sampler must be **euler**, **SigmaShift 12/3**, **no turbo LoRA** (official PDD recipe).
+- 若想更强重绘/更快，可把 `72` 的 denoise 调到 0.3（起点 0.8，2 块，最快）或 0.7（起点 0.973，6 块，更发散）。For stronger re-render/faster, set `72` denoise to 0.3 (start 0.8, 2 blocks, fastest) or 0.7 (start 0.973, 6 blocks, more divergent).
+
+### FastH3 官方路线图（持续跟进）/ Official roadmap (to track)
+
+| 项目 Item | 状态 Status | 备注 Notes |
+|---|---|---|
+| FastH3 Preview v1 发布 / released | ✅ 2026-08-27 | VSA-DataFree / VSA-Synthetic / Dense 两版，4 checkpoint |
+| **FastH3 v0.2** 训练中 / training | 🔄 step 2900/4000（8-25 更新） | 本机已有 fl2va 蒸馏 LoRA `minimax_h3_fl2va_fasth3_preview_v0.2_lora_full...` |
+| **FL2VA / Ref2VA 蒸馏版** / distilled checkpoints | ⏳ 官方「几周内 / in a few weeks」（8-27） | 尚未发布，发布后本插件跟进 |
+| nvfp4 / RTX 优化 / PDD 新训练 | ⏳ roadmap | 官方路线图 |
+
+
+
 ## 5. 示例工作流 1：文生视频+音频（T2VA）/ Workflow 1: Text-to-Video+Audio
 
 **文件 / File**：`example_workflows/BSAI_FastH3_T2VA_4step_VSA.json`
