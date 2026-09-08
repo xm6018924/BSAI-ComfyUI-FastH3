@@ -296,8 +296,8 @@ def _run_native(qs, ks, vs, scale, tau, video_start, sink_conditioning, verbose)
     sink_q = (0, 0) if sink_conditioning != "exact_kv_and_rows" else sink_blocks
     out = _ck.sol_attn(
         qs, ks, vs, tau=tau, scale=scale,
-        sink_blocks=list(sink_blocks), sink_q=list(sink_q), max_blocks=0,
-        centroid_tail=True,
+        sink_blocks=list(sink_blocks), sink_q=list(sink_q),
+        tail=True,
     )                                                            # BTHD
     _STATS["native"] += 1
     if verbose:
