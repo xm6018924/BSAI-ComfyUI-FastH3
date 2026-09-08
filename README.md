@@ -54,17 +54,59 @@
 | `BSAIFastH3EulerSampler` | FastH3 4 步 Euler 采样器（音视频双调度自适应）/ 4-step Euler sampler (video/audio schedule adaptive) | `shift_video=12.0`，`shift_audio=3.0`，`schedule_mode=auto` |
 | `BSAIFastH3VSAStats` | 只读诊断：sparse/dense/native/torch/errors 命中统计 / read-only VSA hit stats | — |
 
-### BSAIFastH3NativeVSA 参数详解 / Parameter details
+### 2.1 全节点参数详解 / Full Parameter Reference
 
-- `video_keep_percent`（视频保留百分比 / video tokens kept %）：视频 token 中保留精确注意力的 tile 百分比，官方约 **10%**。越小越快/越省显存，细节损失越大。Lower = faster/lighter, more detail loss.
-- `sink_conditioning`（条件行处理 / conditioning rows）：
-  - `exact_kv`（默认 / default）：所有视频 query 都精确看到文本/音频/参考条件行（约 3% 开销）→ VSA 官方推荐。All video queries see exact conditioning KV.
-  - `exact_kv_and_rows`：额外让条件 query 行也跑 Dense（音频更稳）。Conditioning query rows also dense (more stable audio).
-  - `off`：只保留视频块 top-k，最省内存但条件对齐弱。Cheapest, weaker conditioning alignment.
-- `backend`：`auto`（有 `comfy_kitchen.sol_attn` 用 native 内核，否则 torch）/ native / torch。
-- `strict_native_backend=True`：native 不可用直接报错；`False` 自动降级 torch 稀疏。Fail hard if native missing / auto-fallback to torch.
-- `min_tokens`：序列长度小于该值直接 Dense（短序列稀疏无收益，默认 8192）。Short sequences go dense.
-- `start_percent` / `end_percent`：采样进度窗口，窗口外的步跑 Dense（高温预热）。Steps outside window run dense (hot-start).
+#### ① `BSAIFastH3Loader` — 专用加载器 / FastH3 loader
+
+| 参数 Parameter | 选项 Options | 默认 Default | 说明 / Explanation |
+|---|---|---|---|
+| `model` | 下拉列表 / dropdown | — | 选择 FastH3 **4 步蒸馏**权重（文件名含 `fastvideo/fasth3/_4step`）。Select the FastH3 **4-step distilled** weight (filename contains `fastvideo/fasth3/_4step`). |
+| `weight_dtype` | `default` / `fp8_e4m3fn` / `fp8_e4m3fn_fast` / `fp8_e5m2` | `default` | 加载精度。**中文**：FastH3 官方权重本身是 `int8_convrot` 量化，`default` 最稳；fp8 仅当确需再启用，可能引入精度损失。**English**: FastH3 weights are already `int8_convrot`-quantized, so `default` is the safest; fp8 only when really needed (may lose precision). |
+| `strict_fast_h3_check` | `True` / `False` | `True` | **中文**：开启时仅接受文件名含 FastH3/4 步标记的权重，防止误加载 50 步基座（防呆）。关掉可强制加载任意 H3 权重。**English**: When on, only filenames with FastH3/4-step markers are accepted (prevents accidentally loading the 50-step base). Turn off to force-load any H3 weight. |
+
+#### ② `BSAIFastH3NativeVSA` — 原生 VSA 稀疏注意力 / native sparse attention
+
+| 参数 Parameter | 选项 Options | 默认 Default | 说明 / Explanation |
+|---|---|---|---|
+| `enabled` | `True` / `False` | `True` | **中文**：总开关。关闭时透传模型、不装 VSA 补丁（全 Dense 生成）。**English**: Master switch. Off = pass-through model, no VSA patch (fully dense). |
+| `video_keep_percent` | `0.5`–`100.0`（步进 0.5） | `10.0` | **中文**：视频 token 中保留**精确注意力**的 tile 百分比。官方约 **10%**。越小越快/越省显存，细节损失越大；越大越还原、越慢。**English**: % of video tiles kept with exact attention. Official ≈**10%**. Lower = faster/lighter but more detail loss; higher = more faithful but slower. |
+| `start_percent` | `0.0`–`1.0` | `0.0` | **中文**：采样进度在此**之前**的步跑 Dense（高温预热，画面结构更稳）。**English**: Steps before this progress run dense (hot-start, more stable structure). |
+| `end_percent` | `0.0`–`1.0` | `1.0` | **中文**：采样进度在此**之后**的步跑 Dense（尾部细节精修）。**English**: Steps after this progress run dense (fine-detail refinement at the end). |
+| `min_tokens` | `0`–`1048576`（步进 256） | `8192` | **中文**：序列长度小于该值时该注意力调用直接 Dense（短序列稀疏无收益）。**English**: Attention calls with sequences shorter than this go dense (sparse pays off only on long sequences). |
+| `sink_conditioning` | `exact_kv` / `exact_kv_and_rows` / `off` | `exact_kv` | 条件行（文本/音频/参考图 KV）处理方式，见下方详解 / How conditioning rows are handled — see detail below. |
+| `backend` | `auto` / `native` / `torch` | `auto` | **中文**：`auto` 有 `comfy_kitchen.sol_attn` 内核用 native（Blackwell 最快），否则 torch；`native` 强制内核；`torch` 纯 PyTorch 块稀疏（40 系/无内核可用）。**English**: `auto` uses the native Blackwell kernel when available, else torch; `native` forces the kernel; `torch` uses pure PyTorch block-sparse (RTX 40-series / no kernel). |
+| `strict_native_backend` | `True` / `False` | `True` | **中文**：`True` 时 native 不可用直接报错；`False` 自动降级 torch 稀疏。**English**: `True` fails hard if native is unavailable; `False` auto-falls-back to torch sparse. |
+| `verbose` | `True` / `False` | `True` | **中文**：打印每次 VSA 命中的形状与后端信息（排障用）。**English**: Log each VSA hit's shapes and backend (for debugging). |
+
+**`sink_conditioning` 选项详解 / sink_conditioning options (选择指南 / how to choose):**
+
+| 选项 Option | 含义 / What it does | 开销 Cost | 适合场景 / Best for |
+|---|---|---|---|
+| `exact_kv`（默认 / default） | 所有视频 query 都**精确看到**文本/音频/参考图条件行；条件行 KV 始终完整参与，视频侧才稀疏。All video queries see exact conditioning KV; only video side is sparse. | ~3% | **通用推荐 / general default**：图生/多参考生视频、参考图还原优先。Image-to-video / multi-ref, faithfulness first. |
+| `exact_kv_and_rows` | 在 `exact_kv` 基础上，**条件 query 行本身也跑 Dense**（条件行注意力全精算）。On top of `exact_kv`, conditioning query rows also run dense. | 略高 / a bit more | **带音频/配音轨**、或音频与参考条件要最稳时。When the video carries an audio track and you need the most stable audio/conditioning alignment. |
+| `off` | 只保留视频块 top-k，不额外保留条件行。Only video top-k kept, no extra conditioning rows. | 最省 / cheapest | **纯文生视频**（无参考条件可对齐）、或显存/速度优先。Pure text-to-video, or VRAM/speed first. |
+
+> **一句话选择 / TL;DR**：图生/多参考 → `exact_kv`（带音频就用 `exact_kv_and_rows`）；纯文生/省显存 → `off`。Image/multi-ref → `exact_kv` (add audio → `exact_kv_and_rows`); pure T2V / tight VRAM → `off`.
+
+#### ③ `BSAIFastH3Timesteps` — 精确时间步 / exact timesteps
+
+| 参数 Parameter | 选项 Options | 默认 Default | 说明 / Explanation |
+|---|---|---|---|
+| `ladder` | 字符串（逗号分隔 0–1000 timestep）/ comma-separated timesteps | `999,749,500,250` | **中文**：FastH3 显式训练的 4 步阶梯（v0.2 官方卡片要求用训练跳点采样，勿用均匀网格）。输出 SIGMAS 末尾自动补 0。**English**: The explicitly trained 4-step ladder (official card requires training jump points, not a uniform grid). Output SIGMAS auto-appends 0. |
+
+#### ④ `BSAIFastH3EulerSampler` — 4 步 Euler 采样器 / 4-step Euler sampler
+
+| 参数 Parameter | 选项 Options | 默认 Default | 说明 / Explanation |
+|---|---|---|---|
+| `shift_video` | `0.01`–`100.0` | `12.0` | **中文**：视频流 flow shift（FastH3 官方 shift-12 整流调度）。**English**: Video flow shift (official shift-12 rectified schedule). |
+| `shift_audio` | `0.01`–`100.0` | `3.0` | **中文**：音频流 flow shift（官方 shift-3）。**English**: Audio flow shift (official shift-3). |
+| `schedule_mode` | `auto` / `native` / `legacy_dual` | `auto` | **中文**：`auto` 检测 ComfyUI 0.31+ 原生 `ModelSamplingAV`——有则单调度 Euler，否则自动切音视频双调度；`native` 强制单调度；`legacy_dual` 强制双调度。**English**: `auto` detects native `ModelSamplingAV` (single schedule) vs legacy (dual schedule); `native` forces single; `legacy_dual` forces dual. |
+
+#### ⑤ `BSAIFastH3VSAStats` — 命中统计（只读）/ VSA hit stats (read-only)
+
+| 参数 Parameter | 选项 Options | 默认 Default | 说明 / Explanation |
+|---|---|---|---|
+| `model` | MODEL 输入 | — | **中文**：接 VSA 补丁后的模型即可，节点输出只读统计文本。`sparse` 计数 > 0 说明 VSA 真实参与采样。**English**: Feed the patched model; the node outputs read-only stats text. `sparse` count > 0 proves VSA was actually active. |
 
 ---
 
