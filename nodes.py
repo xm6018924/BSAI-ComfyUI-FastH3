@@ -361,13 +361,14 @@ def _fast_h3_euler(model, x, sigmas, extra_args=None, callback=None, disable=Non
     if schedule_mode == "native" or (schedule_mode == "auto" and _native_av_schedule(model)):
         print(f"[BSAI FastH3 Euler] native ModelSamplingAV -> 单调度 Euler  "
               f"sigmas={[round(float(s), 4) for s in sigmas]}  x={tuple(x.shape)}", flush=True)
+        _shapes = _latent_shapes(model)
+        _vnumel = math.prod(_shapes[0][1:]) if (_shapes and len(_shapes) >= 1) else None
         for i in trange(len(sigmas) - 1, disable=disable):
             sv, sv_n = float(sigmas[i]), float(sigmas[i + 1])
             denoised = model(x, sigmas[i] * s_in, **extra_args)
             d = (x - denoised) / sigmas[i]
             x = x + (sv_n - sv) * d
-            print(f"[BSAI FastH3 step {i}] {sv:.4f}->{sv_n:.4f}  "
-                  f"denoised_rms={_rms(denoised):.4f} x_rms={_rms(x):.4f}", flush=True)
+            print(f"[BSAI FastH3 step {i}] {sv:.4f}->{sv_n:.4f}", flush=True)
             if callback is not None:
                 callback({"i": i, "denoised": denoised, "x": x,
                           "sigma": sigmas[i], "sigma_hat": sigmas[i]})

@@ -160,16 +160,22 @@ def _log_once(key, message):
 # ---------------------------------------------------------------------------
 
 def _torch_vsa(qs, ks, vs, scale, keep_frac, video_start, video_end,
-               sink_conditioning, verbose):
+               sink_conditioning, verbose, gate=None):
     """Block-sparse attention over the video span (pure PyTorch).
 
-    qs/ks/vs are [B, N, H, D]. Video query rows attend to the conditioning KV
-    (rows before video_start) plus the top-``keep_frac`` video tiles; every
-    other row runs dense. Returns the output [B, N, H, D].
+    Faithful port of FastVideo's MiniMaxH3VSAImpl (tile-64 route):
 
-    Attention is computed with explicit matmul+softmax (not SDPA): the stock
-    SDPA in this PyTorch build requires equal query/key lengths, while our
-    conditioning rows and per-tile sparse groups have different lengths.
+    - Tiles are ``[prefix tiles] + [3D video tiles]``; prefix tiles never
+      straddle segment boundaries (prefix_segments are tiled separately).
+    - Scores are computed **per head** over pooled tiles:
+      ``scores = pooled_q @ pooled_k^T / sqrt(head_dim)``.
+    - Video query rows run sparse: top-k video key tiles (``k_vid =
+      compute_topk(sparsity, n_video_tiles)``) plus **all** prefix keys
+      (``exempt`` default).  Prefix query rows run dense.
+    - Compression branch (distilled checkpoints only): ``out +=
+      softmax(scores) @ pooled_v * gate`` applied over **all** tiles.
+
+    qs/ks/vs are [B, N, H, D]; returns [B, N, H, D].
     """
     B, N, H, D = qs.shape
     cond_end = int(video_start)
@@ -177,23 +183,18 @@ def _torch_vsa(qs, ks, vs, scale, keep_frac, video_start, video_end,
     out = torch.empty_like(qs)
 
     def _attn(qr, kr, vr):
-        """Softmax attention for arbitrary query/key lengths.
-        qr [B, Lq, H, D], kr/vr [B, Lk, H, D] -> [B, Lq, H, D].
-
-        Heads are folded into the batch axis via transpose (NOT plain reshape,
-        which would scramble the (token, head) grid).
-        """
+        """Dense softmax attention with heads folded into the batch axis."""
         b, lq, h, d = qr.shape
         lk = kr.shape[1]
-        q2 = qr.transpose(1, 2).reshape(b * h, lq, d)           # [B*H, Lq, D]
+        q2 = qr.transpose(1, 2).reshape(b * h, lq, d)
         k2 = kr.transpose(1, 2).reshape(b * h, lk, d).transpose(-2, -1)
         att = torch.bmm(q2, k2) * scale
         att = att.softmax(dim=-1)
-        out = torch.bmm(att, vr.transpose(1, 2).reshape(b * h, lk, d))
-        return out.reshape(b, h, lq, d).transpose(1, 2)         # [B, Lq, H, D]
+        o = torch.bmm(att, vr.transpose(1, 2).reshape(b * h, lk, d))
+        return o.reshape(b, h, lq, d).transpose(1, 2)
 
-    # Conditioning / audio / reference query rows -> dense over the whole
-    # sequence (they steer prompt & audio). Chunked to bound peak memory.
+    # Prefix (text / audio / reference) query rows -> dense over the whole
+    # sequence.  Chunked to bound peak memory.
     if cond_end > 0:
         for i in range(0, cond_end, 256):
             j = min(i + 256, cond_end)
@@ -202,7 +203,7 @@ def _torch_vsa(qs, ks, vs, scale, keep_frac, video_start, video_end,
         out[:, cond_end:] = _attn(qs[:, cond_end:], ks, vs)
         return out
 
-    # --- video span: split into 64-token tiles -------------------------------
+    # --- video span: 64-token tiles -----------------------------------------
     nvb = (vn + BLOCK - 1) // BLOCK
     pad = nvb * BLOCK - vn
 
@@ -210,64 +211,99 @@ def _torch_vsa(qs, ks, vs, scale, keep_frac, video_start, video_end,
         s = t[:, cond_end:video_end]
         if not pad:
             return s
-        # F.pad fills from the last dim backwards: (0,0)=D, (0,0)=H,
-        # (0,pad)=L(sequence), (0,0)=B -> pad the video span at the end.
         return F.pad(s, (0, 0, 0, 0, 0, pad, 0, 0))
 
     qv = _slice(qs).view(B, nvb, BLOCK, H, D)
     kv = _slice(ks).view(B, nvb, BLOCK, H, D)
     vv = _slice(vs).view(B, nvb, BLOCK, H, D)
 
-    # Gate: centroid dot-product score per tile (learned-gate style proxy)
-    qc = qv.mean(dim=2)                                     # [B, nvb, H, D]
-    kc = kv.mean(dim=2)
-    scores = torch.einsum("bihd,bjhd->bij", qc, kc) * scale
+    # --- per-head pooled scores (official: [B, H, n_tiles, n_tiles]) --------
+    qc = qv.mean(dim=2).permute(0, 2, 1, 3).reshape(B * H, nvb, D)   # [BH, nvb, D]
+    kc = kv.mean(dim=2).permute(0, 2, 1, 3).reshape(B * H, nvb, D)
+    scores = torch.bmm(qc, kc.transpose(1, 2)) * scale               # [BH, nvb, nvb]
     topk = max(1, round(nvb * keep_frac))
-    topk_idx = scores.topk(topk, dim=-1).indices            # [B, nvb, topk]
+    topk_idx = scores.topk(topk, dim=-1).indices                     # [BH, nvb, topk]
 
+    # --- per-head gather + sparse attention --------------------------------
+    qv2 = qv.permute(0, 3, 1, 2, 4).reshape(B * H, nvb, BLOCK, D)
+    kvf = kv.permute(0, 3, 1, 2, 4).reshape(B * H, nvb * BLOCK, D)
+    vvf = vv.permute(0, 3, 1, 2, 4).reshape(B * H, nvb * BLOCK, D)
     tok_idx = (topk_idx * BLOCK).unsqueeze(-1) + torch.arange(BLOCK, device=qs.device)
-    tok_flat = tok_idx.reshape(B, nvb, topk * BLOCK)        # token idx in 0..nvb*BLOCK-1
-    kvf = kv.reshape(B, nvb * BLOCK, H * D)
-    vvf = vv.reshape(B, nvb * BLOCK, H * D)
+    tok_flat = tok_idx.reshape(B * H, nvb, topk * BLOCK)             # [BH, nvb, topk*BLOCK]
 
-    # Conditioning KV is shared across query tiles; process in chunks to bound
-    # peak memory instead of expanding it once for every tile.
     use_cond = sink_conditioning != "off" and cond_end > 0
-    CHUNK = 2
+    if use_cond:
+        ck = ks[:, :cond_end].permute(0, 2, 1, 3).reshape(B * H, cond_end, D)
+        cv = vs[:, :cond_end].permute(0, 2, 1, 3).reshape(B * H, cond_end, D)
+
+    CHUNK = 4
     pieces = []
     for i in range(0, nvb, CHUNK):
         j = min(i + CHUNK, nvb)
         nb = j - i
-        q2 = qv[:, i:j].reshape(B * nb, BLOCK, H, D)        # [B*nb, BLOCK, H, D]
-        # per-chunk expanded video KV: [B*nb, nvb*BLOCK, HD]
-        kexp = kvf.unsqueeze(1).expand(B, nb, nvb * BLOCK, H * D).reshape(B * nb, nvb * BLOCK, H * D)
-        vexp = vvf.unsqueeze(1).expand(B, nb, nvb * BLOCK, H * D).reshape(B * nb, nvb * BLOCK, H * D)
-        idx = tok_flat[:, i:j].reshape(B * nb, topk * BLOCK)
-        gk = torch.gather(kexp, 1, idx.unsqueeze(-1).expand(B * nb, topk * BLOCK, H * D))
-        gv = torch.gather(vexp, 1, idx.unsqueeze(-1).expand(B * nb, topk * BLOCK, H * D))
+        q2 = qv2[:, i:j].reshape(B * H * nb, BLOCK, D)
+        idx = tok_flat[:, i:j]  # [BH, nb, topk*BLOCK]
+        gk = torch.gather(kvf.unsqueeze(1).expand(B * H, nb, nvb * BLOCK, D),
+                          2, idx.unsqueeze(-1).expand(B * H, nb, topk * BLOCK, D)).reshape(B * H * nb, topk * BLOCK, D)
+        gv = torch.gather(vvf.unsqueeze(1).expand(B * H, nb, nvb * BLOCK, D),
+                          2, idx.unsqueeze(-1).expand(B * H, nb, topk * BLOCK, D)).reshape(B * H * nb, topk * BLOCK, D)
         if use_cond:
-            ck = ks[:, :cond_end].reshape(B, cond_end, H, D) \
-                   .unsqueeze(1).expand(B, nb, cond_end, H, D).reshape(B * nb, cond_end, H, D)
-            cv = vs[:, :cond_end].reshape(B, cond_end, H, D) \
-                   .unsqueeze(1).expand(B, nb, cond_end, H, D).reshape(B * nb, cond_end, H, D)
-            k2 = torch.cat([ck, gk.reshape(B * nb, topk * BLOCK, H, D)], dim=1)
-            v2 = torch.cat([cv, gv.reshape(B * nb, topk * BLOCK, H, D)], dim=1)
+            k2 = torch.cat([ck.unsqueeze(1).expand(B * H, nb, cond_end, D).reshape(B * H * nb, cond_end, D),
+                            gk.reshape(B * H * nb, topk * BLOCK, D)], dim=1)
+            v2 = torch.cat([cv.unsqueeze(1).expand(B * H, nb, cond_end, D).reshape(B * H * nb, cond_end, D),
+                            gv.reshape(B * H * nb, topk * BLOCK, D)], dim=1)
         else:
-            k2 = gk.reshape(B * nb, topk * BLOCK, H, D)
-            v2 = gv.reshape(B * nb, topk * BLOCK, H, D)
-        pieces.append(_attn(q2, k2, v2))
+            k2 = gk.reshape(B * H * nb, topk * BLOCK, D)
+            v2 = gv.reshape(B * H * nb, topk * BLOCK, D)
+        att = torch.bmm(q2, k2.transpose(-2, -1)) * scale
+        att = att.softmax(dim=-1)
+        pieces.append(torch.bmm(att, v2).reshape(B, H, nb, BLOCK, D))
 
-    ov = torch.cat(pieces, dim=0).reshape(B, nvb * BLOCK, H, D)[:, :vn]
-    out[:, cond_end:video_end] = ov
-    _STATS["torch"] += 1
-    if verbose:
-        _log_once(("torch", nvb, topk, cond_end),
-                  f"torch sparse: {B}×{N} tokens, video tiles {nvb}, "
-                  f"top-{topk} kept ({keep_frac * 100:.1f}%), conditioning rows {cond_end} exact")
+    ov = torch.cat(pieces, dim=2).permute(0, 2, 3, 1, 4).reshape(B, nvb * BLOCK, H, D)
+
+    # --- FastVideo VSA-H3 learned compression branch ------------------------
+    # out += softmax(scores) @ pooled_v * gate over ALL tiles (prefix + video).
+    # gate rows must match the tiled video span; a mismatch (observed when the
+    # gate tensor leaks a stale row count across blocks) degrades gracefully to
+    # the sparse path without the compression branch.
+    gate_ok = gate is not None and gate.shape[1] == (npt + nvb) * BLOCK
+    if gate_ok:
+        npt = (cond_end + BLOCK - 1) // BLOCK
+        cpad = npt * BLOCK - cond_end
+        cond_q = qs[:, :cond_end]
+        if cpad:
+            cond_q = F.pad(cond_q, (0, 0, 0, 0, 0, cpad, 0, 0))
+        qcp = cond_q.view(B, npt, BLOCK, H, D).mean(dim=2).permute(0, 2, 1, 3).reshape(B * H, npt, D)
+        cond_k = ks[:, :cond_end]
+        cond_v = vs[:, :cond_end]
+        if cpad:
+            cond_k = F.pad(cond_k, (0, 0, 0, 0, 0, cpad, 0, 0))
+            cond_v = F.pad(cond_v, (0, 0, 0, 0, 0, cpad, 0, 0))
+        kcp = cond_k.view(B, npt, BLOCK, H, D).mean(dim=2).permute(0, 2, 1, 3).reshape(B * H, npt, D)
+        v_pooled = cond_v.view(B, npt, BLOCK, H, D).mean(dim=2).permute(0, 2, 1, 3).reshape(B * H, npt, D)
+        v_pooled = torch.cat([v_pooled, vv.mean(dim=2).permute(0, 2, 1, 3).reshape(B * H, nvb, D)], dim=1)
+        qc_all = torch.cat([qcp, qc], dim=1)
+        kc_all = torch.cat([kcp, kc], dim=1)
+        scores_all = torch.bmm(qc_all, kc_all.transpose(1, 2)) * scale
+        out_c = torch.bmm(scores_all.softmax(dim=-1), v_pooled)         # [BH, nt, D]
+        out_c = out_c.reshape(B, H, npt + nvb, D).permute(0, 2, 1, 3)   # [B, nt, H, D]
+
+        out_pad = out[:, :cond_end]
+        if cpad:
+            out_pad = F.pad(out_pad, (0, 0, 0, 0, 0, cpad, 0, 0))
+        out_tiled = torch.cat([out_pad, ov], dim=1).view(B, npt + nvb, BLOCK, H, D)
+        g_full = gate[:, :video_end]
+        if cpad:
+            g_full = F.pad(g_full, (0, 0, 0, 0, 0, cpad, 0, 0))
+        g_tiled = g_full.view(B, npt + nvb, BLOCK, H, D)
+        out_full = (out_tiled + out_c.unsqueeze(2) * g_tiled).view(B, (npt + nvb) * BLOCK, H, D)
+        out[:, :cond_end] = out_full[:, :cond_end]
+        out[:, cond_end:video_end] = out_full[:, npt * BLOCK: npt * BLOCK + vn]
+    else:
+        out[:, cond_end:video_end] = ov[:, :vn]
     return out
 
 
-# ---------------------------------------------------------------------------
 # native comfy_kitchen.sol_attn backend
 # ---------------------------------------------------------------------------
 
@@ -365,9 +401,10 @@ def make_vsa_override(*, backend, keep_frac, tau, min_tokens, sigma_start, sigma
             _STATS["dense"] += 1
             return dense()
 
-        scale = kwargs.get("scale", None)
+        scale = kwargs.get("scale", dim_head ** -0.5)
         try:
-            if backend == "native":
+            gate_t = options.get("bsai_fasth3_gate")
+            if backend == "native" and gate_t is None:
                 out = _run_native(qs, ks, vs, scale, tau, video_start,
                                   sink_conditioning, verbose)
                 if out is None:
@@ -376,8 +413,10 @@ def make_vsa_override(*, backend, keep_frac, tau, min_tokens, sigma_start, sigma
                 if skip_output_reshape:
                     return out.transpose(1, 2)                 # BHND
                 return out.reshape(b, -1, heads * dim_head)
+            gate_t = options.get("bsai_fasth3_gate")
             out = _torch_vsa(qs, ks, vs, scale, keep_frac, video_start, video_end,
-                             sink_conditioning, verbose)
+                             sink_conditioning, verbose,
+                             gate=None if gate_t is None else gate_t.unsqueeze(0))
         except Exception as exc:
             _STATS["errors"] += 1
             logging.error(f"[BSAI FastH3 VSA] backend failed ({exc}); dense fallback",
