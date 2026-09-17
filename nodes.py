@@ -1,12 +1,20 @@
-"""BSAI-ComfyUI-FastH3 — 快速生成 H3 视频（4 步 DMD2 蒸馏 FastH3）节点套件。
+"""BSAI-ComfyUI-FastH3 — 快速生成 H3 视频（FastVideo FastH3 蒸馏）节点套件。
 
-围绕 FastVideo FastH3 4-step 预览模型（33B 双模态 MiniMax-H3 的无数据 DMD2
-蒸馏 + 90% VSA 稀疏注意力）封装的一站式 ComfyUI 节点：
+围绕 FastVideo FastH3 预览检查点（33B 双模态 MiniMax-H3 的无数据 DMD2 蒸馏
++ VSA 视频稀疏注意力）封装的一站式 ComfyUI 节点，内置两套官方配方：
+
+  * 4 步 Preview v1 / v0.2 —— 阶梯 [999,749,500,250]，视频/音频 shift 12/3，
+    VSA 90% 稀疏（keep 10%），官方 12.5× 前向压缩。
+  * 8 步 V2（2026-09-15 发布）—— 阶梯 [999,874,749,624,500,375,250,125]，
+    视频/音频 shift 10/3（视频 shift 与 v1 不同！），VSA 80% 稀疏（keep 20%），
+    更稳的 8 前向高质量路线。
+
+节点清单：
 
   * BSAIFastH3Loader          FastH3 专用模型加载器（Dense 兼容 + 严格校验）
-  * BSAIFastH3NativeVSA       FastH3 原生 VSA 稀疏注意力补丁
-  * BSAIFastH3Timesteps       FastH3 精确时间步（显式训练阶梯, 默认 [999,749,500,250]）
-  * BSAIFastH3EulerSampler    FastH3 Euler 4 步采样器（音视频双调度自适应）
+  * BSAIFastH3NativeVSA       FastH3 原生 VSA 稀疏注意力补丁（recipe 内建 shift/keep）
+  * BSAIFastH3Timesteps       FastH3 精确时间步（recipe 内建 4 步 / 8 步阶梯）
+  * BSAIFastH3EulerSampler    FastH3 Euler 采样器（recipe 内建 shift，音视频双调度自适应）
   * BSAIFastH3VSAStats        VSA 命中统计（只读诊断）
 
 全部节点仅通过 ModelPatcher.clone() / model_options 注入，不修改 ComfyUI
@@ -34,13 +42,67 @@ try:
 except ImportError:                                            # pragma: no cover
     from fast_h3_vsa import vsa_stats, reset_vsa_stats
 
-SHIFT_V, SHIFT_A = 12.0, 3.0                                   # FastH3 视频/音频 flow shift
+SHIFT_V, SHIFT_A = 12.0, 3.0                                   # FastH3 v1/v0.2 视频/音频 flow shift
+
+# ---------------------------------------------------------------------------
+# FastH3 官方配方 / official recipes（2026-09-16 跟踪）
+#   * 4-step Preview v1/v0.2：ladder [999,749,500,250]，shift 12/3，VSA keep 10%
+#   * 8-step V2：ladder [999,874,749,624,500,375,250,125]，shift 10/3，VSA keep 20%
+#     （V2 视频 shift 为 10，与 v1 的 12 不同；80% 稀疏 = keep 20%）
+# ---------------------------------------------------------------------------
+RECIPE_4STEP = "4-step Preview (999,749,500,250 · shift 12/3 · keep 10%)"
+RECIPE_8STEP_V2 = "8-step V2 (999,874,749,624,500,375,250,125 · shift 10/3 · keep 20%)"
+RECIPE_CUSTOM = "custom"
+RECIPES = (RECIPE_4STEP, RECIPE_8STEP_V2, RECIPE_CUSTOM)
+
+_RECIPE_LADDERS = {
+    RECIPE_4STEP: "999,749,500,250",
+    RECIPE_8STEP_V2: "999,874,749,624,500,375,250,125",
+}
+_RECIPE_SHIFTS = {
+    RECIPE_4STEP: (12.0, 3.0),
+    RECIPE_8STEP_V2: (10.0, 3.0),
+}
+_RECIPE_KEEP = {
+    RECIPE_4STEP: 10.0,
+    RECIPE_8STEP_V2: 20.0,
+}
+
+
+def _recipe_ladder(recipe, ladder):
+    """recipe 非 custom 时返回内建官方阶梯，否则返回用户 ladder 字符串。"""
+    if recipe != RECIPE_CUSTOM and recipe in _RECIPE_LADDERS:
+        return _RECIPE_LADDERS[recipe]
+    return ladder
+
+
+def _patch_av_shift(model, shift_video, shift_audio):
+    """把模型的 ModelSamplingAV 视频/音频 shift 覆盖为配方值（与 ComfyUI 原生
+    MiniMaxH3SigmaShift 节点同构）。返回 clone 后的模型；model_options 深拷贝，
+    后续 clone 不受影响。"""
+    m = model.clone()
+
+    class _ModelSamplingAV(comfy.model_sampling.ModelSamplingAV,
+                           comfy.model_sampling.CONST):
+        pass
+
+    original = m.get_model_object("model_sampling")
+    ms = _ModelSamplingAV(m.model.model_config)
+    ms.set_parameters(shift=shift_video, audio_shift=shift_audio)
+    if hasattr(original, "noise_scale"):
+        ms.set_noise_scale(original.noise_scale)
+    m.add_object_patch("model_sampling", ms)
+    to = m.model_options.setdefault("transformer_options", {})
+    to["minimax_h3_sigma_shift_video"] = shift_video
+    to["minimax_h3_sigma_shift_audio"] = shift_audio
+    print(f"[BSAI FastH3] recipe shift -> video {shift_video} / audio {shift_audio}", flush=True)
+    return m
 
 # ---------------------------------------------------------------------------
 # 1) FastH3 专用模型加载器
 # ---------------------------------------------------------------------------
 
-_FAST_H3_MARKERS = ("fastvideo", "fasth3", "fast_h3", "4step")
+_FAST_H3_MARKERS = ("fastvideo", "fasth3", "fast_h3", "4step", "8step", "v2")
 
 
 def _is_fast_h3_filename(name):
@@ -60,23 +122,25 @@ class BSAIFastH3Loader:
                 "default": True,
                 "label_on": "校验 FastH3 文件名",
                 "label_off": "允许任意 H3 权重",
-                "tooltip": "开启时仅接受文件名含 fastvideo/fasth3/_4step 的 4 步蒸馏权重，"
-                           "避免误加载 50 步基座模型。"}),
+                "tooltip": "开启时仅接受文件名含 fastvideo/fasth3/_4step/_8step/v2 的蒸馏权重，"
+                           "避免误加载 50 步基座模型。8 步 V2 权重（如 minimax_h3_fastvideo_8step_v2_*.safetensors）也通过。"}),
         }}
 
     RETURN_TYPES = ("MODEL",)
     RETURN_NAMES = ("MODEL",)
     FUNCTION = "load_model"
     CATEGORY = "BSAI/FastH3"
-    DESCRIPTION = ("加载 FastVideo FastH3 4 步蒸馏权重（如 "
-                   "minimax_h3_fastvideo_vsa_datafree_1300step_4step_int8_convrot.safetensors）。"
+    DESCRIPTION = ("加载 FastVideo FastH3 蒸馏权重。4 步 v1/v0.2（如 "
+                   "minimax_h3_fastvideo_vsa_datafree_1300step_4step_int8_convrot.safetensors）"
+                   "或 8 步 V2（如 minimax_h3_fastvideo_8step_v2_*.safetensors，2026-09-15 发布）。"
                    "文件放入 ComfyUI/models/diffusion_models。")
 
     def load_model(self, model, weight_dtype="default", strict_fast_h3_check=True):
         if strict_fast_h3_check and not _is_fast_h3_filename(model):
             raise ValueError(
-                f"[BSAI FastH3] {model} 文件名不含 FastH3/4 步标记（fastvideo/fasth3/_4step）。"
-                "FastH3 使用 4 步蒸馏权重；如需强行加载请关闭 strict_fast_h3_check。")
+                f"[BSAI FastH3] {model} 文件名不含 FastH3/蒸馏标记"
+                "（fastvideo/fasth3/_4step/_8step/v2）。FastH3 使用蒸馏权重；"
+                "如需强行加载请关闭 strict_fast_h3_check。")
         model_options = {}
         if weight_dtype == "fp8_e4m3fn":
             model_options["dtype"] = torch.float8_e4m3fn
@@ -111,8 +175,9 @@ class BSAIFastH3NativeVSA:
             "video_keep_percent": ("FLOAT", {
                 "default": 10.0, "min": 0.5, "max": 100.0, "step": 0.5,
                 "forceInput": True,
-                "tooltip": "视频 token 中保留精确注意力的 tile 百分比。FastVideo 官方约 10%。"
-                           "越小越省显存/越快，越低细节损失越大。可接 BSAI H3 MotionFix.video_keep_percent 自动驱动。"}),
+                "tooltip": "视频 token 中保留精确注意力的 tile 百分比。官方：4 步 v1/v0.2 约 10%"
+                           "（90% 稀疏）；8 步 V2 约 20%（80% 稀疏）。越小越省显存/越快，"
+                           "越低细节损失越大。可接 BSAI H3 MotionFix.video_keep_percent 自动驱动。"}),
             "start_percent": ("FLOAT", {
                 "default": 0.0, "min": 0.0, "max": 1.0, "step": 0.01,
                 "tooltip": "采样进度在此之前的步运行 Dense（高温预热）。"}),
@@ -136,6 +201,11 @@ class BSAIFastH3NativeVSA:
                 "tooltip": "True: native 不可用时直接报错。False: 自动降级到 torch 稀疏。"}),
             "verbose": ("BOOLEAN", {"default": True,
                                     "tooltip": "打印每次 VSA 命中的形状与后端信息。"}),
+            "recipe": (list(RECIPES), {
+                "default": RECIPE_4STEP,
+                "tooltip": "官方配方一键预设。4-step: shift 12/3 + keep 10%。"
+                           "8-step V2: shift 10/3 + keep 20%（自动把模型 ModelSamplingAV "
+                           "视频 shift 补丁为 10）。custom: 完全手动（keep 与 shift 自行管理）。"}),
         }}
 
     RETURN_TYPES = ("MODEL",)
@@ -143,11 +213,20 @@ class BSAIFastH3NativeVSA:
     FUNCTION = "apply_vsa"
     CATEGORY = "BSAI/FastH3"
     DESCRIPTION = ("FastH3 原生 VSA（Video Sparse Attention）：按 64-token tile 打分，"
-                   "仅保留 top-k 视频块精确注意力，条件行保持精确。约省 90% 视频自注意力成本。")
+                   "仅保留 top-k 视频块精确注意力，条件行保持精确。4 步配方省约 90% "
+                   "视频自注意力；8 步 V2 配方省约 80% 并自动修正 shift 10/3。")
 
     def apply_vsa(self, model, enabled, video_keep_percent, start_percent, end_percent,
                   min_tokens, sink_conditioning, backend, strict_native_backend,
-                  verbose):
+                  verbose, recipe=RECIPE_4STEP):
+        if recipe != RECIPE_CUSTOM:
+            video_keep_percent = _RECIPE_KEEP.get(recipe, video_keep_percent)
+            shift_video, shift_audio = _RECIPE_SHIFTS.get(
+                recipe, (SHIFT_V, SHIFT_A))
+            # 8 步 V2 的视频 shift 为 10（非 v1 的 12）：先修模型调度，Timesteps/
+            # 采样器共用该模型即全链路一致；VSA 关闭（enabled=False）时也生效。
+            if (shift_video, shift_audio) != (SHIFT_V, SHIFT_A):
+                model = _patch_av_shift(model, shift_video, shift_audio)
         if backend == "auto":
             backend = "native" if _vsa._ck is not None and hasattr(_vsa._ck, "sol_attn") else "torch"
         m = _vsa.apply_vsa(
@@ -171,8 +250,15 @@ class BSAIFastH3Timesteps:
             "ladder": ("STRING", {
                 "default": "999,749,500,250", "multiline": False,
                 "forceInput": True,
-                "tooltip": "显式训练的 4 步阶梯（v0.2 卡片要求用训练跳点采样，勿用均匀网格）。"
-                           "逗号分隔的 timestep（0-1000）。可接 BSAI H3 MotionFix.ladder 自动驱动。"}),
+                "tooltip": "显式训练的阶梯（官方要求用训练跳点采样，勿用均匀网格）。"
+                           "4 步 v1/v0.2: 999,749,500,250；8 步 V2: "
+                           "999,874,749,624,500,375,250,125。recipe=custom 时生效。"
+                           "可接 BSAI H3 MotionFix.ladder 自动驱动。"}),
+            "recipe": (list(RECIPES), {
+                "default": RECIPE_4STEP,
+                "tooltip": "官方配方一键预设阶梯。8-step V2 使用训练阶梯 "
+                           "999,874,749,624,500,375,250,125（9 个 sigma 点 = 8 次前向）。"
+                           "custom: 使用上方 ladder 字符串。"}),
         }}
 
     RETURN_TYPES = ("SIGMAS",)
@@ -180,9 +266,11 @@ class BSAIFastH3Timesteps:
     FUNCTION = "get_sigmas"
     CATEGORY = "BSAI/FastH3"
     DESCRIPTION = ("把 FastH3 显式训练阶梯 timestep 换算成 SamplerCustomAdvanced 的 SIGMAS。"
-                   "默认 [999,749,500,250]，末尾自动补 0（最终去噪）。")
+                   "4 步 [999,749,500,250]；8 步 V2 [999,874,749,624,500,375,250,125]，"
+                   "末尾自动补 0（最终去噪）。8 步 V2 需模型 shift 10/3（由 VSA 节点 recipe 自动补丁）。")
 
-    def get_sigmas(self, model, ladder="999,749,500,250"):
+    def get_sigmas(self, model, ladder="999,749,500,250", recipe=RECIPE_4STEP):
+        ladder = _recipe_ladder(recipe, ladder)
         values = []
         for part in str(ladder).replace("，", ",").replace("[", "").replace("]", "").split(","):
             part = part.strip()
@@ -328,17 +416,27 @@ class BSAIFastH3EulerSampler:
                 "default": "auto",
                 "tooltip": "auto: 检测 ModelSamplingAV，有则单调度 Euler，否则音视频双调度。"
                            "native: 强制单调度。legacy_dual: 强制双调度。"}),
+            "recipe": (list(RECIPES), {
+                "default": RECIPE_4STEP,
+                "tooltip": "官方配方一键预设 shift。4-step: 视频 12 / 音频 3；"
+                           "8-step V2: 视频 10 / 音频 3（注意 V2 视频 shift 不是 12！）。"
+                           "custom: 使用上方 shift 参数。"}),
         }}
 
     RETURN_TYPES = ("SAMPLER",)
     RETURN_NAMES = ("SAMPLER",)
     FUNCTION = "get_sampler"
     CATEGORY = "BSAI/FastH3"
-    DESCRIPTION = ("FastH3 4 步 Euler 采样器。ComfyUI 0.31+ 原生 ModelSamplingAV 下按"
-                   "单调度推进；旧版自动按视频 shift 12 / 音频 shift 3 双调度推进。"
+    DESCRIPTION = ("FastH3 Euler 采样器（任意步数，按 SIGMAS 长度推进）。"
+                   "4 步配方 shift 12/3；8 步 V2 配方 shift 10/3。ComfyUI 0.31+ 原生 "
+                   "ModelSamplingAV 下按单调度推进；旧版自动按视频/音频双调度推进。"
                    "接入 SamplerCustomAdvanced.sampler，与 FastH3 精确时间步搭配使用。")
 
-    def get_sampler(self, shift_video=SHIFT_V, shift_audio=SHIFT_A, schedule_mode="auto"):
+    def get_sampler(self, shift_video=SHIFT_V, shift_audio=SHIFT_A, schedule_mode="auto",
+                    recipe=RECIPE_4STEP):
+        if recipe != RECIPE_CUSTOM:
+            shift_video, shift_audio = _RECIPE_SHIFTS.get(
+                recipe, (shift_video, shift_audio))
         sampler = comfy.samplers.KSAMPLER(
             lambda model, x, sigmas, extra_args=None, callback=None, disable=None, **kw:
             _fast_h3_euler(model, x, sigmas, extra_args=extra_args, callback=callback,
@@ -370,10 +468,14 @@ class BSAIFastH3VSAStats:
         native_ok = _vsa._ck is not None and hasattr(_vsa._ck, "sol_attn")
         st = vsa_stats()
         cfg = model.model_options.get("transformer_options", {}).get("bsai_fasth3_vsa")
+        ms = _model_sampling(model)
+        shift_v = getattr(ms, "shift", None)
+        shift_a = getattr(ms, "audio_shift", None)
         lines = [
             "[BSAI FastH3 VSA Stats]",
             f"  native backend available : {native_ok}",
             f"  configured               : {cfg}",
+            f"  model shift (v/a)        : {shift_v} / {shift_a}",
             f"  sparse calls             : {st['sparse']}",
             f"  dense  calls             : {st['dense']}",
             f"  native / torch           : {st['native']} / {st['torch']}",
@@ -391,10 +493,10 @@ NODE_CLASS_MAPPINGS = {
 }
 
 NODE_DISPLAY_NAME_MAPPINGS = {
-    "BSAIFastH3Loader": "BSAI FastH3 Loader · 专用加载器 (Dense 兼容)",
-    "BSAIFastH3NativeVSA": "BSAI FastH3 Native VSA · 原生稀疏注意力",
-    "BSAIFastH3Timesteps": "BSAI FastH3 Timesteps · 精确时间步 [999,749,500,250]",
-    "BSAIFastH3EulerSampler": "BSAI FastH3 Euler · 4步采样器",
+    "BSAIFastH3Loader": "BSAI FastH3 Loader · 专用加载器 (4步/8步V2 兼容)",
+    "BSAIFastH3NativeVSA": "BSAI FastH3 Native VSA · 原生稀疏注意力 (recipe)",
+    "BSAIFastH3Timesteps": "BSAI FastH3 Timesteps · 精确时间步 (4步/8步V2)",
+    "BSAIFastH3EulerSampler": "BSAI FastH3 Euler · 采样器 (4步/8步V2)",
     "BSAIFastH3VSAStats": "BSAI FastH3 VSA Stats · 命中统计",
 }
 

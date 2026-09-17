@@ -1,9 +1,9 @@
 # BSAI-ComfyUI-FastH3
 
 > **BSAI · ComfyUI 快速生成 H3 视频插件套件 / Fast H3 Video Generation Nodes for ComfyUI**
-> 4 步蒸馏 FastH3 + Native VSA 视频稀疏注意力，文生 / 图生 / 多参考（多参）/ 4K 超分 全链路一键出片。
-> One-stop nodes for **fast H3 video (with synced audio)** in ComfyUI — 4-step distilled **FastH3** +
-> **VSA (Video Sparse Attention)**, covering Text-to-Video / Image-to-Video / Multi-reference / 4K Upscale.
+> 4 步蒸馏 FastH3（v1/v0.2）+ **8 步 V2**（2026-09-15 发布）+ Native VSA 视频稀疏注意力，文生 / 图生 / 多参考（多参）/ 4K 超分 全链路一键出片。
+> One-stop nodes for **fast H3 video (with synced audio)** in ComfyUI — 4-step distilled **FastH3** (v1/v0.2) +
+> **8-Step V2** (released 2026-09-15) + **VSA (Video Sparse Attention)**, covering Text-to-Video / Image-to-Video / Multi-reference / 4K Upscale.
 
 基于（Based on）：
 - FastVideo `FastVideo-FastH3-4-step-Preview-v1-VSA-DataFree`（MiniMax-H3 33B 双模态扩散 Transformer 的无数据 DMD2 蒸馏 / data-free DMD2 distillation）
@@ -31,15 +31,22 @@
 
 ## 1. 插件简介 / Introduction
 
-**中文**：在 ComfyUI 中**快速生成 H3 视频（含同步音轨）**。FastH3 把 50 步 H3 基座蒸馏成 **4 步**（官方约省 **12.5×** 模型前向次数），再叠加 **VSA 视频稀疏注意力**（约 **90%** 稀疏）进一步压显存与耗时。一次 pipeline 同时输出**视频 + 音频**。
+**中文**：在 ComfyUI 中**快速生成 H3 视频（含同步音轨）**。FastVideo 官方提供两条蒸馏路线，本插件**两套配方全内置（recipe 一键切换）**：
 
-**English**: Generate **H3 videos with a synced audio track** fast inside ComfyUI. FastH3 distills the 50-step H3 base model down to **4 steps** (≈ **12.5×** fewer model forwards per the official model card), and **VSA (Video Sparse Attention)** cuts memory and latency by keeping only ~**90%**-sparse exact attention. One pipeline produces **video + audio** at once.
+| 配方 Recipe | 前向次数 Forwards | 训练阶梯 Ladder | shift (视频/音频) | VSA 稀疏 Sparsity |
+|---|---|---|---|---|
+| **4 步 Preview v1 / v0.2** | 4（≈12.5× 快于 50 步基座） | `999,749,500,250` | 12 / 3 | 90%（keep 10%） |
+| **8 步 V2（2026-09-15 发布）** | 8（更高质量路线） | `999,874,749,624,500,375,250,125` | **10** / 3 | 80%（keep 20%） |
+
+一次 pipeline 同时输出**视频 + 音频**。VSA（Video Sparse Attention）把视频自注意力稀疏化进一步压显存与耗时。
+
+**English**: Generate **H3 videos with a synced audio track** fast inside ComfyUI. FastVideo distills the 50-step H3 base model down to **4 steps** (v1/v0.2, ≈ **12.5×** fewer forwards) or the new **8-Step V2** (2026-09-15, 8 forwards, higher quality), and **VSA (Video Sparse Attention)** cuts memory and latency. One pipeline produces **video + audio** at once.
 
 | 痛点 Problem | 解法 Solution |
 |---|---|
-| H3 基座要 50 去噪步，很慢 / 50-step base is slow | FastH3 蒸馏为 **4 步**（shift-12 整流调度）/ distilled to **4 steps** |
+| H3 基座要 50 去噪步，很慢 / 50-step base is slow | FastH3 蒸馏为 **4 步**（shift-12 整流调度）或 **8 步 V2**（shift-10）/ distilled to **4 steps** (shift-12) or **8-Step V2** (shift-10) |
 | 长视频注意力 O(N²) 显存爆炸 / O(N²) attention blows VRAM | **VSA 稀疏注意力**：64-token 分块，top-k 视频块精确注意力 / 64-token tiled top-k |
-| 4 步必须走训练阶梯 / 4-step needs the trained ladder | `BSAIFastH3Timesteps` 输出 `[999,749,500,250]` 对应 SIGMAS |
+| 蒸馏步必须走训练阶梯 / distilled steps need the trained ladder | `BSAIFastH3Timesteps` 输出 `[999,749,500,250]`（4 步）或 `[999,874,749,624,500,375,250,125]`（8 步 V2）对应 SIGMAS |
 | 音视频双调度易错 / dual schedule error-prone | `BSAIFastH3EulerSampler` 自动检测原生 `ModelSamplingAV`，单/双调度自动切换 |
 
 ---
@@ -48,11 +55,16 @@
 
 | 节点 Node | 作用 Purpose | 关键参数（默认）Key params (default) |
 |---|---|---|
-| `BSAIFastH3Loader` | FastH3 专用加载器（Dense 兼容 + 文件名严格校验）/ FastH3 loader (Dense-compatible + strict filename check) | `weight_dtype=default`，`strict_fast_h3_check=True` |
-| `BSAIFastH3NativeVSA` | VSA 稀疏注意力补丁（native / torch 双后端自动切换）/ VSA sparse-attention patch (native/torch auto) | `video_keep_percent=10.0`，`sink_conditioning=exact_kv`，`backend=auto`，`min_tokens=8192` |
-| `BSAIFastH3Timesteps` | 精确时间步：显式训练阶梯 → SIGMAS / exact ladder → SIGMAS | `ladder="999,749,500,250"` |
-| `BSAIFastH3EulerSampler` | FastH3 4 步 Euler 采样器（音视频双调度自适应）/ 4-step Euler sampler (video/audio schedule adaptive) | `shift_video=12.0`，`shift_audio=3.0`，`schedule_mode=auto` |
+| `BSAIFastH3Loader` | FastH3 专用加载器（Dense 兼容 + 文件名严格校验）/ FastH3 loader (Dense-compatible + strict filename check) | `weight_dtype=default`，`strict_fast_h3_check=True`（接受 `_4step`/`_8step`/`v2` 蒸馏权重） |
+| `BSAIFastH3NativeVSA` | VSA 稀疏注意力补丁（native / torch 双后端自动切换）+ 配方 shift 补丁 / VSA sparse-attention patch (native/torch auto) + recipe shift | `video_keep_percent=10.0`，`sink_conditioning=exact_kv`，`backend=auto`，`min_tokens=8192`，`recipe=4-step` |
+| `BSAIFastH3Timesteps` | 精确时间步：显式训练阶梯 → SIGMAS / exact ladder → SIGMAS | `recipe=4-step`（内置 `999,749,500,250` / 8 步 V2 `999,874,749,624,500,375,250,125`） |
+| `BSAIFastH3EulerSampler` | FastH3 Euler 采样器（音视频双调度自适应）/ Euler sampler (video/audio schedule adaptive) | `shift_video=12.0`，`shift_audio=3.0`，`schedule_mode=auto`，`recipe=4-step`（8 步 V2 → shift 10/3） |
 | `BSAIFastH3VSAStats` | 只读诊断：sparse/dense/native/torch/errors 命中统计 / read-only VSA hit stats | — |
+
+> **recipe 说明 / About `recipe`**：三个节点（VSA / Timesteps / EulerSampler）都带 `recipe` 一键预设：
+> - `4-step Preview (...)`：4 步 v1/v0.2 官方契约（阶梯 `999,749,500,250`、shift 12/3、keep 10%）。**兼容旧工作流**：该参数默认即 4 步，旧 JSON 无需改动。
+> - `8-step V2 (...)`：**8 步 V2** 官方契约（阶梯 `999,874,749,624,500,375,250,125`、**shift 10/3**、keep 20%）。VSA 节点会自动把模型 `ModelSamplingAV` 视频 shift 补丁为 10（V2 与 v1 的 12 不同），Timesteps / 采样器共用该模型即全链路一致。
+> - `custom`：完全手动（ladder / shift / keep 自行管理）。
 
 ### 2.1 全节点参数详解 / Full Parameter Reference
 
@@ -60,9 +72,9 @@
 
 | 参数 Parameter | 选项 Options | 默认 Default | 说明 / Explanation |
 |---|---|---|---|
-| `model` | 下拉列表 / dropdown | — | 选择 FastH3 **4 步蒸馏**权重（文件名含 `fastvideo/fasth3/_4step`）。Select the FastH3 **4-step distilled** weight (filename contains `fastvideo/fasth3/_4step`). |
+| `model` | 下拉列表 / dropdown | — | 选择 FastH3 **蒸馏**权重：4 步 v1/v0.2（文件名含 `fastvideo/fasth3/_4step`）或 8 步 V2（含 `_8step`/`v2`）。Select the FastH3 **distilled** weight: 4-step v1/v0.2 (filename contains `fastvideo/fasth3/_4step`) or 8-Step V2 (contains `_8step`/`v2`). |
 | `weight_dtype` | `default` / `fp8_e4m3fn` / `fp8_e4m3fn_fast` / `fp8_e5m2` | `default` | 加载精度。**中文**：FastH3 官方权重本身是 `int8_convrot` 量化，`default` 最稳；fp8 仅当确需再启用，可能引入精度损失。**English**: FastH3 weights are already `int8_convrot`-quantized, so `default` is the safest; fp8 only when really needed (may lose precision). |
-| `strict_fast_h3_check` | `True` / `False` | `True` | **中文**：开启时仅接受文件名含 FastH3/4 步标记的权重，防止误加载 50 步基座（防呆）。关掉可强制加载任意 H3 权重。**English**: When on, only filenames with FastH3/4-step markers are accepted (prevents accidentally loading the 50-step base). Turn off to force-load any H3 weight. |
+| `strict_fast_h3_check` | `True` / `False` | `True` | **中文**：开启时仅接受文件名含 FastH3/蒸馏标记（`fastvideo/fasth3/_4step/_8step/v2`）的权重，防止误加载 50 步基座（防呆）。关掉可强制加载任意 H3 权重。**English**: When on, only filenames with FastH3/distill markers (`fastvideo/fasth3/_4step/_8step/v2`) are accepted (prevents accidentally loading the 50-step base). Turn off to force-load any H3 weight. |
 
 #### ② `BSAIFastH3NativeVSA` — 原生 VSA 稀疏注意力 / native sparse attention
 
@@ -77,6 +89,7 @@
 | `backend` | `auto` / `native` / `torch` | `auto` | **中文**：`auto` 有 `comfy_kitchen.sol_attn` 内核用 native（Blackwell 最快），否则 torch；`native` 强制内核；`torch` 纯 PyTorch 块稀疏（40 系/无内核可用）。**English**: `auto` uses the native Blackwell kernel when available, else torch; `native` forces the kernel; `torch` uses pure PyTorch block-sparse (RTX 40-series / no kernel). |
 | `strict_native_backend` | `True` / `False` | `True` | **中文**：`True` 时 native 不可用直接报错；`False` 自动降级 torch 稀疏。**English**: `True` fails hard if native is unavailable; `False` auto-falls-back to torch sparse. |
 | `verbose` | `True` / `False` | `True` | **中文**：打印每次 VSA 命中的形状与后端信息（排障用）。**English**: Log each VSA hit's shapes and backend (for debugging). |
+| `recipe` | `4-step Preview (...)` / `8-step V2 (...)` / `custom` | `4-step Preview (...)` | **中文**：官方配方一键预设。4 步 = keep 10%（默认，无需补丁）；**8 步 V2 = keep 20% 并自动把模型 `ModelSamplingAV` 视频 shift 补丁为 10/3**（V2 视频 shift 不是 12！），Timesteps/采样器共用该模型即全链路一致；custom = 完全手动（可配合原生 `MiniMaxH3SigmaShift` 使用）。**English**: One-click official recipe. 4-step = keep 10% (default, no patch); **8-Step V2 = keep 20% + auto-patch the model's `ModelSamplingAV` video shift to 10/3** (V2's video shift is NOT 12); custom = fully manual (pair with native `MiniMaxH3SigmaShift`). |
 
 **`sink_conditioning` 选项详解 / sink_conditioning options (选择指南 / how to choose):**
 
@@ -92,15 +105,17 @@
 
 | 参数 Parameter | 选项 Options | 默认 Default | 说明 / Explanation |
 |---|---|---|---|
-| `ladder` | 字符串（逗号分隔 0–1000 timestep）/ comma-separated timesteps | `999,749,500,250` | **中文**：FastH3 显式训练的 4 步阶梯（v0.2 官方卡片要求用训练跳点采样，勿用均匀网格）。输出 SIGMAS 末尾自动补 0。**English**: The explicitly trained 4-step ladder (official card requires training jump points, not a uniform grid). Output SIGMAS auto-appends 0. |
+| `ladder` | 字符串（逗号分隔 0–1000 timestep）/ comma-separated timesteps | `999,749,500,250` | **中文**：FastH3 显式训练的 4 步阶梯（v0.2 官方卡片要求用训练跳点采样，勿用均匀网格）。输出 SIGMAS 末尾自动补 0。`recipe=custom` 时生效。**English**: The explicitly trained 4-step ladder (official card requires training jump points, not a uniform grid). Output SIGMAS auto-appends 0. Active when `recipe=custom`. |
+| `recipe` | `4-step Preview (...)` / `8-step V2 (...)` / `custom` | `4-step Preview (...)` | **中文**：一键预设官方阶梯。8 步 V2 = `999,874,749,624,500,375,250,125`（9 个 sigma 点 = 8 次前向），需模型 shift 10/3（VSA 节点 recipe 已自动补丁）；custom = 用上方 ladder。**English**: One-click official ladder. 8-Step V2 = `999,874,749,624,500,375,250,125` (9 sigma points = 8 forwards), requires model shift 10/3 (auto-patched by the VSA node recipe); custom = use `ladder` above. |
 
-#### ④ `BSAIFastH3EulerSampler` — 4 步 Euler 采样器 / 4-step Euler sampler
+#### ④ `BSAIFastH3EulerSampler` — Euler 采样器 / Euler sampler
 
 | 参数 Parameter | 选项 Options | 默认 Default | 说明 / Explanation |
 |---|---|---|---|
 | `shift_video` | `0.01`–`100.0` | `12.0` | **中文**：视频流 flow shift（FastH3 官方 shift-12 整流调度）。**English**: Video flow shift (official shift-12 rectified schedule). |
 | `shift_audio` | `0.01`–`100.0` | `3.0` | **中文**：音频流 flow shift（官方 shift-3）。**English**: Audio flow shift (official shift-3). |
 | `schedule_mode` | `auto` / `native` / `legacy_dual` | `auto` | **中文**：`auto` 检测 ComfyUI 0.31+ 原生 `ModelSamplingAV`——有则单调度 Euler，否则自动切音视频双调度；`native` 强制单调度；`legacy_dual` 强制双调度。**English**: `auto` detects native `ModelSamplingAV` (single schedule) vs legacy (dual schedule); `native` forces single; `legacy_dual` forces dual. |
+| `recipe` | `4-step Preview (...)` / `8-step V2 (...)` / `custom` | `4-step Preview (...)` | **中文**：一键预设 shift。4 步 = 视频 12 / 音频 3；**8 步 V2 = 视频 10 / 音频 3**（注意 V2 视频 shift 不是 12！）；custom = 用上方 shift 参数。**English**: One-click shift preset. 4-step = video 12 / audio 3; **8-Step V2 = video 10 / audio 3** (V2's video shift is NOT 12!); custom = use the shift params above. |
 
 #### ⑤ `BSAIFastH3VSAStats` — 命中统计（只读）/ VSA hit stats (read-only)
 
@@ -137,19 +152,23 @@ python -m pip install comfy_kitchen
 | 文件 File | 放置目录 Folder | 大小 Size |
 |---|---|---|
 | `minimax_h3_fastvideo_vsa_datafree_1300step_4step_int8_convrot.safetensors` | `models/diffusion_models` | ~22.9 GB |
+| `BSAI_minimax_h3_fastvideo_8step_v2_int8_convrot.safetensors`（自转 / self-converted，见 §4.2） | `models/diffusion_models` | ~35.97 GB |
 | `qwen3vl_32b_minimax_h3_nvfp4_awq.safetensors` | `models/text_encoders` | — |
 | `minimax_h3_video_vae_int8_convrot.safetensors` | `models/vae` | ~3.17 GB |
 | `minimax_h3_audio_vae_fp32.safetensors` | `models/vae` | — |
 
 来源 / Sources：
-- FastH3 模型卡 / Model card：<https://huggingface.co/FastVideo/FastVideo-FastH3-4-step-Preview-v1-VSA-DataFree>
+- FastH3 v1 模型卡 / Model card：<https://huggingface.co/FastVideo/FastVideo-FastH3-4-step-Preview-v1-VSA-DataFree>
+- FastH3 v0.2 模型卡 / v0.2 card：<https://huggingface.co/FastVideo/FastVideo-Minimax-FastH3-Preview-v0.2>
+- FastH3 8步 V2 模型卡 / 8-Step V2 card：<https://huggingface.co/FastVideo/FastVideo-FastH3-8-Step-V2>
 - KJ 文件仓库 / File repo：<https://huggingface.co/Kijai/MiniMax-H3-experimental/tree/main>
 - 国内镜像 / China mirror：`set HF_ENDPOINT=https://hf-mirror.com`（BSAI Pro 启动脚本已默认设置）
 
-> ⚠️ FastH3 是 **4 步蒸馏**权重，文件名带 `fastvideo ... _4step`。**不要**误用 50 步基座
+> ⚠️ FastH3 是 **蒸馏权重**：4 步文件名带 `fastvideo ... _4step`，8 步 V2 带 `... _8step`/`v2`。
+> **不要**误用 50 步基座
 > `minimax_h3_f12va_pruned_w4a8_mixed.safetensors`。加载器默认 `strict_fast_h3_check=True` 防呆；
 > 确需加载其它 H3 权重可关闭该校验。
-> ⚠️ FastH3 is the **4-step distilled** weights (filename contains `fastvideo ... _4step`). **Do not**
+> ⚠️ FastH3 is the **distilled** weights: 4-step (filename contains `fastvideo ... _4step`), 8-Step V2 (contains `... _8step`/`v2`). **Do not**
 > use the 50-step base. The loader validates the filename by default; disable `strict_fast_h3_check` only if you really need another H3 weight.
 
 ---
@@ -195,11 +214,30 @@ python -m pip install comfy_kitchen
 | 项目 Item | 状态 Status | 备注 Notes |
 |---|---|---|
 | FastH3 Preview v1 发布 / released | ✅ 2026-08-27 | VSA-DataFree / VSA-Synthetic / Dense 两版，4 checkpoint |
-| **FastH3 v0.2** 训练中 / training | 🔄 step 2900/4000（8-25 更新） | 本机已有 fl2va 蒸馏 LoRA `minimax_h3_fl2va_fasth3_preview_v0.2_lora_full...` |
-| **FL2VA / Ref2VA 蒸馏版** / distilled checkpoints | ⏳ 官方「几周内 / in a few weeks」（8-27） | 尚未发布，发布后本插件跟进 |
+| **FastH3 v0.2** 发布 / released | ✅ 2026-09-中旬 | 4 步，step 2900/4000（同一跑次，比 v1 多 1500 步）；官方 4 步示例已默认指向 v0.2；采样契约与 v1 相同（ladder [999,749,500,250]） |
+| **FL2VA / Ref2VA 蒸馏版** / distilled checkpoints | ⏳ 尚未发布 | v1/v0.2/V2 卡均说明“FL2VA 和 Ref2VA 未蒸馏”；官方路线图“Omni Ref 为下一个焦点” |
+| **FastH3 8-Step V2** 发布 / released | ✅ **2026-09-15** | 8 前向，阶梯 [999,874,749,624,500,375,250,125]，**视频 shift 10/3**（非 12），VSA 80% 稀疏；本插件已内置 recipe |
+| MLX / Apple Silicon | ✅ 2026-09-01/09-15 | FastMetal-QAD 1.3B/5B/14B；FastH3 4步 v1 的 MLX INT4/6/8 已发布（与本插件无关，Windows 不用） |
 | nvfp4 / RTX 优化 / PDD 新训练 | ⏳ roadmap | 官方路线图 |
 
 
+
+### 4.2 FastVideo / FastH3 升级跟踪（2026-09-16 更新） / Upgrade tracking
+
+以下信息来源于 FastVideo 官方 HF 组织页、各模型卡与 GitHub NEWS，本插件已据此完成代码升级：
+
+| 事件 Event | 时间 Date | 内容与对本插件的影响 Impact |
+|---|---|---|
+| **FastH3 8-Step V2 发布** | **2026-09-15** | 新的 8 前向无数据 DMD2 检查点，从 MiniMax-H3 蒸馏，80% VSA 稀疏。关键差异：**视频 shift = 10（非 v1 的 12）**，阶梯 8 级 `[999,874,749,624,500,375,250,125]`（九个 sigma 点 = 8 次前向），官方示例 `basic_fasth3_8step.py` 要求 `--steps 9`。本插件已内置 `recipe="8-step V2"`（VSA 自动补丁 shift 10/3 并默认 keep 20%）。 |
+| **FastH3 Preview v0.2 发布** | 2026-09-中旬 | 4 步，step 2900/4000，与 v1 同跑次。官方 4 步示例已默认指向 v0.2；采样契约与 v1 完全相同（ladder [999,749,500,250]、shift 12/3、keep 10%），本插件无需改动即可使用。 |
+| **v1 卡修正采样契约** | 2026-09-中旬 | 官方强调：必须按训练阶梯 `[999,749,500,250]` 采样（本插件默认就是），不要用均匀网格；并添加“Matching LoRA”选项（可只下载蒸馏 LoRA，本插件用全量权路线，不影响）。 |
+| **ComfyUI 原生 H3 节点** | ✅ | 本机 ComfyUI 已含原生 `MiniMaxH3ImageToVideo` / `MiniMaxH3SigmaShift`（默认 12/3），与本插件配合使用。 |
+
+**8 步 V2 权重：已自转完成（2026-09-16/17）**：因 HF 直连不可达、Kijai/Comfy-Org 尚未发布 V2 单文件转换版，从 ModelScope 官方镜像（`FastVideo/FastVideo-FastH3-8-Step-V2`）拉取 14 个 Diffusers shard（~70GB，sha256 逐一比对 OK）后自写转换器合并，产物 `BSAI_minimax_h3_fastvideo_8step_v2_int8_convrot.safetensors`（35.97GB / int8_tensorwise+convrot，250 层 gs=256 + 50 层 adaln gs=64）。放入 `models/diffusion_models`，运行新工作流 `example_workflows/BSAI_FastH3_T2VA_8step_V2.json` 即可（已内置 8 步阶梯 / shift 10/3 / keep 20%）。验证详情见 §10。
+
+**FL2VA / Ref2VA 蒸馏版尚未发布**：据官方消息，“Omni Ref 是下一个焦点”，发布后本插件跟进。
+
+---
 
 ## 5. 示例工作流 1：文生视频+音频（T2VA）/ Workflow 1: Text-to-Video+Audio
 
@@ -229,6 +267,8 @@ SamplerCustomAdvanced ─┬─► VAEDecode ─► CreateVideo(24fps) ─► Sa
 - 时长 / Duration：改 `MiniMaxH3ImageToVideo.length`（124≈5s；训练区间约 124–362，再长未充分测试）。
 - 分辨率 / Resolution：改 `width/height`（32 的倍数；0.4MP 起步，显存不够先降）。
 - 随机种子 / Seed：`RandomNoise.noise_seed`。
+
+**8 步 V2 变体 / 8-step V2 variant**：`example_workflows/BSAI_FastH3_T2VA_8step_V2.json`。已内置 8 步阶梯 `999,874,749,624,500,375,250,125`、shift 10/3、VSA keep 20%；等待 8步 V2 的 ComfyUI 单文件转换版权重即可一键出片。
 
 ---
 
@@ -352,7 +392,15 @@ FastH3 4步轨 ┼─► FlashVSR 时序修复轨（默认看这条：scale=2 �
 - 5 个节点在真实 ComfyUI 加载机制下全部注册成功 / all 5 nodes registered under the real loader.
 - 单元测试通过 / unit tests pass：时间步 `[999,749,500,250] → sigmas [0.9999,0.9728,0.9231,0.8,0.0]`；torch 稀疏注意力条件行与 Dense 全等、形状/有限性正确；BTHD/BHND 两种形态与短序列降级 Dense 均通过。
 - native 后端：`comfy_kitchen.sol_attn` 在 GPU（bf16, head_dim 128, 8192 tokens）实测输出正确。
+- 升级验证（2026-09-16）/ upgrade verification：以本机 ComfyUI `ModelSamplingAV` 实测 8 步 V2 阶梯 sigmas = `[0.9999,0.9858,0.9676,0.9432,0.9091,0.8571,0.7692,0.5882,0.0]`（9 点 = 8 次前向），与官方契约一致；recipe 路线、加载器标记（`_8step`/`v2`）与旧工作流兼容性均已验证。
 - ⚠️ 因 FastH3 蒸馏权重（~22.9GB）未完成下载，尚未做端到端出图验证；权重补齐后按示例工作流一键出片即可。End-to-end render not yet verified because the ~22.9GB weight was still downloading; once in place, run the example workflows directly.
+- **V2 权重转换验证（2026-09-16）**：`BSAI_minimax_h3_fastvideo_8step_v2_int8_convrot.safetensors`（35.97GB / 1185 键，BSAI 前缀命名规范）四节验证套件全绿：
+  1. 结构重读：I8 300 + U8 300（comfy_quant，全部 int8_tensorwise+convrot，gs 256/64）+ BF16 272 + F32 313，键集与 v1 完全同构（唯一差异 time_embedder MLP ↔ adaln_t_table 曲线）；
+  2. ComfyUI `model_detection`：识别 MiniMaxH3，gate_compress=True、time_embed_dim=2688、timestep_input_dim=256、rope_inv_freq_len=16；
+  3. 真实加载（模拟官方 loader 全流程，mmap 零拷贝，~1s）：无 missing、无 unexpected、0 left-over；
+  4. GPU 单块量化前向（DiTBlock + mixed_precision_ops，含 convrot gs=256 与 adaln gs=64 两层路径 + split-half RoPE + gate_compress）：无 NaN，输出形状/量级正常。
+  - 转换中修复的缺陷：量化三元组键名（`.weight.weight_scale` → `.weight_scale`）、头部写入丢失、v1 基线规格核对、量化钩子依赖 `mixed_precision_ops`（非 manual_cast）。
+  - 端到端出图仍待首次实跑；权重文件、加载器、8 步 recipe 与示例工作流 `BSAI_FastH3_T2VA_8step_V2.json` 已就位。
 
 ---
 

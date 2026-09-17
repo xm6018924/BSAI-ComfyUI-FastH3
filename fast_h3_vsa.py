@@ -2,12 +2,13 @@
 
 What it does
 ------------
-FastVideo's FastH3 4-step preview cuts the video DiT cost in half through two
-levers: 4-step DMD2 distillation and VSA (Video Sparse Attention). VSA does not
-make every video token attend to every other video token; it scores 64-token
-tiles and keeps only the informative ones exact, so attention cost drops by
-roughly an order of magnitude while the conditioning rows (text / audio /
-reference) stay exact.
+FastVideo's FastH3 previews cut the video DiT cost through two levers: DMD2
+distillation (4-step v1/v0.2, or 8-step V2) and VSA (Video Sparse Attention).
+VSA does not make every video token attend to every other video token; it scores
+64-token tiles and keeps only the informative ones exact, so attention cost drops
+by roughly an order of magnitude while the conditioning rows (text / audio /
+reference) stay exact. Official operating points: 4-step keeps ~10% (90%
+sparsity), 8-step V2 keeps ~20% (80% sparsity).
 
 This module installs that behaviour as a per-model patch through the same seam
 ComfyUI's H3 attention reads: ``transformer_options["optimized_attention_override"]``.
