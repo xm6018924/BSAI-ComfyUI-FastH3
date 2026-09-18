@@ -1,9 +1,9 @@
 # BSAI-ComfyUI-FastH3
 
 > **BSAI · ComfyUI 快速生成 H3 视频插件套件 / Fast H3 Video Generation Nodes for ComfyUI**
-> 4 步蒸馏 FastH3（v1/v0.2）+ **8 步 V2**（2026-09-15 发布）+ Native VSA 视频稀疏注意力，文生 / 图生 / 多参考（多参）/ 4K 超分 全链路一键出片。
+> 4 步蒸馏 FastH3（v1/v0.2）+ **8 步 V2**（2026-09-15 发布）+ **3 步 TaoMate**（阿里淘天 2026-09 发布）+ Native VSA 视频稀疏注意力，文生 / 图生 / 多参考（多参）/ 4K 超分 全链路一键出片。
 > One-stop nodes for **fast H3 video (with synced audio)** in ComfyUI — 4-step distilled **FastH3** (v1/v0.2) +
-> **8-Step V2** (released 2026-09-15) + **VSA (Video Sparse Attention)**, covering Text-to-Video / Image-to-Video / Multi-reference / 4K Upscale.
+> **8-Step V2** (released 2026-09-15) + **3-Step TaoMate** (TaoLive AIGC, 2026-09) + **VSA (Video Sparse Attention)**, covering Text-to-Video / Image-to-Video / Multi-reference / 4K Upscale.
 
 基于（Based on）：
 - FastVideo `FastVideo-FastH3-4-step-Preview-v1-VSA-DataFree`（MiniMax-H3 33B 双模态扩散 Transformer 的无数据 DMD2 蒸馏 / data-free DMD2 distillation）
@@ -31,22 +31,23 @@
 
 ## 1. 插件简介 / Introduction
 
-**中文**：在 ComfyUI 中**快速生成 H3 视频（含同步音轨）**。FastVideo 官方提供两条蒸馏路线，本插件**两套配方全内置（recipe 一键切换）**：
+**中文**：在 ComfyUI 中**快速生成 H3 视频（含同步音轨）**。FastVideo 官方提供两条蒸馏路线 + 阿里淘天 TaoMate 3 步 LoRA，本插件**三套配方全内置（recipe 一键切换）**：
 
 | 配方 Recipe | 前向次数 Forwards | 训练阶梯 Ladder | shift (视频/音频) | VSA 稀疏 Sparsity |
 |---|---|---|---|---|
 | **4 步 Preview v1 / v0.2** | 4（≈12.5× 快于 50 步基座） | `999,749,500,250` | 12 / 3 | 90%（keep 10%） |
 | **8 步 V2（2026-09-15 发布）** | 8（更高质量路线） | `999,874,749,624,500,375,250,125` | **10** / 3 | 80%（keep 20%） |
+| **3 步 TaoMate（2026-09 发布）** | 3（最快路线，配原版 H3 底座 + TaoMate LoRA） | `999,750,500` | 12 / 3 | 100%（Dense） |
 
-一次 pipeline 同时输出**视频 + 音频**。VSA（Video Sparse Attention）把视频自注意力稀疏化进一步压显存与耗时。
+一次 pipeline 同时输出**视频 + 音频**。VSA（Video Sparse Attention）把视频自注意力稀疏化进一步压显存与耗时；TaoMate 配方走 Dense（原版 H3 无稀疏训练，勿强行稀疏）。
 
-**English**: Generate **H3 videos with a synced audio track** fast inside ComfyUI. FastVideo distills the 50-step H3 base model down to **4 steps** (v1/v0.2, ≈ **12.5×** fewer forwards) or the new **8-Step V2** (2026-09-15, 8 forwards, higher quality), and **VSA (Video Sparse Attention)** cuts memory and latency. One pipeline produces **video + audio** at once.
+**English**: Generate **H3 videos with a synced audio track** fast inside ComfyUI. FastVideo distills the 50-step H3 base model down to **4 steps** (v1/v0.2, ≈ **12.5×** fewer forwards), the new **8-Step V2** (2026-09-15, 8 forwards, higher quality), or pairs with the **TaoMate-H3 3-step LoRA** (TaoLive AIGC, 2026-09, on the original MiniMax-H3 base). **VSA (Video Sparse Attention)** cuts memory and latency; the TaoMate recipe runs Dense (the base model has no sparse training — do not force sparsity on it). One pipeline produces **video + audio** at once.
 
 | 痛点 Problem | 解法 Solution |
 |---|---|
-| H3 基座要 50 去噪步，很慢 / 50-step base is slow | FastH3 蒸馏为 **4 步**（shift-12 整流调度）或 **8 步 V2**（shift-10）/ distilled to **4 steps** (shift-12) or **8-Step V2** (shift-10) |
+| H3 基座要 50 去噪步，很慢 / 50-step base is slow | FastH3 蒸馏为 **4 步**（shift-12 整流调度）、**8 步 V2**（shift-10）或 **TaoMate 3 步**（原版 H3 + LoRA）/ distilled to **4 steps** (shift-12), **8-Step V2** (shift-10) or **TaoMate 3 steps** (base H3 + LoRA) |
 | 长视频注意力 O(N²) 显存爆炸 / O(N²) attention blows VRAM | **VSA 稀疏注意力**：64-token 分块，top-k 视频块精确注意力 / 64-token tiled top-k |
-| 蒸馏步必须走训练阶梯 / distilled steps need the trained ladder | `BSAIFastH3Timesteps` 输出 `[999,749,500,250]`（4 步）或 `[999,874,749,624,500,375,250,125]`（8 步 V2）对应 SIGMAS |
+| 蒸馏步必须走训练阶梯 / distilled steps need the trained ladder | `BSAIFastH3Timesteps` 输出 `[999,749,500,250]`（4 步）、`[999,874,749,624,500,375,250,125]`（8 步 V2）或 `[999,750,500]`（3 步 TaoMate）对应 SIGMAS |
 | 音视频双调度易错 / dual schedule error-prone | `BSAIFastH3EulerSampler` 自动检测原生 `ModelSamplingAV`，单/双调度自动切换 |
 
 ---
@@ -55,15 +56,16 @@
 
 | 节点 Node | 作用 Purpose | 关键参数（默认）Key params (default) |
 |---|---|---|
-| `BSAIFastH3Loader` | FastH3 专用加载器（Dense 兼容 + 文件名严格校验）/ FastH3 loader (Dense-compatible + strict filename check) | `weight_dtype=default`，`strict_fast_h3_check=True`（接受 `_4step`/`_8step`/`v2` 蒸馏权重） |
+| `BSAIFastH3Loader` | FastH3 专用加载器（Dense 兼容 + 文件名严格校验，支持原版 H3 底座）/ FastH3 loader (Dense-compatible + strict filename check, base-H3 support) | `weight_dtype=default`，`model_type=auto`，`strict_fast_h3_check=True`（接受 `_4step`/`_8step`/`v2` 蒸馏权重或 `minimax_h3_fl2va*` 原版基座） |
 | `BSAIFastH3NativeVSA` | VSA 稀疏注意力补丁（native / torch 双后端自动切换）+ 配方 shift 补丁 / VSA sparse-attention patch (native/torch auto) + recipe shift | `video_keep_percent=10.0`，`sink_conditioning=exact_kv`，`backend=auto`，`min_tokens=8192`，`recipe=4-step` |
-| `BSAIFastH3Timesteps` | 精确时间步：显式训练阶梯 → SIGMAS / exact ladder → SIGMAS | `recipe=4-step`（内置 `999,749,500,250` / 8 步 V2 `999,874,749,624,500,375,250,125`） |
-| `BSAIFastH3EulerSampler` | FastH3 Euler 采样器（音视频双调度自适应）/ Euler sampler (video/audio schedule adaptive) | `shift_video=12.0`，`shift_audio=3.0`，`schedule_mode=auto`，`recipe=4-step`（8 步 V2 → shift 10/3） |
+| `BSAIFastH3Timesteps` | 精确时间步：显式训练阶梯 → SIGMAS / exact ladder → SIGMAS | `recipe=4-step`（内置 `999,749,500,250` / 8 步 V2 `999,874,749,624,500,375,250,125` / 3 步 TaoMate `999,750,500`） |
+| `BSAIFastH3EulerSampler` | FastH3 Euler 采样器（音视频双调度自适应）/ Euler sampler (video/audio schedule adaptive) | `shift_video=12.0`，`shift_audio=3.0`，`schedule_mode=auto`，`recipe=4-step`（8 步 V2 → shift 10/3，3 步 TaoMate → shift 12/3） |
 | `BSAIFastH3VSAStats` | 只读诊断：sparse/dense/native/torch/errors 命中统计 / read-only VSA hit stats | — |
 
 > **recipe 说明 / About `recipe`**：三个节点（VSA / Timesteps / EulerSampler）都带 `recipe` 一键预设：
 > - `4-step Preview (...)`：4 步 v1/v0.2 官方契约（阶梯 `999,749,500,250`、shift 12/3、keep 10%）。**兼容旧工作流**：该参数默认即 4 步，旧 JSON 无需改动。
 > - `8-step V2 (...)`：**8 步 V2** 官方契约（阶梯 `999,874,749,624,500,375,250,125`、**shift 10/3**、keep 20%）。VSA 节点会自动把模型 `ModelSamplingAV` 视频 shift 补丁为 10（V2 与 v1 的 12 不同），Timesteps / 采样器共用该模型即全链路一致。
+> - `3-step TaoMate (...)`：**3 步 TaoMate** 契约（阶梯 `999,750,500`、shift 12/3、keep 100% Dense）。配原版 `minimax_h3_fl2va_*` 底座 + `TaoMate-H3-step3000-ComfyUI-*.safetensors` LoRA（`LoraLoaderModelOnly` 或 BSAI-ComfyUI-TaoMate 的 `BSAITaoMateLoRALoader` 加载）。原版 H3 无稀疏训练，VSA 不参与（Dense 透传）。
 > - `custom`：完全手动（ladder / shift / keep 自行管理）。
 
 ### 2.1 全节点参数详解 / Full Parameter Reference
@@ -72,9 +74,10 @@
 
 | 参数 Parameter | 选项 Options | 默认 Default | 说明 / Explanation |
 |---|---|---|---|
-| `model` | 下拉列表 / dropdown | — | 选择 FastH3 **蒸馏**权重：4 步 v1/v0.2（文件名含 `fastvideo/fasth3/_4step`）或 8 步 V2（含 `_8step`/`v2`）。Select the FastH3 **distilled** weight: 4-step v1/v0.2 (filename contains `fastvideo/fasth3/_4step`) or 8-Step V2 (contains `_8step`/`v2`). |
+| `model` | 下拉列表 / dropdown | — | 选择 FastH3 **蒸馏**权重（4 步 v1/v0.2 含 `fastvideo/fasth3/_4step`、8 步 V2 含 `_8step`/`v2`），或 `model_type=base_h3_fl2va` 时选原版 **MiniMax-H3 基座**（`minimax_h3_fl2va*`，TaoMate 3 步 LoRA 的官方底座）。Select the FastH3 **distilled** weight (4-step: `fastvideo/fasth3/_4step`; 8-Step V2: `_8step`/`v2`), or the original **MiniMax-H3 base** (`minimax_h3_fl2va*`, the official base for the TaoMate 3-step LoRA) when `model_type=base_h3_fl2va`. |
 | `weight_dtype` | `default` / `fp8_e4m3fn` / `fp8_e4m3fn_fast` / `fp8_e5m2` | `default` | 加载精度。**中文**：FastH3 官方权重本身是 `int8_convrot` 量化，`default` 最稳；fp8 仅当确需再启用，可能引入精度损失。**English**: FastH3 weights are already `int8_convrot`-quantized, so `default` is the safest; fp8 only when really needed (may lose precision). |
-| `strict_fast_h3_check` | `True` / `False` | `True` | **中文**：开启时仅接受文件名含 FastH3/蒸馏标记（`fastvideo/fasth3/_4step/_8step/v2`）的权重，防止误加载 50 步基座（防呆）。关掉可强制加载任意 H3 权重。**English**: When on, only filenames with FastH3/distill markers (`fastvideo/fasth3/_4step/_8step/v2`) are accepted (prevents accidentally loading the 50-step base). Turn off to force-load any H3 weight. |
+| `model_type` | `auto` / `fast_h3_distill` / `base_h3_fl2va` | `auto` | **中文**：`auto` 按文件名自动识别（蒸馏或原版基座均可）；`fast_h3_distill` 仅接受 FastH3 蒸馏权重；`base_h3_fl2va` 仅接受原版 H3 基座（TaoMate 配方用）。**English**: `auto` detects from filename (distill or base); `fast_h3_distill` only distilled; `base_h3_fl2va` only the original base (TaoMate recipe). |
+| `strict_fast_h3_check` | `True` / `False` | `True` | **中文**：开启时按 `model_type` 校验文件名（蒸馏标记 `fastvideo/fasth3/_4step/_8step/v2` 或原版基座标记 `minimax_h3_fl2va/ref2va/hybrid`），防止误加载错误权重（防呆）。关掉可强制加载任意 H3 权重。**English**: When on, validates filenames against `model_type` (distill markers `fastvideo/fasth3/_4step/_8step/v2` or base markers `minimax_h3_fl2va/ref2va/hybrid`), preventing accidental wrong-weight loads. Turn off to force-load any H3 weight. |
 
 #### ② `BSAIFastH3NativeVSA` — 原生 VSA 稀疏注意力 / native sparse attention
 
@@ -89,7 +92,7 @@
 | `backend` | `auto` / `native` / `torch` | `auto` | **中文**：`auto` 有 `comfy_kitchen.sol_attn` 内核用 native（Blackwell 最快），否则 torch；`native` 强制内核；`torch` 纯 PyTorch 块稀疏（40 系/无内核可用）。**English**: `auto` uses the native Blackwell kernel when available, else torch; `native` forces the kernel; `torch` uses pure PyTorch block-sparse (RTX 40-series / no kernel). |
 | `strict_native_backend` | `True` / `False` | `True` | **中文**：`True` 时 native 不可用直接报错；`False` 自动降级 torch 稀疏。**English**: `True` fails hard if native is unavailable; `False` auto-falls-back to torch sparse. |
 | `verbose` | `True` / `False` | `True` | **中文**：打印每次 VSA 命中的形状与后端信息（排障用）。**English**: Log each VSA hit's shapes and backend (for debugging). |
-| `recipe` | `4-step Preview (...)` / `8-step V2 (...)` / `custom` | `4-step Preview (...)` | **中文**：官方配方一键预设。4 步 = keep 10%（默认，无需补丁）；**8 步 V2 = keep 20% 并自动把模型 `ModelSamplingAV` 视频 shift 补丁为 10/3**（V2 视频 shift 不是 12！），Timesteps/采样器共用该模型即全链路一致；custom = 完全手动（可配合原生 `MiniMaxH3SigmaShift` 使用）。**English**: One-click official recipe. 4-step = keep 10% (default, no patch); **8-Step V2 = keep 20% + auto-patch the model's `ModelSamplingAV` video shift to 10/3** (V2's video shift is NOT 12); custom = fully manual (pair with native `MiniMaxH3SigmaShift`). |
+| `recipe` | `4-step Preview (...)` / `8-step V2 (...)` / `3-step TaoMate (...)` / `custom` | `4-step Preview (...)` | **中文**：官方配方一键预设。4 步 = keep 10%（默认，无需补丁）；**8 步 V2 = keep 20% 并自动把模型 `ModelSamplingAV` 视频 shift 补丁为 10/3**（V2 视频 shift 不是 12！）；**3 步 TaoMate = keep 100%（Dense 透传，原版 H3 无稀疏训练）**；custom = 完全手动（可配合原生 `MiniMaxH3SigmaShift` 使用）。**English**: One-click official recipe. 4-step = keep 10% (default, no patch); **8-Step V2 = keep 20% + auto-patch the model's `ModelSamplingAV` video shift to 10/3** (V2's video shift is NOT 12); **3-step TaoMate = keep 100% (Dense pass-through — the base H3 has no sparse training)**; custom = fully manual (pair with native `MiniMaxH3SigmaShift`). |
 
 **`sink_conditioning` 选项详解 / sink_conditioning options (选择指南 / how to choose):**
 
@@ -106,7 +109,7 @@
 | 参数 Parameter | 选项 Options | 默认 Default | 说明 / Explanation |
 |---|---|---|---|
 | `ladder` | 字符串（逗号分隔 0–1000 timestep）/ comma-separated timesteps | `999,749,500,250` | **中文**：FastH3 显式训练的 4 步阶梯（v0.2 官方卡片要求用训练跳点采样，勿用均匀网格）。输出 SIGMAS 末尾自动补 0。`recipe=custom` 时生效。**English**: The explicitly trained 4-step ladder (official card requires training jump points, not a uniform grid). Output SIGMAS auto-appends 0. Active when `recipe=custom`. |
-| `recipe` | `4-step Preview (...)` / `8-step V2 (...)` / `custom` | `4-step Preview (...)` | **中文**：一键预设官方阶梯。8 步 V2 = `999,874,749,624,500,375,250,125`（9 个 sigma 点 = 8 次前向），需模型 shift 10/3（VSA 节点 recipe 已自动补丁）；custom = 用上方 ladder。**English**: One-click official ladder. 8-Step V2 = `999,874,749,624,500,375,250,125` (9 sigma points = 8 forwards), requires model shift 10/3 (auto-patched by the VSA node recipe); custom = use `ladder` above. |
+| `recipe` | `4-step Preview (...)` / `8-step V2 (...)` / `3-step TaoMate (...)` / `custom` | `4-step Preview (...)` | **中文**：一键预设官方阶梯。8 步 V2 = `999,874,749,624,500,375,250,125`（9 个 sigma 点 = 8 次前向），需模型 shift 10/3（VSA 节点 recipe 已自动补丁）；3 步 TaoMate = `999,750,500`（4 个 sigma 点 = 3 次前向，shift 12/3）；custom = 用上方 ladder。**English**: One-click official ladder. 8-Step V2 = `999,874,749,624,500,375,250,125` (9 sigma points = 8 forwards), requires model shift 10/3 (auto-patched by the VSA node recipe); 3-step TaoMate = `999,750,500` (4 sigma points = 3 forwards, shift 12/3); custom = use `ladder` above. |
 
 #### ④ `BSAIFastH3EulerSampler` — Euler 采样器 / Euler sampler
 
@@ -115,7 +118,7 @@
 | `shift_video` | `0.01`–`100.0` | `12.0` | **中文**：视频流 flow shift（FastH3 官方 shift-12 整流调度）。**English**: Video flow shift (official shift-12 rectified schedule). |
 | `shift_audio` | `0.01`–`100.0` | `3.0` | **中文**：音频流 flow shift（官方 shift-3）。**English**: Audio flow shift (official shift-3). |
 | `schedule_mode` | `auto` / `native` / `legacy_dual` | `auto` | **中文**：`auto` 检测 ComfyUI 0.31+ 原生 `ModelSamplingAV`——有则单调度 Euler，否则自动切音视频双调度；`native` 强制单调度；`legacy_dual` 强制双调度。**English**: `auto` detects native `ModelSamplingAV` (single schedule) vs legacy (dual schedule); `native` forces single; `legacy_dual` forces dual. |
-| `recipe` | `4-step Preview (...)` / `8-step V2 (...)` / `custom` | `4-step Preview (...)` | **中文**：一键预设 shift。4 步 = 视频 12 / 音频 3；**8 步 V2 = 视频 10 / 音频 3**（注意 V2 视频 shift 不是 12！）；custom = 用上方 shift 参数。**English**: One-click shift preset. 4-step = video 12 / audio 3; **8-Step V2 = video 10 / audio 3** (V2's video shift is NOT 12!); custom = use the shift params above. |
+| `recipe` | `4-step Preview (...)` / `8-step V2 (...)` / `3-step TaoMate (...)` / `custom` | `4-step Preview (...)` | **中文**：一键预设 shift。4 步 = 视频 12 / 音频 3；**8 步 V2 = 视频 10 / 音频 3**（注意 V2 视频 shift 不是 12！）；3 步 TaoMate = 视频 12 / 音频 3；custom = 用上方 shift 参数。**English**: One-click shift preset. 4-step = video 12 / audio 3; **8-Step V2 = video 10 / audio 3** (V2's video shift is NOT 12!); 3-step TaoMate = video 12 / audio 3; custom = use the shift params above. |
 
 #### ⑤ `BSAIFastH3VSAStats` — 命中统计（只读）/ VSA hit stats (read-only)
 
@@ -157,11 +160,14 @@ python -m pip install comfy_kitchen
 | `qwen3vl_32b_minimax_h3_nvfp4_awq.safetensors` | `models/text_encoders` | — |
 | `minimax_h3_video_vae_int8_convrot.safetensors` | `models/vae` | ~3.17 GB |
 | `minimax_h3_audio_vae_fp32.safetensors` | `models/vae` | — |
+| `TaoMate-H3-step3000-ComfyUI-BF16.safetensors`（3 步 LoRA，**recipe 3-step TaoMate 必装** / required for the 3-step recipe） | `models/loras` | ~1.16 GB |
+| `minimax_h3_fl2va_pruned_int8_convrot.safetensors`（原版 H3 基座，**TaoMate 3 步配方底座** / base for the TaoMate 3-step recipe） | `models/diffusion_models` | ~19.53 GB |
 
 来源 / Sources：
 - FastH3 v1 模型卡 / Model card：<https://huggingface.co/FastVideo/FastVideo-FastH3-4-step-Preview-v1-VSA-DataFree>
 - FastH3 v0.2 模型卡 / v0.2 card：<https://huggingface.co/FastVideo/FastVideo-Minimax-FastH3-Preview-v0.2>
 - FastH3 8步 V2 模型卡 / 8-Step V2 card：<https://huggingface.co/FastVideo/FastVideo-FastH3-8-Step-V2>
+- TaoMate-H3 官方仓库 / official repo：<https://huggingface.co/TaoLiveAIGC/TaoMate-H3>（阿里淘天 TaoLive AIGC；3 步蒸馏 LoRA，rank 128 / alpha 128，step-3000 generator EMA；官方目标是原版 MiniMax-H3）
 - KJ 文件仓库 / File repo：<https://huggingface.co/Kijai/MiniMax-H3-experimental/tree/main>
 - 国内镜像 / China mirror：`set HF_ENDPOINT=https://hf-mirror.com`（BSAI Pro 启动脚本已默认设置）
 
@@ -238,6 +244,17 @@ python -m pip install comfy_kitchen
 
 **FL2VA / Ref2VA 蒸馏版尚未发布**：据官方消息，“Omni Ref 是下一个焦点”，发布后本插件跟进。
 
+### 4.3 FastVideo / FastH3 / 生态升级跟踪（2026-09-18 更新） / Upgrade tracking
+
+以下信息来源于 FastVideo 官方 HF 组织页、各模型卡、GitHub NEWS 与 B 站/头条生态实测（BV1mseM6oEQT 等），本插件已据此完成代码升级：
+
+| 事件 Event | 时间 Date | 内容与对本插件的影响 Impact |
+|---|---|---|
+| **TaoMate-H3 3 步 LoRA 发布** | **2026-09-中旬** | 阿里淘天 TaoLive AIGC 发布 `TaoMate-H3`：3 步蒸馏 LoRA（rank 128/alpha 128，step-3000 generator EMA），官方目标是**原版 MiniMax-H3**（FL2VA 分支），**无需 FastH3 蒸馏权重**。ComfyUI 兼容版 `TaoMate-H3-step3000-ComfyUI-BF16/FP32.safetensors` 已由社区转换。实测：**Euler 采样器 + CFG 1.2~1.5** 效果最佳、LoRA 强度勿过高（1.0 会糊脸）；**勿叠加旧缓存插件**（3 步已极少步数，额外缓存收益有限且可能破坏训练语义）。本插件新增 `recipe="3-step TaoMate"`（阶梯 `999,750,500`、shift 12/3、keep 100% Dense），Loader 新增 `model_type=base_h3_fl2va` 支持原版底座。 |
+| **nonchucks / VC-Attention（免训练加速注意力）** | **2026-09-16** | Nunchux AI 发布 VC-Attention / Nunchux Attention：VSMOOTH（压误差）+ XCAST-FP8（优化 softmax），B200 比 BF16 flash attention 快 ~1.91×、B300 ~1.83×，画质比 SAGE Attention 2 更接近原版。**当前无公开 kernel（No public kernel），为商业产品预告**，ComfyUI 尚未内置；本插件无需改动，待官方/ComfyUI 内置后工作流经 `ModelAttentionBackend` 自动受益。 |
+| **ComfyUI 0.36.0 MiniMax-H3 优化** | **2026-09-16** | ComfyUI 0.36.0 加入 MiniMax H3 VAE 优化、视频拼接/Flux 视频编辑/通用循环等节点；FastVideo FastH3 8 步蒸馏（文生/图生+音频）原生模板。本机 ComfyUI 已升级 0.36.0；官方 V2 工作流验证：**视频 VAE 必须用 int8 版**（fp16 版在 0.36.0 decode 雪花+OOM，根因已定位）。 |
+| **FastH3 V2 + TaoMate 叠加实测** | 2026-09-18 | 社区实测将 TaoMate 3 步 LoRA 叠加到 FastH3 V2 上可“3 步极速 + 视频放大”（非官方组合，官方目标是原版 H3）；有参考生视频（多参考图）版本可用但需调参。本插件 3-step TaoMate 配方优先走官方组合（原版 H3 + LoRA），如需叠加 V2 用 `recipe=custom` 手动管理。 |
+
 ---
 
 ## 5. 示例工作流 1：文生视频+音频（T2VA）/ Workflow 1: Text-to-Video+Audio
@@ -270,6 +287,8 @@ SamplerCustomAdvanced ─┬─► VAEDecode ─► CreateVideo(24fps) ─► Sa
 - 随机种子 / Seed：`RandomNoise.noise_seed`。
 
 **8 步 V2 变体 / 8-step V2 variant**：`example_workflows/BSAI_FastH3_T2VA_8step_V2.json`。已内置 8 步阶梯 `999,874,749,624,500,375,250,125`、shift 10/3、VSA keep 20%；**官方权重 `fastvideo_fasth3_8step_v2_pruned_int8_convrot.safetensors` 已由 Comfy-Org 于 2026-09-15 发布（FastVideo/FastVideo-FastH3-Comfy），本机已验证正常出片**（视频 VAE 请用 `minimax_h3_video_vae_int8_convrot.safetensors`——fp16 版在本机 ComfyUI 0.36.0 decode 异常/雪花）。
+
+**3 步 TaoMate 变体 / 3-step TaoMate variant**：`example_workflows/BSAI_FastH3_T2VA_3step_TaoMate.json`。最快路线：原版 H3 底座（`minimax_h3_fl2va_pruned_int8_convrot.safetensors`，Loader `model_type=base_h3_fl2va`）+ `TaoMate-H3-step3000-ComfyUI-*.safetensors` LoRA（`LoraLoaderModelOnly`，strength 1.0）+ recipe `3-step TaoMate`（阶梯 `999,750,500`、shift 12/3、keep 100% Dense）。**注意视频 VAE 用 int8 版**（示例已内置；fp16 版雪花）。CFG 建议 1.2~1.5（用 `CFGGuider` 替换 `BasicGuider` 可调）。
 
 ---
 
@@ -395,6 +414,7 @@ FastH3 4步轨 ┼─► FlashVSR 时序修复轨（默认看这条：scale=2 �
 - native 后端：`comfy_kitchen.sol_attn` 在 GPU（bf16, head_dim 128, 8192 tokens）实测输出正确。
 - 升级验证（2026-09-16）/ upgrade verification：以本机 ComfyUI `ModelSamplingAV` 实测 8 步 V2 阶梯 sigmas = `[0.9999,0.9858,0.9676,0.9432,0.9091,0.8571,0.7692,0.5882,0.0]`（9 点 = 8 次前向），与官方契约一致；recipe 路线、加载器标记（`_8step`/`v2`）与旧工作流兼容性均已验证。
 - **V2 端到端实跑（2026-09-18）**：官方权重 `fastvideo_fasth3_8step_v2_pruned_int8_convrot.safetensors`（ModelScope sha256 校验一致）+ 官方采样链（MiniMaxH3SigmaShift 10/3 → comfy kitchen → BlockSparseAttention vsa keep10 0.2-1.0 → simple/8 → res_multistep）+ `minimax_h3_video_vae_int8_convrot`，864x480x124 帧：**画面正常、音频无电流声**。⚠️ fp16 视频 VAE 在本机 ComfyUI 0.36.0 decode 异常/雪花（官方模板默认 fp16，BSAI 工作流已改用 int8 版）。End-to-end V2 render verified (official weight + official sampling chain + int8 VAE); fp16 video VAE decode is broken in ComfyUI 0.36.0, so the BSAI workflow uses the int8 VAE.
+- **3 步 TaoMate 配方升级（2026-09-18）**：新增 `RECIPE_STEP3_TAOMATE`（阶梯 `999,750,500`、shift 12/3、keep 100% Dense），Loader 新增 `model_type`（`auto`/`fast_h3_distill`/`base_h3_fl2va`）支持原版 `minimax_h3_fl2va*` 底座；新增示例工作流 `BSAI_FastH3_T2VA_3step_TaoMate.json`（原版 H3 pruned int8 + TaoMate BF16 LoRA + int8 视频 VAE）。参数来自用户第 065 期已验证的 TaoMate 工作流（Euler + 3 步 + shift 12/3），社区实测 CFG 1.2~1.5 更佳。`py_compile` 通过、工作流 JSON 结构校验通过。
 - **V2 权重转换验证（2026-09-16）**：`BSAI_minimax_h3_fastvideo_8step_v2_int8_convrot.safetensors`（35.97GB / 1185 键，BSAI 前缀命名规范）四节验证套件全绿：
   1. 结构重读：I8 300 + U8 300（comfy_quant，全部 int8_tensorwise+convrot，gs 256/64）+ BF16 272 + F32 313，键集与 v1 完全同构（唯一差异 time_embedder MLP ↔ adaln_t_table 曲线）；
   2. ComfyUI `model_detection`：识别 MiniMaxH3，gate_compress=True、time_embed_dim=2688、timestep_input_dim=256、rope_inv_freq_len=16；
