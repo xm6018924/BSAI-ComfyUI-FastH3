@@ -266,10 +266,10 @@ def _torch_vsa(qs, ks, vs, scale, keep_frac, video_start, video_end,
     # gate rows must match the tiled video span; a mismatch (observed when the
     # gate tensor leaks a stale row count across blocks) degrades gracefully to
     # the sparse path without the compression branch.
+    npt = (cond_end + BLOCK - 1) // BLOCK
+    cpad = npt * BLOCK - cond_end
     gate_ok = gate is not None and gate.shape[1] == (npt + nvb) * BLOCK
     if gate_ok:
-        npt = (cond_end + BLOCK - 1) // BLOCK
-        cpad = npt * BLOCK - cond_end
         cond_q = qs[:, :cond_end]
         if cpad:
             cond_q = F.pad(cond_q, (0, 0, 0, 0, 0, cpad, 0, 0))

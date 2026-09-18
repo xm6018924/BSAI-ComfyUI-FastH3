@@ -31,7 +31,7 @@
         "Node name for S&R": "BSAIFastH3Loader"
       },
       "widgets_values": [
-        "BSAI_minimax_h3_fastvideo_8step_v2_int8_convrot.safetensors",
+        "fastvideo_fasth3_8step_v2_pruned_int8_convrot.safetensors",
         "default",
         true
       ],

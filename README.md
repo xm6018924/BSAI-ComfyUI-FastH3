@@ -152,7 +152,8 @@ python -m pip install comfy_kitchen
 | 文件 File | 放置目录 Folder | 大小 Size |
 |---|---|---|
 | `minimax_h3_fastvideo_vsa_datafree_1300step_4step_int8_convrot.safetensors` | `models/diffusion_models` | ~22.9 GB |
-| `BSAI_minimax_h3_fastvideo_8step_v2_int8_convrot.safetensors`（自转 / self-converted，见 §4.2） | `models/diffusion_models` | ~35.97 GB |
+| `fastvideo_fasth3_8step_v2_pruned_int8_convrot.safetensors`（**官方 Comfy-Org repack，推荐 / official, recommended**） | `models/diffusion_models` | ~20.61 GB |
+| `BSAI_minimax_h3_fastvideo_8step_v2_int8_convrot.safetensors`（自转 / self-converted，**雪花根因已定位，仅作对照 / root-caused, reference only**，见 §4.2） | `models/diffusion_models` | ~35.97 GB |
 | `qwen3vl_32b_minimax_h3_nvfp4_awq.safetensors` | `models/text_encoders` | — |
 | `minimax_h3_video_vae_int8_convrot.safetensors` | `models/vae` | ~3.17 GB |
 | `minimax_h3_audio_vae_fp32.safetensors` | `models/vae` | — |
@@ -268,7 +269,7 @@ SamplerCustomAdvanced ─┬─► VAEDecode ─► CreateVideo(24fps) ─► Sa
 - 分辨率 / Resolution：改 `width/height`（32 的倍数；0.4MP 起步，显存不够先降）。
 - 随机种子 / Seed：`RandomNoise.noise_seed`。
 
-**8 步 V2 变体 / 8-step V2 variant**：`example_workflows/BSAI_FastH3_T2VA_8step_V2.json`。已内置 8 步阶梯 `999,874,749,624,500,375,250,125`、shift 10/3、VSA keep 20%；等待 8步 V2 的 ComfyUI 单文件转换版权重即可一键出片。
+**8 步 V2 变体 / 8-step V2 variant**：`example_workflows/BSAI_FastH3_T2VA_8step_V2.json`。已内置 8 步阶梯 `999,874,749,624,500,375,250,125`、shift 10/3、VSA keep 20%；**官方权重 `fastvideo_fasth3_8step_v2_pruned_int8_convrot.safetensors` 已由 Comfy-Org 于 2026-09-15 发布（FastVideo/FastVideo-FastH3-Comfy），本机已验证正常出片**（视频 VAE 请用 `minimax_h3_video_vae_int8_convrot.safetensors`——fp16 版在本机 ComfyUI 0.36.0 decode 异常/雪花）。
 
 ---
 
@@ -393,14 +394,14 @@ FastH3 4步轨 ┼─► FlashVSR 时序修复轨（默认看这条：scale=2 �
 - 单元测试通过 / unit tests pass：时间步 `[999,749,500,250] → sigmas [0.9999,0.9728,0.9231,0.8,0.0]`；torch 稀疏注意力条件行与 Dense 全等、形状/有限性正确；BTHD/BHND 两种形态与短序列降级 Dense 均通过。
 - native 后端：`comfy_kitchen.sol_attn` 在 GPU（bf16, head_dim 128, 8192 tokens）实测输出正确。
 - 升级验证（2026-09-16）/ upgrade verification：以本机 ComfyUI `ModelSamplingAV` 实测 8 步 V2 阶梯 sigmas = `[0.9999,0.9858,0.9676,0.9432,0.9091,0.8571,0.7692,0.5882,0.0]`（9 点 = 8 次前向），与官方契约一致；recipe 路线、加载器标记（`_8step`/`v2`）与旧工作流兼容性均已验证。
-- ⚠️ 因 FastH3 蒸馏权重（~22.9GB）未完成下载，尚未做端到端出图验证；权重补齐后按示例工作流一键出片即可。End-to-end render not yet verified because the ~22.9GB weight was still downloading; once in place, run the example workflows directly.
+- **V2 端到端实跑（2026-09-18）**：官方权重 `fastvideo_fasth3_8step_v2_pruned_int8_convrot.safetensors`（ModelScope sha256 校验一致）+ 官方采样链（MiniMaxH3SigmaShift 10/3 → comfy kitchen → BlockSparseAttention vsa keep10 0.2-1.0 → simple/8 → res_multistep）+ `minimax_h3_video_vae_int8_convrot`，864x480x124 帧：**画面正常、音频无电流声**。⚠️ fp16 视频 VAE 在本机 ComfyUI 0.36.0 decode 异常/雪花（官方模板默认 fp16，BSAI 工作流已改用 int8 版）。End-to-end V2 render verified (official weight + official sampling chain + int8 VAE); fp16 video VAE decode is broken in ComfyUI 0.36.0, so the BSAI workflow uses the int8 VAE.
 - **V2 权重转换验证（2026-09-16）**：`BSAI_minimax_h3_fastvideo_8step_v2_int8_convrot.safetensors`（35.97GB / 1185 键，BSAI 前缀命名规范）四节验证套件全绿：
   1. 结构重读：I8 300 + U8 300（comfy_quant，全部 int8_tensorwise+convrot，gs 256/64）+ BF16 272 + F32 313，键集与 v1 完全同构（唯一差异 time_embedder MLP ↔ adaln_t_table 曲线）；
   2. ComfyUI `model_detection`：识别 MiniMaxH3，gate_compress=True、time_embed_dim=2688、timestep_input_dim=256、rope_inv_freq_len=16；
   3. 真实加载（模拟官方 loader 全流程，mmap 零拷贝，~1s）：无 missing、无 unexpected、0 left-over；
   4. GPU 单块量化前向（DiTBlock + mixed_precision_ops，含 convrot gs=256 与 adaln gs=64 两层路径 + split-half RoPE + gate_compress）：无 NaN，输出形状/量级正常。
   - 转换中修复的缺陷：量化三元组键名（`.weight.weight_scale` → `.weight_scale`）、头部写入丢失、v1 基线规格核对、量化钩子依赖 `mixed_precision_ops`（非 manual_cast）。
-  - 端到端出图仍待首次实跑；权重文件、加载器、8 步 recipe 与示例工作流 `BSAI_FastH3_T2VA_8step_V2.json` 已就位。
+  - 端到端出图已实跑通过（2026-09-18，官方权重 + 官方采样链 vsa keep10 + int8 VAE，864x480x124 帧，画面正常、音频无电流声）；雪花根因=自转权重 time-embedding 结构（MLP 2688 维）与官方 repack（adaln_t_table 曲线表 8 维）不一致。
 
 ---
 
