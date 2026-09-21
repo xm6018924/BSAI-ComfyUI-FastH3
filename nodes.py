@@ -213,11 +213,9 @@ class BSAIFastH3NativeVSA:
             "model": ("MODEL",),
             "enabled": ("BOOLEAN", {
                 "default": True,
-                "forceInput": True,
                 "tooltip": "关闭时透传模型，不安装 VSA 补丁。可接 BSAI H3 MotionFix.vsa_enabled 自动驱动。"}),
             "video_keep_percent": ("FLOAT", {
                 "default": 10.0, "min": 0.5, "max": 100.0, "step": 0.5,
-                "forceInput": True,
                 "tooltip": "视频 token 中保留精确注意力的 tile 百分比。官方：4 步 v1/v0.2 约 10%"
                            "（90% 稀疏）；8 步 V2 约 20%（80% 稀疏）。越小越省显存/越快，"
                            "越低细节损失越大。可接 BSAI H3 MotionFix.video_keep_percent 自动驱动。"}),
@@ -295,7 +293,6 @@ class BSAIFastH3Timesteps:
             "model": ("MODEL",),
             "ladder": ("STRING", {
                 "default": "999,749,500,250", "multiline": False,
-                "forceInput": True,
                 "tooltip": "显式训练的阶梯（官方要求用训练跳点采样，勿用均匀网格）。"
                            "4 步 v1/v0.2: 999,749,500,250；8 步 V2: "
                            "999,874,749,624,500,375,250,125；3 步 TaoMate: 999,750,500。"
