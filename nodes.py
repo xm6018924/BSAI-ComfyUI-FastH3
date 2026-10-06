@@ -38,6 +38,24 @@ import comfy.sd
 import comfy.utils
 import folder_paths
 
+# ==== BSAI 插件协同 SDK：加载即自动注册（失败不拖垮插件） ====
+try:
+    import sys as _bsai_sys, os as _bsai_os
+    _BSAI_ORCH_DIR = _bsai_os.path.join(
+        _bsai_os.path.dirname(_bsai_os.path.abspath(__file__)),
+        "..", "BSAI-ComfyUI-Orchestrator")
+    if _bsai_os.path.isdir(_BSAI_ORCH_DIR) and _BSAI_ORCH_DIR not in _bsai_sys.path:
+        _bsai_sys.path.insert(0, _BSAI_ORCH_DIR)
+    from bsai_orch_client import BSAIOrch  # noqa: E402
+    BSAIOrch.register(
+        name="BSAI-FastH3",
+        kind="sampling",
+        hardware=["cuda"],
+    )
+except Exception as _bsai_e:  # 注册失败不得拖垮插件
+    print(f"[BSAI SDK] BSAI-FastH3 注册失败(忽略): {_bsai_e}")
+# ==== BSAI SDK 块结束 ====
+
 from . import fast_h3_vsa as _vsa
 
 # 兼容两种 Python 包导入形态（直接 import vs 以 custom_nodes 包导入）
@@ -404,6 +422,16 @@ def _fast_h3_euler(model, x, sigmas, extra_args=None, callback=None, disable=Non
     s_in = x.new_ones([x.shape[0]])
     _rms = lambda t: float(t.float().pow(2).mean().sqrt())
 
+    # ---- BSAI 协同：GPU 主采样租约（短任务 watchdog=False；失败不阻断采样） ----
+    _bsai_alloc = None
+    try:
+        _bsai_alloc = BSAIOrch.allocate("sampling", requester="8191", watchdog=False)
+        if not _bsai_alloc.ok:
+            print(f"[BSAI FastH3] SDK 未取得 gpu1_sampling 租约({_bsai_alloc.reason})，仍按原逻辑采样", flush=True)
+    except Exception as _bsai_ae:
+        print(f"[BSAI FastH3] SDK allocate 异常(忽略): {_bsai_ae}", flush=True)
+        _bsai_alloc = None
+
     if schedule_mode == "native" or (schedule_mode == "auto" and _native_av_schedule(model)):
         print(f"[BSAI FastH3 Euler] native ModelSamplingAV -> 单调度 Euler  "
               f"sigmas={[round(float(s), 4) for s in sigmas]}  x={tuple(x.shape)}", flush=True)
@@ -418,6 +446,11 @@ def _fast_h3_euler(model, x, sigmas, extra_args=None, callback=None, disable=Non
             if callback is not None:
                 callback({"i": i, "denoised": denoised, "x": x,
                           "sigma": sigmas[i], "sigma_hat": sigmas[i]})
+        if _bsai_alloc is not None:
+            try:
+                _bsai_alloc.release()
+            except Exception:
+                pass
         return x
 
     # 旧版 ComfyUI：视频/音频各自 flow 调度（video shift 12 / audio shift 3），分别推进
@@ -446,6 +479,11 @@ def _fast_h3_euler(model, x, sigmas, extra_args=None, callback=None, disable=Non
         if callback is not None:
             callback({"i": i, "denoised": denoised, "x": x,
                       "sigma": sigmas[i], "sigma_hat": sigmas[i]})
+    if _bsai_alloc is not None:
+        try:
+            _bsai_alloc.release()
+        except Exception:
+            pass
     return x
 
 
