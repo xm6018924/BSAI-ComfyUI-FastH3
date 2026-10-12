@@ -12,6 +12,20 @@
 可选依赖：comfy_kitchen（含 sol_attn 内核时启用 native VSA，否则自动用 torch 稀疏）。
 """
 
+# === BSAI H3 VAE 全量加载统一补丁（宿主 BSAI-ComfyUI-Sol-H3）===
+# 修复 H3 AudioVAE/VideoVAE 走 DynamicVRAM 权重量流导致的解码极慢。
+# try/except 容错，宿主缺失则 no-op。
+try:
+    import sys as _sys, os as _os
+    _SOL = _os.path.join(_os.path.dirname(_os.path.abspath(__file__)),
+                         "..", "BSAI-ComfyUI-Sol-H3")
+    if _SOL not in _sys.path:
+        _sys.path.insert(0, _SOL)
+    import bsai_h3_vae_full as _h3v
+    _h3v.apply_global_patch("BSAI-ComfyUI-FastH3")
+except Exception:
+    pass
+
 from .nodes import NODE_CLASS_MAPPINGS, NODE_DISPLAY_NAME_MAPPINGS
 
 __all__ = ["NODE_CLASS_MAPPINGS", "NODE_DISPLAY_NAME_MAPPINGS"]
