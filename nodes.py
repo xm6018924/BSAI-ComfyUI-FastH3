@@ -157,29 +157,30 @@ class BSAIFastH3Loader:
                              {"advanced": True}),
             "model_type": (["auto", "fast_h3_distill", "base_h3_fl2va"], {
                 "default": "auto",
-                "tooltip": "auto: 按文件名自动识别。fast_h3_distill: 仅接受 FastH3 蒸馏权重"
-                           "（fastvideo/fasth3/4step/8step/v2）。base_h3_fl2va: 接受原版 "
-                           "MiniMax-H3 基座（minimax_h3_fl2va/ref2va/hybrid，TaoMate-H3 "
-                           "3 步 LoRA 的官方底座）。"}),
+                "tooltip": "auto: auto-detect from the filename. fast_h3_distill: only accept FastH3 distilled weights "
+                           "(fastvideo/fasth3/4step/8step/v2). base_h3_fl2va: accept the original "
+                           "MiniMax-H3 base (minimax_h3_fl2va/ref2va/hybrid, the official base for the "
+                           "TaoMate-H3 3-step LoRA)."}),
             "strict_fast_h3_check": ("BOOLEAN", {
                 "default": True,
-                "label_on": "校验模型文件名",
-                "label_off": "允许任意 H3 权重",
-                "tooltip": "开启时按 model_type 校验：fast_h3_distill 仅接受文件名含 "
-                           "fastvideo/fasth3/_4step/_8step/v2 的蒸馏权重，避免误加载 50 步 "
-                           "基座模型；base_h3_fl2va 接受 minimax_h3_fl2va/ref2va/hybrid 原版基座"
-                           "（配 TaoMate-H3 3 步 LoRA 用）。"}),
+                "label_on": "Validate model filename",
+                "label_off": "Allow any H3 weights",
+                "tooltip": "When on, validates against model_type: fast_h3_distill only accepts distilled weights with "
+                           "fastvideo/fasth3/_4step/_8step/v2 in the filename (avoids loading the 50-step "
+                           "base model); base_h3_fl2va accepts minimax_h3_fl2va/ref2va/hybrid base "
+                           "(for the TaoMate-H3 3-step LoRA)."}),
         }}
 
     RETURN_TYPES = ("MODEL",)
     RETURN_NAMES = ("MODEL",)
     FUNCTION = "load_model"
     CATEGORY = "BSAI/FastH3"
-    DESCRIPTION = ("加载 FastVideo FastH3 蒸馏权重或原版 MiniMax-H3 基座。4 步 v1/v0.2"
-                   "（如 minimax_h3_fastvideo_vsa_datafree_1300step_4step_int8_convrot.safetensors）"
-                   "或 8 步 V2（如 minimax_h3_fastvideo_8step_v2_*.safetensors，2026-09-15 发布）；"
-                   "model_type=base_h3_fl2va 时加载原版 minimax_h3_fl2va_*（配 TaoMate-H3 "
-                   "3 步 LoRA，recipe 选 3-step TaoMate）。文件放入 ComfyUI/models/diffusion_models。")
+    DESCRIPTION = ("Load FastVideo FastH3 distilled weights or the original MiniMax-H3 base. "
+                   "4-step v1/v0.2 "
+                   "(e.g. minimax_h3_fastvideo_vsa_datafree_1300step_4step_int8_convrot.safetensors) "
+                   "or 8-step V2 (e.g. minimax_h3_fastvideo_8step_v2_*.safetensors, released 2026-09-15); "
+                   "with model_type=base_h3_fl2va it loads the original minimax_h3_fl2va_* (pair with the "
+                   "TaoMate-H3 3-step LoRA, recipe = 3-step TaoMate). Put files in ComfyUI/models/diffusion_models.")
 
     def load_model(self, model, weight_dtype="default", model_type="auto",
                    strict_fast_h3_check=True):
@@ -187,21 +188,21 @@ class BSAIFastH3Loader:
             if model_type == "base_h3_fl2va":
                 if not _is_base_h3_filename(model):
                     raise ValueError(
-                        f"[BSAI FastH3] {model} 文件名不含原版 H3 基座标记"
-                        "（minimax_h3_fl2va/ref2va/hybrid）。TaoMate 配方需要原版基座；"
-                        "如需强行加载请关闭 strict_fast_h3_check 或改 model_type=auto。")
+                        f"[BSAI FastH3] {model} filename lacks the original H3 base marker "
+                        "(minimax_h3_fl2va/ref2va/hybrid). The TaoMate recipe needs the original base; "
+                        "to force-load anyway, turn off strict_fast_h3_check or set model_type=auto.")
             elif model_type == "fast_h3_distill":
                 if not _is_fast_h3_filename(model):
                     raise ValueError(
-                        f"[BSAI FastH3] {model} 文件名不含 FastH3/蒸馏标记"
-                        "（fastvideo/fasth3/_4step/_8step/v2）。FastH3 使用蒸馏权重；"
-                        "如需强行加载请关闭 strict_fast_h3_check。")
+                        f"[BSAI FastH3] {model} filename lacks the FastH3/distilled marker "
+                        "(fastvideo/fasth3/_4step/_8step/v2). FastH3 uses distilled weights; "
+                        "to force-load anyway, turn off strict_fast_h3_check.")
             elif not (_is_fast_h3_filename(model) or _is_base_h3_filename(model)):
                 raise ValueError(
-                    f"[BSAI FastH3] {model} 文件名既不含 FastH3/蒸馏标记"
-                    "（fastvideo/fasth3/_4step/_8step/v2）也不含原版 H3 基座标记"
-                    "（minimax_h3_fl2va/ref2va/hybrid）。如需强行加载请关闭 "
-                    "strict_fast_h3_check。")
+                    f"[BSAI FastH3] {model} filename has neither the FastH3/distilled marker "
+                    "(fastvideo/fasth3/_4step/_8step/v2) nor the original H3 base marker "
+                    "(minimax_h3_fl2va/ref2va/hybrid). To force-load anyway, turn off "
+                    "strict_fast_h3_check.")
         model_options = {}
         if weight_dtype == "fp8_e4m3fn":
             model_options["dtype"] = torch.float8_e4m3fn
@@ -231,52 +232,52 @@ class BSAIFastH3NativeVSA:
             "model": ("MODEL",),
             "enabled": ("BOOLEAN", {
                 "default": True,
-                "tooltip": "关闭时透传模型，不安装 VSA 补丁。可接 BSAI H3 MotionFix.vsa_enabled 自动驱动。"}),
+                "tooltip": "When off, passes the model through without installing the VSA patch. Can be driven by BSAI H3 MotionFix.vsa_enabled."}),
             "video_keep_percent": ("FLOAT", {
                 "default": 10.0, "min": 0.5, "max": 100.0, "step": 0.5,
-                "tooltip": "视频 token 中保留精确注意力的 tile 百分比。官方：4 步 v1/v0.2 约 10%"
-                           "（90% 稀疏）；8 步 V2 约 20%（80% 稀疏）。越小越省显存/越快，"
-                           "越低细节损失越大。可接 BSAI H3 MotionFix.video_keep_percent 自动驱动。"}),
+                "tooltip": "Percentage of video tokens that keep exact attention. Official: ~10% for 4-step v1/v0.2 "
+                           "(90% sparse); ~20% for 8-step V2 (80% sparse). Lower = less VRAM / faster, "
+                           "but more detail loss. Can be driven by BSAI H3 MotionFix.video_keep_percent."}),
             "start_percent": ("FLOAT", {
                 "default": 0.0, "min": 0.0, "max": 1.0, "step": 0.01,
-                "tooltip": "采样进度在此之前的步运行 Dense（高温预热）。"}),
+                "tooltip": "Steps before this sampling progress run Dense (high-temperature warmup)."}),
             "end_percent": ("FLOAT", {
                 "default": 1.0, "min": 0.0, "max": 1.0, "step": 0.01,
-                "tooltip": "采样进度在此之后运行 Dense。"}),
+                "tooltip": "Steps after this sampling progress run Dense."}),
             "min_tokens": ("INT", {
                 "default": 8192, "min": 0, "max": 1048576, "step": 256,
-                "tooltip": "序列长度小于此值的注意力调用保持 Dense（短序列稀疏无收益）。"}),
+                "tooltip": "Attention calls with sequence length below this stay Dense (sparsity has no benefit on short sequences)."}),
             "sink_conditioning": (["exact_kv", "exact_kv_and_rows", "off"], {
                 "default": "exact_kv",
-                "tooltip": "exact_kv: 所有视频 query 都精确看到 text/audio/ref 条件行（~3% 开销）。"
-                           "exact_kv_and_rows: 额外让条件 query 行也跑 Dense（音频更稳）。"
-                           "off: 只保留视频块 top-k，内存最省但条件对齐变弱。"}),
+                "tooltip": "exact_kv: all video queries see text/audio/ref conditioning rows exactly (~3% overhead). "
+                           "exact_kv_and_rows: additionally runs Dense on conditioning query rows (more stable audio). "
+                           "off: only video-block top-k is kept, lowest memory but weaker conditioning alignment."}),
             "backend": (["auto", "native", "torch"], {
                 "default": "auto",
-                "tooltip": "auto: 有 comfy_kitchen.sol_attn 用 native（Blackwell 内核），否则 torch。"
-                           "native: 强制 comfy_kitchen 内核。torch: 纯 PyTorch 块稀疏（40 系可用）。"}),
+                "tooltip": "auto: uses native (Blackwell kernel) when comfy_kitchen.sol_attn is available, else torch. "
+                           "native: force the comfy_kitchen kernel. torch: pure PyTorch block sparsity (works on 40-series)."}),
             "strict_native_backend": ("BOOLEAN", {
                 "default": True,
-                "tooltip": "True: native 不可用时直接报错。False: 自动降级到 torch 稀疏。"}),
+                "tooltip": "True: error out when native is unavailable. False: automatically fall back to torch sparsity."}),
             "verbose": ("BOOLEAN", {"default": True,
-                                    "tooltip": "打印每次 VSA 命中的形状与后端信息。"}),
+                                    "tooltip": "Print the shape and backend info of every VSA hit."}),
             "recipe": (list(RECIPES), {
                 "default": RECIPE_4STEP,
-                "tooltip": "官方配方一键预设。4-step: shift 12/3 + keep 10%。"
-                           "8-step V2: shift 10/3 + keep 20%（自动把模型 ModelSamplingAV "
-                           "视频 shift 补丁为 10）。3-step TaoMate: shift 12/3 + keep 100% "
-                           "（Dense；配原版 minimax_h3_fl2va 底座 + TaoMate LoRA，不稀疏）。"
-                           "custom: 完全手动（keep 与 shift 自行管理）。"}),
+                "tooltip": "Official one-click recipe presets. 4-step: shift 12/3 + keep 10%. "
+                           "8-step V2: shift 10/3 + keep 20% (auto-patches the model ModelSamplingAV "
+                           "video shift to 10). 3-step TaoMate: shift 12/3 + keep 100% "
+                           "(Dense; pairs with the original minimax_h3_fl2va base + TaoMate LoRA, not sparse). "
+                           "custom: fully manual (keep and shift managed by you)."}),
         }}
 
     RETURN_TYPES = ("MODEL",)
     RETURN_NAMES = ("MODEL",)
     FUNCTION = "apply_vsa"
     CATEGORY = "BSAI/FastH3"
-    DESCRIPTION = ("FastH3 原生 VSA（Video Sparse Attention）：按 64-token tile 打分，"
-                   "仅保留 top-k 视频块精确注意力，条件行保持精确。4 步配方省约 90% "
-                   "视频自注意力；8 步 V2 配方省约 80% 并自动修正 shift 10/3；"
-                   "3-step TaoMate 配方 keep 100%（Dense，不稀疏）。")
+    DESCRIPTION = ("FastH3 native VSA (Video Sparse Attention): scores 64-token tiles, "
+                   "keeps only top-k video blocks exact and conditioning rows exact. "
+                   "4-step recipe saves ~90% video self-attention; 8-step V2 saves ~80% "
+                   "and auto-fixes shift 10/3; 3-step TaoMate keeps 100% (Dense, not sparse).")
 
     def apply_vsa(self, model, enabled, video_keep_percent, start_percent, end_percent,
                   min_tokens, sink_conditioning, backend, strict_native_backend,
@@ -311,27 +312,27 @@ class BSAIFastH3Timesteps:
             "model": ("MODEL",),
             "ladder": ("STRING", {
                 "default": "999,749,500,250", "multiline": False,
-                "tooltip": "显式训练的阶梯（官方要求用训练跳点采样，勿用均匀网格）。"
-                           "4 步 v1/v0.2: 999,749,500,250；8 步 V2: "
-                           "999,874,749,624,500,375,250,125；3 步 TaoMate: 999,750,500。"
-                           "recipe=custom 时生效。"
-                           "可接 BSAI H3 MotionFix.ladder 自动驱动。"}),
+                "tooltip": "Explicitly trained ladder (the official requirement is to sample at training jump points, not a uniform grid). "
+                           "4-step v1/v0.2: 999,749,500,250; 8-step V2: "
+                           "999,874,749,624,500,375,250,125; 3-step TaoMate: 999,750,500. "
+                           "Effective when recipe=custom. "
+                           "Can be driven by BSAI H3 MotionFix.ladder."}),
             "recipe": (list(RECIPES), {
                 "default": RECIPE_4STEP,
-                "tooltip": "官方配方一键预设阶梯。8-step V2 使用训练阶梯 "
-                           "999,874,749,624,500,375,250,125（9 个 sigma 点 = 8 次前向）；"
-                           "3-step TaoMate 使用 999,750,500（4 个 sigma 点 = 3 次前向）。"
-                           "custom: 使用上方 ladder 字符串。"}),
+                "tooltip": "Official one-click recipe ladders. 8-step V2 uses the training ladder "
+                           "999,874,749,624,500,375,250,125 (9 sigma points = 8 forwards); "
+                           "3-step TaoMate uses 999,750,500 (4 sigma points = 3 forwards). "
+                           "custom: use the ladder string above."}),
         }}
 
     RETURN_TYPES = ("SIGMAS",)
     RETURN_NAMES = ("SIGMAS",)
     FUNCTION = "get_sigmas"
     CATEGORY = "BSAI/FastH3"
-    DESCRIPTION = ("把 FastH3 显式训练阶梯 timestep 换算成 SamplerCustomAdvanced 的 SIGMAS。"
-                   "4 步 [999,749,500,250]；8 步 V2 [999,874,749,624,500,375,250,125]；"
-                   "3 步 TaoMate [999,750,500]，末尾自动补 0（最终去噪）。"
-                   "8 步 V2 需模型 shift 10/3（由 VSA 节点 recipe 自动补丁）。")
+    DESCRIPTION = ("Convert FastH3 explicitly-trained ladder timesteps into SIGMAS for SamplerCustomAdvanced. "
+                   "4-step [999,749,500,250]; 8-step V2 [999,874,749,624,500,375,250,125]; "
+                   "3-step TaoMate [999,750,500]; 0 is appended at the end (final denoise). "
+                   "8-step V2 needs model shift 10/3 (auto-patched by the VSA node recipe).")
 
     def get_sigmas(self, model, ladder="999,749,500,250", recipe=RECIPE_4STEP):
         ladder = _recipe_ladder(recipe, ladder)
@@ -341,7 +342,7 @@ class BSAIFastH3Timesteps:
             if part:
                 values.append(float(part))
         if len(values) < 2:
-            raise ValueError(f"[BSAI FastH3] 阶梯至少需要 2 个 timestep: {ladder!r}")
+            raise ValueError(f"[BSAI FastH3] ladder needs at least 2 timesteps: {ladder!r}")
         ms = model.get_model_object("model_sampling")
         sig = []
         for t in values:
@@ -457,8 +458,8 @@ def _fast_h3_euler(model, x, sigmas, extra_args=None, callback=None, disable=Non
     shapes = _latent_shapes(model)
     if not shapes or len(shapes) < 2:
         raise RuntimeError(
-            "BSAI FastH3 Euler 需要 MiniMax-H3 视频+音频 latent "
-            "(EmptyMiniMaxH3LatentAV / MiniMaxH3ImageToVideo 输出)。")
+            "BSAI FastH3 Euler requires a MiniMax-H3 video+audio latent "
+            "(EmptyMiniMaxH3LatentAV / MiniMaxH3ImageToVideo output).")
     v_numel = math.prod(shapes[0][1:])
     a_numel = x.shape[-1] - v_numel
     print(f"[BSAI FastH3 Euler] legacy 双调度 (无 ModelSamplingAV)  "
@@ -493,31 +494,31 @@ class BSAIFastH3EulerSampler:
         return {"required": {
             "shift_video": ("FLOAT", {
                 "default": SHIFT_V, "min": 0.01, "max": 100.0, "step": 0.01,
-                "tooltip": "视频流 flow shift（FastH3 官方 shift-12 整流调度）。"}),
+                "tooltip": "Video-stream flow shift (FastH3 official shift-12 rectified schedule)."}),
             "shift_audio": ("FLOAT", {
                 "default": SHIFT_A, "min": 0.01, "max": 100.0, "step": 0.01,
-                "tooltip": "音频流 flow shift（FastH3 官方 shift-3）。"}),
+                "tooltip": "Audio-stream flow shift (FastH3 official shift-3)."}),
             "schedule_mode": (["auto", "native", "legacy_dual"], {
                 "default": "auto",
-                "tooltip": "auto: 检测 ModelSamplingAV，有则单调度 Euler，否则音视频双调度。"
-                           "native: 强制单调度。legacy_dual: 强制双调度。"}),
+                "tooltip": "auto: detect ModelSamplingAV; single-schedule Euler if present, otherwise dual audio/video schedule. "
+                           "native: force single schedule. legacy_dual: force dual schedule."}),
             "recipe": (list(RECIPES), {
                 "default": RECIPE_4STEP,
-                "tooltip": "官方配方一键预设 shift。4-step: 视频 12 / 音频 3；"
-                           "8-step V2: 视频 10 / 音频 3（注意 V2 视频 shift 不是 12！）；"
-                           "3-step TaoMate: 视频 12 / 音频 3。"
-                           "custom: 使用上方 shift 参数。"}),
+                "tooltip": "Official one-click recipe shift presets. 4-step: video 12 / audio 3; "
+                           "8-step V2: video 10 / audio 3 (note V2 video shift is NOT 12!); "
+                           "3-step TaoMate: video 12 / audio 3. "
+                           "custom: use the shift parameters above."}),
         }}
 
     RETURN_TYPES = ("SAMPLER",)
     RETURN_NAMES = ("SAMPLER",)
     FUNCTION = "get_sampler"
     CATEGORY = "BSAI/FastH3"
-    DESCRIPTION = ("FastH3 Euler 采样器（任意步数，按 SIGMAS 长度推进）。"
-                   "4 步配方 shift 12/3；8 步 V2 配方 shift 10/3；3 步 TaoMate 配方 shift 12/3。"
-                   "ComfyUI 0.31+ 原生 "
-                   "ModelSamplingAV 下按单调度推进；旧版自动按视频/音频双调度推进。"
-                   "接入 SamplerCustomAdvanced.sampler，与 FastH3 精确时间步搭配使用。")
+    DESCRIPTION = ("FastH3 Euler sampler (any step count, advances by SIGMAS length). "
+                   "4-step recipe shift 12/3; 8-step V2 shift 10/3; 3-step TaoMate shift 12/3. "
+                   "Under native ModelSamplingAV (ComfyUI 0.31+) it advances with a single schedule; "
+                   "on older builds it auto-advances with dual video/audio schedules. "
+                   "Plug into SamplerCustomAdvanced.sampler together with FastH3 Timesteps.")
 
     def get_sampler(self, shift_video=SHIFT_V, shift_audio=SHIFT_A, schedule_mode="auto",
                     recipe=RECIPE_4STEP):
@@ -548,8 +549,8 @@ class BSAIFastH3VSAStats:
     FUNCTION = "get_stats"
     CATEGORY = "BSAI/FastH3"
     OUTPUT_NODE = True
-    DESCRIPTION = ("只读查看 FastH3 VSA 的命中统计（sparse/dense/native/torch/errors）。"
-                   "sparse 计数 > 0 说明 VSA 真实参与了采样。")
+    DESCRIPTION = ("Read-only view of FastH3 VSA hit statistics (sparse/dense/native/torch/errors). "
+                   "A sparse count > 0 means VSA actually participated in sampling.")
 
     def get_stats(self, model):
         native_ok = _vsa._ck is not None and hasattr(_vsa._ck, "sol_attn")
@@ -580,11 +581,11 @@ NODE_CLASS_MAPPINGS = {
 }
 
 NODE_DISPLAY_NAME_MAPPINGS = {
-    "BSAIFastH3Loader": "BSAI FastH3 Loader · 专用加载器 (4步/8步V2 兼容)",
-    "BSAIFastH3NativeVSA": "BSAI FastH3 Native VSA · 原生稀疏注意力 (recipe)",
-    "BSAIFastH3Timesteps": "BSAI FastH3 Timesteps · 精确时间步 (4步/8步V2)",
-    "BSAIFastH3EulerSampler": "BSAI FastH3 Euler · 采样器 (4步/8步V2)",
-    "BSAIFastH3VSAStats": "BSAI FastH3 VSA Stats · 命中统计",
+    "BSAIFastH3Loader": "BSAI FastH3 Loader (4-step / 8-step V2)",
+    "BSAIFastH3NativeVSA": "BSAI FastH3 Native VSA (recipe)",
+    "BSAIFastH3Timesteps": "BSAI FastH3 Timesteps (4-step / 8-step V2)",
+    "BSAIFastH3EulerSampler": "BSAI FastH3 Euler Sampler (4-step / 8-step V2)",
+    "BSAIFastH3VSAStats": "BSAI FastH3 VSA Stats",
 }
 
 __all__ = ["NODE_CLASS_MAPPINGS", "NODE_DISPLAY_NAME_MAPPINGS"]
