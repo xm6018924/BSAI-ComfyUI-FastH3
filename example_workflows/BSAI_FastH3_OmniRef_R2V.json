@@ -1,0 +1,371 @@
+{
+  "last_node_id": 18,
+  "last_link_id": 25,
+  "nodes": [
+    {
+      "id": 1,
+      "type": "BSAIFastH3Loader",
+      "pos": [0, 0],
+      "size": [350, 130],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [{"name": "MODEL", "type": "MODEL", "links": [1, 3, 5, 25], "slot_index": 0}],
+      "properties": {"Node name for S&R": "BSAIFastH3Loader"},
+      "widgets_values": [
+        "H3/FastH3omini/fasth3_omniref_8step_pruned_int8_convrot.safetensors",
+        "default",
+        "omni_ref",
+        true
+      ],
+      "title": "BSAI① FastH3 OmniRef 专用加载器 (omni_ref)"
+    },
+    {
+      "id": 2,
+      "type": "BSAIFastH3NativeVSA",
+      "pos": [400, 0],
+      "size": [360, 240],
+      "flags": {},
+      "order": 1,
+      "mode": 0,
+      "inputs": [{"name": "model", "type": "MODEL", "link": 1}],
+      "outputs": [{"name": "MODEL", "type": "MODEL", "links": [2], "slot_index": 0}],
+      "properties": {"Node name for S&R": "BSAIFastH3NativeVSA"},
+      "widgets_values": [
+        true,
+        10.0,
+        0.0,
+        1.0,
+        8192,
+        "exact_kv",
+        "auto",
+        true,
+        true,
+        "8-step OmniRef (999,874,749,624,500,375,250,125 · shift 12/3 · keep 10%)"
+      ],
+      "title": "BSAI② Native VSA (OmniRef keep 10%, shift 12/3)"
+    },
+    {
+      "id": 3,
+      "type": "BSAIFastH3Timesteps",
+      "pos": [0, 180],
+      "size": [360, 110],
+      "flags": {},
+      "order": 2,
+      "mode": 0,
+      "inputs": [{"name": "model", "type": "MODEL", "link": 3}],
+      "outputs": [{"name": "SIGMAS", "type": "SIGMAS", "links": [7], "slot_index": 0}],
+      "properties": {"Node name for S&R": "BSAIFastH3Timesteps"},
+      "widgets_values": [
+        "999,874,749,624,500,375,250,125",
+        "8-step OmniRef (999,874,749,624,500,375,250,125 · shift 12/3 · keep 10%)"
+      ],
+      "title": "BSAI③ 精确时间步 [OmniRef 8步阶梯]"
+    },
+    {
+      "id": 4,
+      "type": "BSAIFastH3EulerSampler",
+      "pos": [400, 280],
+      "size": [320, 130],
+      "flags": {},
+      "order": 3,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [{"name": "SAMPLER", "type": "SAMPLER", "links": [8], "slot_index": 0}],
+      "properties": {"Node name for S&R": "BSAIFastH3EulerSampler"},
+      "widgets_values": [
+        12.0,
+        3.0,
+        "auto",
+        "8-step OmniRef (999,874,749,624,500,375,250,125 · shift 12/3 · keep 10%)"
+      ],
+      "title": "BSAI④ Euler 采样器 (OmniRef shift 12/3)"
+    },
+    {
+      "id": 5,
+      "type": "CLIPLoader",
+      "pos": [0, 330],
+      "size": [350, 100],
+      "flags": {},
+      "order": 4,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [{"name": "CLIP", "type": "CLIP", "links": [4], "slot_index": 0}],
+      "properties": {"Node name for S&R": "CLIPLoader"},
+      "widgets_values": [
+        "qwen3vl_32b_minimax_h3_nvfp4_awq.safetensors",
+        "minimax",
+        "default"
+      ],
+      "title": "CLIP 文本编码器 (qwen3vl 32B)"
+    },
+    {
+      "id": 6,
+      "type": "VAELoader",
+      "pos": [0, 460],
+      "size": [350, 70],
+      "flags": {},
+      "order": 5,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [{"name": "VAE", "type": "VAE", "links": [9, 11], "slot_index": 0}],
+      "properties": {"Node name for S&R": "VAELoader"},
+      "widgets_values": [
+        "minimax_h3_video_vae_int8_convrot.safetensors"
+      ],
+      "title": "视频 VAE (int8_convrot)"
+    },
+    {
+      "id": 7,
+      "type": "VAELoader",
+      "pos": [0, 550],
+      "size": [350, 70],
+      "flags": {},
+      "order": 6,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [{"name": "VAE", "type": "VAE", "links": [10, 12], "slot_index": 0}],
+      "properties": {"Node name for S&R": "VAELoader"},
+      "widgets_values": [
+        "minimax_h3_audio_vae_fp32.safetensors"
+      ],
+      "title": "音频 VAE (fp32)"
+    },
+    {
+      "id": 8,
+      "type": "LoadImage",
+      "pos": [-800, 330],
+      "size": [330, 350],
+      "flags": {},
+      "order": 7,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {"name": "IMAGE", "type": "IMAGE", "links": [13], "slot_index": 0},
+        {"name": "MASK", "type": "MASK", "links": null}
+      ],
+      "properties": {"Node name for S&R": "LoadImage"},
+      "widgets_values": [
+        "yellow_plane_ref.png",
+        "image"
+      ],
+      "title": "参考图 1 — <Picture 1> 身份/主角"
+    },
+    {
+      "id": 9,
+      "type": "LoadImage",
+      "pos": [-800, 700],
+      "size": [330, 350],
+      "flags": {},
+      "order": 8,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {"name": "IMAGE", "type": "IMAGE", "links": [14], "slot_index": 0},
+        {"name": "MASK", "type": "MASK", "links": null}
+      ],
+      "properties": {"Node name for S&R": "LoadImage"},
+      "widgets_values": [
+        "location_ref.png",
+        "image"
+      ],
+      "title": "参考图 2 — <Picture 2> 场景/地点"
+    },
+    {
+      "id": 10,
+      "type": "MiniMaxH3ReferenceToVideo",
+      "pos": [820, 0],
+      "size": [500, 530],
+      "flags": {},
+      "order": 9,
+      "mode": 0,
+      "inputs": [
+        {"name": "clip", "type": "CLIP", "link": 4},
+        {"name": "vae", "type": "VAE", "link": 9},
+        {"name": "audio_vae", "type": "VAE", "link": 10},
+        {"name": "ref_image_1", "type": "IMAGE", "link": 13},
+        {"name": "ref_image_2", "type": "IMAGE", "link": 14}
+      ],
+      "outputs": [
+        {"name": "positive", "type": "CONDITIONING", "links": [6], "slot_index": 0},
+        {"name": "latent", "type": "LATENT", "links": [16], "slot_index": 0}
+      ],
+      "properties": {"Node name for S&R": "MiniMaxH3ReferenceToVideo"},
+      "widgets_values": [
+        "Cinematic tracking shot, <Picture 1> the yellow vintage biplane soars gracefully over the golden wheat fields from <Picture 2>. The camera follows closely at 50 meters altitude, slow dolly forward, 35mm film grain. The pilot's radio crackles, wind whooshes past the wings, cheerful orchestral score swells.",
+        1344,
+        768,
+        124,
+        "match",
+        null,
+        null
+      ],
+      "title": "MiniMaxH3 ReferenceToVideo — OmniRef (2图条件)"
+    },
+    {
+      "id": 11,
+      "type": "RandomNoise",
+      "pos": [820, 580],
+      "size": [280, 60],
+      "flags": {},
+      "order": 10,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [{"name": "NOISE", "type": "NOISE", "links": [17], "slot_index": 0}],
+      "properties": {"Node name for S&R": "RandomNoise"},
+      "widgets_values": [123456662],
+      "title": "随机噪波 (RandomNoise)"
+    },
+    {
+      "id": 12,
+      "type": "BasicGuider",
+      "pos": [820, 670],
+      "size": [300, 70],
+      "flags": {},
+      "order": 11,
+      "mode": 0,
+      "inputs": [
+        {"name": "model", "type": "MODEL", "link": 5},
+        {"name": "conditioning", "type": "CONDITIONING", "link": 6}
+      ],
+      "outputs": [{"name": "GUIDER", "type": "GUIDER", "links": [18], "slot_index": 0}],
+      "properties": {"Node name for S&R": "BasicGuider"},
+      "widgets_values": [],
+      "title": "BasicGuider"
+    },
+    {
+      "id": 13,
+      "type": "SamplerCustomAdvanced",
+      "pos": [820, 770],
+      "size": [300, 110],
+      "flags": {},
+      "order": 12,
+      "mode": 0,
+      "inputs": [
+        {"name": "noise", "type": "NOISE", "link": 17},
+        {"name": "guider", "type": "GUIDER", "link": 18},
+        {"name": "sampler", "type": "SAMPLER", "link": 8},
+        {"name": "sigmas", "type": "SIGMAS", "link": 7},
+        {"name": "latent_image", "type": "LATENT", "link": 16}
+      ],
+      "outputs": [
+        {"name": "output", "type": "LATENT", "links": [19, 20], "slot_index": 0}
+      ],
+      "properties": {"Node name for S&R": "SamplerCustomAdvanced"},
+      "widgets_values": [],
+      "title": "SamplerCustomAdvanced (OmniRef 8-step)"
+    },
+    {
+      "id": 14,
+      "type": "VAEDecode",
+      "pos": [1170, 770],
+      "size": [280, 70],
+      "flags": {},
+      "order": 13,
+      "mode": 0,
+      "inputs": [
+        {"name": "samples", "type": "LATENT", "link": 19},
+        {"name": "vae", "type": "VAE", "link": 11}
+      ],
+      "outputs": [{"name": "IMAGE", "type": "IMAGE", "links": [21], "slot_index": 0}],
+      "properties": {"Node name for S&R": "VAEDecode"},
+      "widgets_values": [],
+      "title": "视频解码 VAEDecode"
+    },
+    {
+      "id": 15,
+      "type": "VAEDecodeAudio",
+      "pos": [1170, 870],
+      "size": [280, 70],
+      "flags": {},
+      "order": 14,
+      "mode": 0,
+      "inputs": [
+        {"name": "samples", "type": "LATENT", "link": 20},
+        {"name": "vae", "type": "VAE", "link": 12}
+      ],
+      "outputs": [{"name": "AUDIO", "type": "AUDIO", "links": [22, 23], "slot_index": 0}],
+      "properties": {"Node name for S&R": "VAEDecodeAudio"},
+      "widgets_values": [],
+      "title": "音频解码 VAEDecodeAudio"
+    },
+    {
+      "id": 16,
+      "type": "CreateVideo",
+      "pos": [1520, 770],
+      "size": [300, 90],
+      "flags": {},
+      "order": 15,
+      "mode": 0,
+      "inputs": [
+        {"name": "images", "type": "IMAGE", "link": 21},
+        {"name": "audio", "type": "AUDIO", "link": 22}
+      ],
+      "outputs": [{"name": "VIDEO", "type": "VIDEO", "links": [24], "slot_index": 0}],
+      "properties": {"Node name for S&R": "CreateVideo"},
+      "widgets_values": [24.0, "auto"],
+      "title": "合成视频 24fps + 原生立体声音轨"
+    },
+    {
+      "id": 17,
+      "type": "SaveVideo",
+      "pos": [1520, 900],
+      "size": [300, 90],
+      "flags": {},
+      "order": 16,
+      "mode": 0,
+      "inputs": [{"name": "video", "type": "VIDEO", "link": 24}],
+      "outputs": [],
+      "properties": {"Node name for S&R": "SaveVideo"},
+      "widgets_values": ["BSAI_FastH3_OmniRef", "auto", "auto", "auto"],
+      "title": "保存视频 (SaveVideo)"
+    },
+    {
+      "id": 18,
+      "type": "BSAIFastH3VSAStats",
+      "pos": [400, 770],
+      "size": [360, 70],
+      "flags": {},
+      "order": 17,
+      "mode": 0,
+      "inputs": [{"name": "model", "type": "MODEL", "link": 25}],
+      "outputs": [{"name": "stats", "type": "STRING", "links": [], "slot_index": 0}],
+      "properties": {"Node name for S&R": "BSAIFastH3VSAStats"},
+      "widgets_values": [],
+      "title": "BSAI VSA 命中统计（验证稀疏注意力生效）"
+    }
+  ],
+  "links": [
+    [1, 1, 0, 2, 0, "MODEL"],
+    [2, 2, 0, 3, 0, "MODEL"],
+    [3, 1, 0, 3, 0, "MODEL"],
+    [4, 5, 0, 10, 0, "CLIP"],
+    [5, 1, 0, 12, 0, "MODEL"],
+    [6, 10, 0, 12, 1, "CONDITIONING"],
+    [7, 3, 0, 13, 3, "SIGMAS"],
+    [8, 4, 0, 13, 2, "SAMPLER"],
+    [9, 6, 0, 10, 1, "VAE"],
+    [10, 7, 0, 10, 2, "VAE"],
+    [11, 6, 0, 14, 1, "VAE"],
+    [12, 7, 0, 15, 1, "VAE"],
+    [13, 8, 0, 10, 3, "IMAGE"],
+    [14, 9, 0, 10, 4, "IMAGE"],
+    [16, 10, 1, 13, 4, "LATENT"],
+    [17, 11, 0, 13, 0, "NOISE"],
+    [18, 12, 0, 13, 1, "GUIDER"],
+    [19, 13, 0, 14, 0, "LATENT"],
+    [20, 13, 0, 15, 0, "LATENT"],
+    [21, 14, 0, 16, 0, "IMAGE"],
+    [22, 15, 0, 16, 1, "AUDIO"],
+    [23, 15, 0, 18, 0, "AUDIO"],
+    [24, 16, 0, 17, 0, "VIDEO"],
+    [25, 1, 0, 18, 0, "MODEL"]
+  ],
+  "groups": [],
+  "config": {},
+  "extra": {
+    "note": "BSAI FastH3 OmniRef 参考图/视频/音频多条件生成工作流。\n\n核心配置（官方模板一致）：\n- 模型：fasth3_omniref_8step_pruned_int8_convrot.safetensors (22.2 GB)\n- 采样：8 步 Euler，guidance 1.0\n- Video shift: 12.0 / Audio shift: 3.0\n- VSA：keep 10%（90% 稀疏，OmniRef 官方要求）\n- ref_image_size：match（快）或 max（强身份保真但慢数倍）\n\nReferenceToVideo 支持：\n- ref_images: 最多 9 张 (按 <Picture 1>~<Picture 9> 顺序引用)\n- ref_videos: 最多 3 个 (按 <Video 1>~<Video 3>)\n- ref_video_audios: 最多 3 个 (随视频自带音轨)\n- ref_audios: 最多 3 个 (独立音频参考)\n\nPrompt 写法：先描述参考主体，再描述场景/运镜/声音。参考视频和音频 riding 每步采样，max 模式耗时比 match 多 2-3x。\n\nBSAI 插件节点提供：Loader 专用校验 + Native VSA 稀疏加速 + 精确时间步 + Euler 自适应采样 + VSA 统计。"
+  },
+  "version": 0.4
+}

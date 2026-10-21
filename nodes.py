@@ -1,14 +1,17 @@
-"""BSAI-ComfyUI-FastH3 — 快速生成 H3 视频（FastVideo FastH3 蒸馏 + TaoMate 3步）节点套件。
+"""BSAI-ComfyUI-FastH3 — 快速生成 H3 视频（FastVideo FastH3 蒸馏 + TaoMate 3步 + OmniRef 8步）节点套件。
 
-围绕 FastVideo FastH3 预览检查点（33B 双模态 MiniMax-H3 的无数据 DMD2 蒸馏
-+ VSA 视频稀疏注意力）封装的一站式 ComfyUI 节点，内置三套配方：
+围绕 FastVideo FastH3 系列蒸馏模型 + VSA 视频稀疏注意力封装的一站式
+ComfyUI 节点，内置四套配方：
 
   * 4 步 Preview v1 / v0.2 —— 阶梯 [999,749,500,250]，视频/音频 shift 12/3，
     VSA 90% 稀疏（keep 10%），官方 12.5× 前向压缩。
   * 8 步 V2（2026-09-15 发布）—— 阶梯 [999,874,749,624,500,375,250,125]，
     视频/音频 shift 10/3（视频 shift 与 v1 不同！），VSA 80% 稀疏（keep 20%），
     更稳的 8 前向高质量路线。
-  * 3 步 TaoMate（阿里淘天 TaoLive AIGC，2026-09 发布）—— 阶梯 [999,750,500]，
+  * 8 步 OmniRef（2026-10-20 发布）—— 阶梯 [999,874,749,624,500,375,250,125]，
+    视频/音频 shift 12/3（回到 v1 值），VSA 90% 稀疏（keep 10%），reference-conditioned
+    蒸馏，支持最多 9 图 + 3 视频 + 3 音频的多参考条件生成。
+  * 3 步 TaoMate（阿里淘天 TaoLive AIGC）—— 阶梯 [999,750,500]，
     视频/音频 shift 12/3，keep 100%（Dense；TaoMate 是原版 MiniMax-H3 的
     3 步蒸馏 LoRA，配合 TaoMate-H3-step3000-ComfyUI-*.safetensors 使用，
     底座模型用 minimax_h3_fl2va_* 原版权重，社区实测 Euler + CFG 1.2~1.5）。
@@ -67,10 +70,13 @@ except ImportError:                                            # pragma: no cove
 SHIFT_V, SHIFT_A = 12.0, 3.0                                   # FastH3 v1/v0.2 视频/音频 flow shift
 
 # ---------------------------------------------------------------------------
-# FastH3 官方配方 / official recipes（2026-09-18 跟踪）
+# FastH3 官方配方 / official recipes（2026-10-21 跟踪，新增 OmniRef）
 #   * 4-step Preview v1/v0.2：ladder [999,749,500,250]，shift 12/3，VSA keep 10%
 #   * 8-step V2：ladder [999,874,749,624,500,375,250,125]，shift 10/3，VSA keep 20%
 #     （V2 视频 shift 为 10，与 v1 的 12 不同；80% 稀疏 = keep 20%）
+#   * 8-step OmniRef（2026-10-20）：ladder 同 V2，shift 12/3，VSA keep 10%
+#     reference-conditioned 蒸馏；官方模板 shift 12/3 + VSA keep 10% + 8 step；
+#     支持最多 9 images + 3 videos + 3 audios 多参考条件
 #   * 3-step TaoMate：ladder [999,750,500]，shift 12/3，keep 100%（Dense）
 #     阿里淘天 TaoLiveAIGC 发布的 MiniMax-H3 3 步蒸馏 LoRA（rank128/alpha128，
 #     step3000 EMA）；底座为原版 minimax_h3_fl2va_*（TaoMate 官方目标模型），
@@ -78,23 +84,27 @@ SHIFT_V, SHIFT_A = 12.0, 3.0                                   # FastH3 v1/v0.2 
 # ---------------------------------------------------------------------------
 RECIPE_4STEP = "4-step Preview (999,749,500,250 · shift 12/3 · keep 10%)"
 RECIPE_8STEP_V2 = "8-step V2 (999,874,749,624,500,375,250,125 · shift 10/3 · keep 20%)"
+RECIPE_8STEP_OMNI = "8-step OmniRef (999,874,749,624,500,375,250,125 · shift 12/3 · keep 10%)"
 RECIPE_STEP3_TAOMATE = "3-step TaoMate (999,750,500 · shift 12/3 · keep 100% Dense)"
 RECIPE_CUSTOM = "custom"
-RECIPES = (RECIPE_4STEP, RECIPE_8STEP_V2, RECIPE_STEP3_TAOMATE, RECIPE_CUSTOM)
+RECIPES = (RECIPE_4STEP, RECIPE_8STEP_V2, RECIPE_8STEP_OMNI, RECIPE_STEP3_TAOMATE, RECIPE_CUSTOM)
 
 _RECIPE_LADDERS = {
     RECIPE_4STEP: "999,749,500,250",
     RECIPE_8STEP_V2: "999,874,749,624,500,375,250,125",
+    RECIPE_8STEP_OMNI: "999,874,749,624,500,375,250,125",
     RECIPE_STEP3_TAOMATE: "999,750,500",
 }
 _RECIPE_SHIFTS = {
     RECIPE_4STEP: (12.0, 3.0),
     RECIPE_8STEP_V2: (10.0, 3.0),
+    RECIPE_8STEP_OMNI: (12.0, 3.0),
     RECIPE_STEP3_TAOMATE: (12.0, 3.0),
 }
 _RECIPE_KEEP = {
     RECIPE_4STEP: 10.0,
     RECIPE_8STEP_V2: 20.0,
+    RECIPE_8STEP_OMNI: 10.0,
     RECIPE_STEP3_TAOMATE: 100.0,
 }
 
@@ -132,7 +142,10 @@ def _patch_av_shift(model, shift_video, shift_audio):
 # 1) FastH3 专用模型加载器
 # ---------------------------------------------------------------------------
 
-_FAST_H3_MARKERS = ("fastvideo", "fasth3", "fast_h3", "4step", "8step", "v2")
+_FAST_H3_MARKERS = ("fastvideo", "fasth3", "fast_h3", "omniref", "omni_ref", "omni",
+                     "4step", "8step", "v2")
+# OmniRef 专用标记（8 步 reference-conditioned 蒸馏，2026-10-20 发布）
+_OMNI_REF_MARKERS = ("omniref", "omni_ref")
 # 原版 MiniMax-H3 基座（TaoMate-H3 3 步 LoRA 的官方目标模型）文件名标记
 _BASE_H3_MARKERS = ("minimax_h3_fl2va", "minimax_h3_ref2va", "minimax_h3_hybrid")
 
@@ -140,6 +153,11 @@ _BASE_H3_MARKERS = ("minimax_h3_fl2va", "minimax_h3_ref2va", "minimax_h3_hybrid"
 def _is_fast_h3_filename(name):
     base = os.path.splitext(os.path.basename(name).lower())[0]
     return any(k in base for k in _FAST_H3_MARKERS)
+
+
+def _is_omni_ref_filename(name):
+    base = os.path.splitext(os.path.basename(name).lower())[0]
+    return any(k in base for k in _OMNI_REF_MARKERS)
 
 
 def _is_base_h3_filename(name):
@@ -155,10 +173,11 @@ class BSAIFastH3Loader:
             "model": (sorted(models),),
             "weight_dtype": (["default", "fp8_e4m3fn", "fp8_e4m3fn_fast", "fp8_e5m2"],
                              {"advanced": True}),
-            "model_type": (["auto", "fast_h3_distill", "base_h3_fl2va"], {
+            "model_type": (["auto", "fast_h3_distill", "omni_ref", "base_h3_fl2va"], {
                 "default": "auto",
                 "tooltip": "auto: auto-detect from the filename. fast_h3_distill: only accept FastH3 distilled weights "
-                           "(fastvideo/fasth3/4step/8step/v2). base_h3_fl2va: accept the original "
+                           "(fastvideo/fasth3/omniref/omni/4step/8step/v2). omni_ref: accept only FastH3 OmniRef "
+                           "(fasth3_omniref_*). base_h3_fl2va: accept the original "
                            "MiniMax-H3 base (minimax_h3_fl2va/ref2va/hybrid, the official base for the "
                            "TaoMate-H3 3-step LoRA)."}),
             "strict_fast_h3_check": ("BOOLEAN", {
@@ -166,8 +185,9 @@ class BSAIFastH3Loader:
                 "label_on": "Validate model filename",
                 "label_off": "Allow any H3 weights",
                 "tooltip": "When on, validates against model_type: fast_h3_distill only accepts distilled weights with "
-                           "fastvideo/fasth3/_4step/_8step/v2 in the filename (avoids loading the 50-step "
-                           "base model); base_h3_fl2va accepts minimax_h3_fl2va/ref2va/hybrid base "
+                           "fastvideo/fasth3/omniref/omni/_4step/_8step/v2 in the filename (avoids loading the 50-step "
+                           "base model); omni_ref only accepts fasth3_omniref_* (the 8-step reference-conditioned "
+                           "checkpoint); base_h3_fl2va accepts minimax_h3_fl2va/ref2va/hybrid base "
                            "(for the TaoMate-H3 3-step LoRA)."}),
         }}
 
@@ -175,17 +195,26 @@ class BSAIFastH3Loader:
     RETURN_NAMES = ("MODEL",)
     FUNCTION = "load_model"
     CATEGORY = "BSAI/FastH3"
-    DESCRIPTION = ("Load FastVideo FastH3 distilled weights or the original MiniMax-H3 base. "
-                   "4-step v1/v0.2 "
-                   "(e.g. minimax_h3_fastvideo_vsa_datafree_1300step_4step_int8_convrot.safetensors) "
-                   "or 8-step V2 (e.g. minimax_h3_fastvideo_8step_v2_*.safetensors, released 2026-09-15); "
-                   "with model_type=base_h3_fl2va it loads the original minimax_h3_fl2va_* (pair with the "
-                   "TaoMate-H3 3-step LoRA, recipe = 3-step TaoMate). Put files in ComfyUI/models/diffusion_models.")
+    DESCRIPTION = ("Load FastVideo FastH3 distilled weights (4-step v1, 8-step V2, "
+                   "8-step OmniRef) or the original MiniMax-H3 base. "
+                   "OmniRef (2026-10-20) = fasth3_omniref_8step_* with shift 12/3 + VSA keep 10%; "
+                   "V2 = minimax_h3_fastvideo_8step_v2_* with shift 10/3 + keep 20%; "
+                   "4-step v1/v0.2 = minimax_h3_fastvideo_vsa_*; "
+                   "with model_type=base_h3_fl2va it loads minimax_h3_fl2va_* (pair with the "
+                   "TaoMate-H3 3-step LoRA, recipe = 3-step TaoMate). Put files in "
+                   "ComfyUI/models/diffusion_models.")
 
     def load_model(self, model, weight_dtype="default", model_type="auto",
                    strict_fast_h3_check=True):
         if strict_fast_h3_check:
-            if model_type == "base_h3_fl2va":
+            if model_type == "omni_ref":
+                if not _is_omni_ref_filename(model):
+                    raise ValueError(
+                        f"[BSAI FastH3] {model} filename lacks the OmniRef marker "
+                        "(omniref / omni_ref). OmniRef recipe pairs with "
+                        "fasth3_omniref_8step_* checkpoints; to force-load anyway, "
+                        "turn off strict_fast_h3_check or set model_type=auto.")
+            elif model_type == "base_h3_fl2va":
                 if not _is_base_h3_filename(model):
                     raise ValueError(
                         f"[BSAI FastH3] {model} filename lacks the original H3 base marker "
@@ -195,12 +224,12 @@ class BSAIFastH3Loader:
                 if not _is_fast_h3_filename(model):
                     raise ValueError(
                         f"[BSAI FastH3] {model} filename lacks the FastH3/distilled marker "
-                        "(fastvideo/fasth3/_4step/_8step/v2). FastH3 uses distilled weights; "
+                        "(fastvideo/fasth3/omniref/omni/_4step/_8step/v2). FastH3 uses distilled weights; "
                         "to force-load anyway, turn off strict_fast_h3_check.")
             elif not (_is_fast_h3_filename(model) or _is_base_h3_filename(model)):
                 raise ValueError(
                     f"[BSAI FastH3] {model} filename has neither the FastH3/distilled marker "
-                    "(fastvideo/fasth3/_4step/_8step/v2) nor the original H3 base marker "
+                    "(fastvideo/fasth3/omniref/omni/_4step/_8step/v2) nor the original H3 base marker "
                     "(minimax_h3_fl2va/ref2va/hybrid). To force-load anyway, turn off "
                     "strict_fast_h3_check.")
         model_options = {}
@@ -262,10 +291,12 @@ class BSAIFastH3NativeVSA:
             "verbose": ("BOOLEAN", {"default": True,
                                     "tooltip": "Print the shape and backend info of every VSA hit."}),
             "recipe": (list(RECIPES), {
-                "default": RECIPE_4STEP,
+                "default": RECIPE_8STEP_OMNI,
                 "tooltip": "Official one-click recipe presets. 4-step: shift 12/3 + keep 10%. "
                            "8-step V2: shift 10/3 + keep 20% (auto-patches the model ModelSamplingAV "
-                           "video shift to 10). 3-step TaoMate: shift 12/3 + keep 100% "
+                           "video shift to 10). 8-step OmniRef (2026-10-20): shift 12/3 + keep 10% "
+                           "(reference-to-video checkpoint, 9 images + 3 videos + 3 audios). "
+                           "3-step TaoMate: shift 12/3 + keep 100% "
                            "(Dense; pairs with the original minimax_h3_fl2va base + TaoMate LoRA, not sparse). "
                            "custom: fully manual (keep and shift managed by you)."}),
         }}
@@ -277,7 +308,8 @@ class BSAIFastH3NativeVSA:
     DESCRIPTION = ("FastH3 native VSA (Video Sparse Attention): scores 64-token tiles, "
                    "keeps only top-k video blocks exact and conditioning rows exact. "
                    "4-step recipe saves ~90% video self-attention; 8-step V2 saves ~80% "
-                   "and auto-fixes shift 10/3; 3-step TaoMate keeps 100% (Dense, not sparse).")
+                   "and auto-fixes shift 10/3; 8-step OmniRef saves ~90% (keep 10%, shift 12/3, "
+                   "for reference-to-video); 3-step TaoMate keeps 100% (Dense, not sparse).")
 
     def apply_vsa(self, model, enabled, video_keep_percent, start_percent, end_percent,
                   min_tokens, sink_conditioning, backend, strict_native_backend,
@@ -318,9 +350,11 @@ class BSAIFastH3Timesteps:
                            "Effective when recipe=custom. "
                            "Can be driven by BSAI H3 MotionFix.ladder."}),
             "recipe": (list(RECIPES), {
-                "default": RECIPE_4STEP,
+                "default": RECIPE_8STEP_OMNI,
                 "tooltip": "Official one-click recipe ladders. 8-step V2 uses the training ladder "
                            "999,874,749,624,500,375,250,125 (9 sigma points = 8 forwards); "
+                           "8-step OmniRef uses the same 8-step ladder; "
+                           "4-step Preview: 999,749,500,250; "
                            "3-step TaoMate uses 999,750,500 (4 sigma points = 3 forwards). "
                            "custom: use the ladder string above."}),
         }}
@@ -503,8 +537,8 @@ class BSAIFastH3EulerSampler:
                 "tooltip": "auto: detect ModelSamplingAV; single-schedule Euler if present, otherwise dual audio/video schedule. "
                            "native: force single schedule. legacy_dual: force dual schedule."}),
             "recipe": (list(RECIPES), {
-                "default": RECIPE_4STEP,
-                "tooltip": "Official one-click recipe shift presets. 4-step: video 12 / audio 3; "
+                "default": RECIPE_8STEP_OMNI,
+                "tooltip": "Official one-click recipe shift presets. 4-step / OmniRef: video 12 / audio 3; "
                            "8-step V2: video 10 / audio 3 (note V2 video shift is NOT 12!); "
                            "3-step TaoMate: video 12 / audio 3. "
                            "custom: use the shift parameters above."}),
@@ -515,10 +549,11 @@ class BSAIFastH3EulerSampler:
     FUNCTION = "get_sampler"
     CATEGORY = "BSAI/FastH3"
     DESCRIPTION = ("FastH3 Euler sampler (any step count, advances by SIGMAS length). "
-                   "4-step recipe shift 12/3; 8-step V2 shift 10/3; 3-step TaoMate shift 12/3. "
-                   "Under native ModelSamplingAV (ComfyUI 0.31+) it advances with a single schedule; "
-                   "on older builds it auto-advances with dual video/audio schedules. "
-                   "Plug into SamplerCustomAdvanced.sampler together with FastH3 Timesteps.")
+                   "4-step recipe shift 12/3; 8-step V2 shift 10/3; 8-step OmniRef shift 12/3; "
+                   "3-step TaoMate shift 12/3. Under native ModelSamplingAV (ComfyUI 0.31+) "
+                   "it advances with a single schedule; on older builds it auto-advances with "
+                   "dual video/audio schedules. Plug into SamplerCustomAdvanced.sampler "
+                   "together with FastH3 Timesteps.")
 
     def get_sampler(self, shift_video=SHIFT_V, shift_audio=SHIFT_A, schedule_mode="auto",
                     recipe=RECIPE_4STEP):
@@ -581,10 +616,10 @@ NODE_CLASS_MAPPINGS = {
 }
 
 NODE_DISPLAY_NAME_MAPPINGS = {
-    "BSAIFastH3Loader": "BSAI FastH3 Loader (4-step / 8-step V2)",
+    "BSAIFastH3Loader": "BSAI FastH3 Loader (4-step / 8-step V2 / OmniRef)",
     "BSAIFastH3NativeVSA": "BSAI FastH3 Native VSA (recipe)",
-    "BSAIFastH3Timesteps": "BSAI FastH3 Timesteps (4-step / 8-step V2)",
-    "BSAIFastH3EulerSampler": "BSAI FastH3 Euler Sampler (4-step / 8-step V2)",
+    "BSAIFastH3Timesteps": "BSAI FastH3 Timesteps (4-step / 8-step / OmniRef)",
+    "BSAIFastH3EulerSampler": "BSAI FastH3 Euler Sampler (4-step / 8-step / OmniRef)",
     "BSAIFastH3VSAStats": "BSAI FastH3 VSA Stats",
 }
 
